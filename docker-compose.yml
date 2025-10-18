@@ -23,8 +23,8 @@ services:
     image: app-backend:latest
     container_name: backend
     environment:
-        APP_ENV: production
-        APP_DEBUG: "false"
+        APP_ENV: "local"
+        APP_DEBUG: "true"
         QUEUE_CONNECTION: redis
         CACHE_DRIVER: redis
         REDIS_CLIENT: phpredis
