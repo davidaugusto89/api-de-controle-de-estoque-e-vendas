@@ -149,7 +149,7 @@ final class RedisLockTest extends TestCase
         $this->assertFalse($store->isLocked('key-reuse'));
     }
 
-    public function test_callback_exception_releases_lock(): void
+    public function test_callback_lanca_excecao_e_libera_lock(): void
     {
         // Arrange
         $clock = new FakeClock(1_600_000_000);

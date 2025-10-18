@@ -11,14 +11,14 @@ use Tests\TestCase;
 #[CoversClass(RegisterInventoryRequest::class)]
 final class RegisterInventoryRequestTest extends TestCase
 {
-    public function test_authorize_allows_by_default(): void
+    public function test_autorizar_permite_por_padrao(): void
     {
         $req = new RegisterInventoryRequest;
 
         $this->assertTrue($req->authorize());
     }
 
-    public function test_rules_define_product_quantity_and_unit_cost(): void
+    public function test_regras_definem_produto_quantidade_e_custo_unitario(): void
     {
         $req = new RegisterInventoryRequest;
         $rules = $req->rules();
@@ -28,7 +28,7 @@ final class RegisterInventoryRequestTest extends TestCase
         $this->assertArrayHasKey('unit_cost', $rules);
     }
 
-    public function test_messages_contains_custom_messages(): void
+    public function test_messages_contem_mensagens_customizadas(): void
     {
         $req = new RegisterInventoryRequest;
         $messages = $req->messages();

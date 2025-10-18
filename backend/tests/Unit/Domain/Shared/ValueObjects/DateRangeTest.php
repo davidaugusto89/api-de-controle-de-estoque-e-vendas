@@ -46,9 +46,9 @@ final class DateRangeTest extends TestCase
     public static function validRangesProvider(): array
     {
         return [
-            'from-before-to' => ['2025-10-17 00:00:00', '2025-10-18 00:00:00'],
-            'same-instant' => ['2025-10-18 10:00:00', '2025-10-18 10:00:00'], // from == to is permitido
-            'different-times-same-day' => ['2025-10-18 01:23:45', '2025-10-18 23:59:59'],
+            'from antes de to' => ['2025-10-17 00:00:00', '2025-10-18 00:00:00'],
+            'mesmo instante' => ['2025-10-18 10:00:00', '2025-10-18 10:00:00'], // from == to is permitido
+            'diferentes horarios mesmo dia' => ['2025-10-18 01:23:45', '2025-10-18 23:59:59'],
         ];
     }
 
@@ -60,8 +60,8 @@ final class DateRangeTest extends TestCase
     public static function invalidRangesProvider(): array
     {
         return [
-            'from-after-to-one-day' => ['2025-10-19 00:00:00', '2025-10-18 23:59:59'],
-            'from-after-to-same-day' => ['2025-10-18 12:00:01', '2025-10-18 12:00:00'],
+            'from depois de to um dia' => ['2025-10-19 00:00:00', '2025-10-18 23:59:59'],
+            'from depois de to mesmo dia' => ['2025-10-18 12:00:01', '2025-10-18 12:00:00'],
         ];
     }
 

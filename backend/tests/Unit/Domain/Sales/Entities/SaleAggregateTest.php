@@ -48,13 +48,13 @@ final class SaleAggregateTest extends TestCase
     public static function providerForTotals(): array
     {
         return [
-            'single_item' => [
+            'item unico' => [
                 [[1, 2, 10.00, 6.00]],
                 20.00, // amount = 2 * 10
                 12.00, // cost = 2 * 6
                 8.00,  // profit = amount - cost
             ],
-            'multiple_items' => [
+            'multiplos itens' => [
                 [
                     [1, 1, 9.99, 4.50],
                     [2, 3, 5.50, 2.00],
@@ -64,7 +64,7 @@ final class SaleAggregateTest extends TestCase
                 (1 * 4.50) + (3 * 2.00) + (2 * 60.00),
                 ((1 * 9.99) + (3 * 5.50) + (2 * 100.00)) - ((1 * 4.50) + (3 * 2.00) + (2 * 60.00)),
             ],
-            'zero_quantity_and_zero_price' => [
+            'quantidade_zero_e_preco_zero' => [
                 [
                     [1, 0, 10.00, 5.00],
                     [2, 5, 0.00, 0.00],
@@ -73,7 +73,7 @@ final class SaleAggregateTest extends TestCase
                 0.0, // no positive cost
                 0.0,
             ],
-            'negative_values_allowed_by_current_impl' => [
+            'valores_negativos_permitidos_pela_impl_atual' => [
                 [
                     [1, 2, -10.00, 5.00],  // negative price
                     [2, -1, 20.00, -8.00], // negative qty and negative cost (odd but allowed)

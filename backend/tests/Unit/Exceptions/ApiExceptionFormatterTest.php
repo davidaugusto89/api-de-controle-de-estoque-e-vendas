@@ -19,7 +19,7 @@ use Tests\TestCase;
 
 class ApiExceptionFormatterTest extends TestCase
 {
-    public function test_validation_exception_formats_response()
+    public function test_excecao_de_validacao_formata_resposta()
     {
         $request = Request::create('/test');
 
@@ -41,7 +41,7 @@ class ApiExceptionFormatterTest extends TestCase
         $this->assertArrayHasKey('errors', $payload['error']['details']);
     }
 
-    public function test_authentication_and_authorization_and_not_found_exceptions()
+    public function test_autenticacao_autorizacao_e_nao_encontrado_sao_tratados()
     {
         $request = Request::create('/');
 
@@ -62,7 +62,7 @@ class ApiExceptionFormatterTest extends TestCase
         $this->assertSame(404, $r4->getStatusCode());
     }
 
-    public function test_method_not_allowed_and_throttle_include_headers()
+    public function test_method_not_allowed_e_throttle_incluem_headers()
     {
         $request = Request::create('/');
 
@@ -81,7 +81,7 @@ class ApiExceptionFormatterTest extends TestCase
         $this->assertEquals(60, (int) $r2->headers->get('Retry-After'));
     }
 
-    public function test_method_not_allowed_when_allow_is_array()
+    public function test_method_not_allowed_quando_allow_eh_array()
     {
         $request = Request::create('/');
 
@@ -95,7 +95,7 @@ class ApiExceptionFormatterTest extends TestCase
         $this->assertSame('GET, POST', $res->headers->get('Allow'));
     }
 
-    public function test_method_not_allowed_when_allow_missing()
+    public function test_method_not_allowed_quando_allow_ausente()
     {
         $request = Request::create('/');
 
@@ -110,7 +110,7 @@ class ApiExceptionFormatterTest extends TestCase
         $this->assertSame('', $res->headers->get('Allow'));
     }
 
-    public function test_http_exception_maintains_status_and_debug_when_enabled()
+    public function test_http_exception_preserva_status_e_debug_quando_habilitado()
     {
         $request = Request::create('/');
 
@@ -138,7 +138,7 @@ class ApiExceptionFormatterTest extends TestCase
         config(['app.debug' => false]);
     }
 
-    public function test_query_exception_and_fallback_have_500_and_debug_off_by_default()
+    public function test_query_exception_e_fallback_tem_500_e_debug_desligado_por_padrao()
     {
         $request = Request::create('/');
 
@@ -156,7 +156,7 @@ class ApiExceptionFormatterTest extends TestCase
         $this->assertSame('InternalServerError', $payload2['error']['code']);
     }
 
-    public function test_query_and_generic_exception_include_debug_when_enabled()
+    public function test_query_e_excecao_generica_incluem_debug_quando_habilitado()
     {
         $request = Request::create('/');
         config(['app.debug' => true]);
@@ -181,7 +181,7 @@ class ApiExceptionFormatterTest extends TestCase
         config(['app.debug' => false]);
     }
 
-    public function test_throttle_requests_preserves_multiple_headers_and_array_values()
+    public function test_throttle_preserva_headers_multiplos_e_valores_array()
     {
         $request = Request::create('/');
 
@@ -215,7 +215,7 @@ class ApiExceptionFormatterTest extends TestCase
         $this->assertEquals('100', $r2->headers->get('X-RateLimit-Limit'));
     }
 
-    public function test_throttle_includes_debug_when_enabled()
+    public function test_throttle_inclui_debug_quando_habilitado()
     {
         $request = Request::create('/');
         config(['app.debug' => true]);
@@ -231,7 +231,7 @@ class ApiExceptionFormatterTest extends TestCase
         config(['app.debug' => false]);
     }
 
-    public function test_request_id_is_used_when_header_present()
+    public function test_request_id_e_usado_quando_header_presente()
     {
         $request = Request::create('/', 'GET', [], [], [], ['HTTP_X_REQUEST_ID' => 'myid']);
         $ex = new \Exception('x');

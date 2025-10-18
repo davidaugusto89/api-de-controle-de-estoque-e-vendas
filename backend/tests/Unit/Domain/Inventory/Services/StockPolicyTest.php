@@ -40,7 +40,7 @@ final class StockPolicyTest extends TestCase
     public static function providerIncreaseSuccess(): array
     {
         return [
-            'simples incremento' => [0, 1, 1],
+            'incremento simples' => [0, 1, 1],
             'incremento grande' => [100, 900, 1000],
             'no limite' => [999_999, 1, 1_000_000],
         ];
@@ -101,7 +101,7 @@ final class StockPolicyTest extends TestCase
     public static function providerDecreaseSuccess(): array
     {
         return [
-            'simples diminuição' => [5, 1, 4],
+            'diminuição simples' => [5, 1, 4],
             'zerar estoque' => [3, 3, 0],
         ];
     }

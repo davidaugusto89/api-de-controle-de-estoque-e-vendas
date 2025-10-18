@@ -37,31 +37,31 @@ final class MarginCalculatorTest extends TestCase
                 0.0, 0.0,
                 0.00, 0.00,
             ],
-            'simple_positive' => [
+            'positivo simples' => [
                 100.0, 60.0,
                 40.00, 40.00,
             ],
-            'rounding_up_profit' => [
+            'arredondamento para cima' => [
                 1.235, 0.0,
                 1.24, 100.00, // profit arredonda para 1.24, percentual sobre 1.235 é 100.00%
             ],
-            'rounding_down_profit' => [
+            'arredondamento para baixo' => [
                 1.234, 0.0,
                 1.23, 100.00, // profit arredonda para 1.23
             ],
-            'small_margin_percent' => [
+            'pequeno percentual' => [
                 10.0, 9.995,
                 0.01, 0.05, // profit = round(0.005,2)=0.01 ; percent = round((0.005/10)*100,2)=0.05
             ],
-            'negative_amounts' => [
+            'valores negativos' => [
                 -100.0, -50.0,
                 -50.00, 0.00, // totalAmount <= 0 -> percent = 0.0 (proteção)
             ],
-            'multiple_values' => [
+            'multiplos valores' => [
                 200.0, 50.0,
                 150.00, 75.00,
             ],
-            'precision_case' => [
+            'caso de precisao' => [
                 100.0, 33.3333,
                 66.67, 66.67, // difference ~66.6667 -> round 66.67
             ],

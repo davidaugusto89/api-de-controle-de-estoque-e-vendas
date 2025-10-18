@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 final class ForceJsonResponseTest extends TestCase
 {
-    public function test_horizon_path_returns_original_response_untouched(): void
+    public function test_caminho_horizon_retorna_resposta_original_intacta(): void
     {
         $request = Request::create('/horizon', 'GET');
 
@@ -29,7 +29,7 @@ final class ForceJsonResponseTest extends TestCase
         $this->assertSame('1', $res->headers->get('X-Orig'));
     }
 
-    public function test_horizon_wildcard_path_returns_original_response_untouched(): void
+    public function test_caminho_coringa_horizon_retorna_resposta_original_intacta(): void
     {
         $request = Request::create('/horizon/queues', 'GET');
 
@@ -47,7 +47,7 @@ final class ForceJsonResponseTest extends TestCase
         $this->assertSame('2', $res->headers->get('X-Orig'));
     }
 
-    public function test_sets_accept_header_when_client_not_expects_json_and_next_receives_it(): void
+    public function test_define_header_accept_quando_cliente_nao_espera_json_e_next_recebe(): void
     {
         $request = Request::create('/api/test', 'GET');
         // ensure request does not expect json
@@ -66,7 +66,7 @@ final class ForceJsonResponseTest extends TestCase
         $this->assertSame('application/json', $capturedAccept);
     }
 
-    public function test_preserves_accept_when_client_expects_json(): void
+    public function test_preserva_accept_quando_cliente_espera_json(): void
     {
         $request = Request::create('/api/test', 'GET');
         $request->headers->set('Accept', 'application/json');
@@ -85,7 +85,7 @@ final class ForceJsonResponseTest extends TestCase
         $this->assertSame('application/json', $capturedAccept);
     }
 
-    public function test_converts_json_string_response_to_json_response_and_preserves_headers_and_status(): void
+    public function test_converte_string_json_para_json_response_preservando_headers_e_status(): void
     {
         $request = Request::create('/api/x', 'GET');
 
@@ -107,7 +107,7 @@ final class ForceJsonResponseTest extends TestCase
         $this->assertSame('application/json', $res->headers->get('Content-Type'));
     }
 
-    public function test_converts_plain_text_response_to_standard_json_message(): void
+    public function test_converte_texto_para_mensagem_json_padrao(): void
     {
         $request = Request::create('/api/y', 'GET');
 
@@ -125,7 +125,7 @@ final class ForceJsonResponseTest extends TestCase
         $this->assertSame('application/json', $res->headers->get('Content-Type'));
     }
 
-    public function test_does_not_rewrap_if_already_json_response_but_sets_content_type(): void
+    public function test_nao_reembrulha_se_ja_json_mas_define_content_type(): void
     {
         $request = Request::create('/api/z', 'GET');
 

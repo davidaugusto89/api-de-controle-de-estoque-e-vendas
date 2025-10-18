@@ -44,14 +44,14 @@ final class SaleValidatorTest extends TestCase
         $objItem->unit_cost = 5.0;
 
         return [
-            'array items' => [[
+            'itens em array' => [[
                 ['product_id' => 1, 'quantity' => 1, 'unit_price' => 0.0, 'unit_cost' => 0.0],
                 ['product_id' => 2, 'quantity' => 5, 'unit_price' => 3.25, 'unit_cost' => 1.0],
             ]],
-            'object-like items' => [[
+            'itens como objeto' => [[
                 $objItem,
             ]],
-            'string numeric ids and floats' => [[
+            'ids numericos em string e floats' => [[
                 ['product_id' => '3', 'quantity' => '4', 'unit_price' => '7.5', 'unit_cost' => '2.5'],
             ]],
         ];
@@ -79,13 +79,13 @@ final class SaleValidatorTest extends TestCase
         $objMissing->unit_cost = 0.5;
 
         return [
-            'array missing product_id' => [[
+            'array sem product_id' => [[
                 ['quantity' => 1, 'unit_price' => 1.0, 'unit_cost' => 0.5],
             ]],
             'array product_id zero' => [[
                 ['product_id' => 0, 'quantity' => 1, 'unit_price' => 1.0, 'unit_cost' => 0.5],
             ]],
-            'object missing product_id' => [[$objMissing]],
+            'objeto sem product_id' => [[$objMissing]],
         ];
     }
 
@@ -106,8 +106,8 @@ final class SaleValidatorTest extends TestCase
     public static function providerInvalidQuantity(): array
     {
         return [
-            'quantity zero' => [['product_id' => 5, 'quantity' => 0, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
-            'quantity negative' => [['product_id' => 5, 'quantity' => -3, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
+            'quantidade zero' => [['product_id' => 5, 'quantity' => 0, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
+            'quantidade negativa' => [['product_id' => 5, 'quantity' => -3, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
         ];
     }
 
@@ -128,8 +128,8 @@ final class SaleValidatorTest extends TestCase
     public static function providerNegativePriceOrCost(): array
     {
         return [
-            'negative price' => [['product_id' => 3, 'quantity' => 1, 'unit_price' => -0.01, 'unit_cost' => 0.5], 'Item 3: unit_price não pode ser negativo.'],
-            'negative cost' => [['product_id' => 3, 'quantity' => 1, 'unit_price' => 1.0, 'unit_cost' => -2.0], 'Item 3: unit_cost não pode ser negativo.'],
+            'preco negativo' => [['product_id' => 3, 'quantity' => 1, 'unit_price' => -0.01, 'unit_cost' => 0.5], 'Item 3: unit_price não pode ser negativo.'],
+            'custo negativo' => [['product_id' => 3, 'quantity' => 1, 'unit_price' => 1.0, 'unit_cost' => -2.0], 'Item 3: unit_cost não pode ser negativo.'],
         ];
     }
 
