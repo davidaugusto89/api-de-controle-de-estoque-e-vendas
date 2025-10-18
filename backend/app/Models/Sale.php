@@ -24,7 +24,7 @@ class Sale extends Model
 
     protected $table = 'sales';
 
-    protected $guarded = ['id'];
+    protected $guarded = ['id', 'sale_date'];
 
     protected $fillable = [
         'total_amount',
