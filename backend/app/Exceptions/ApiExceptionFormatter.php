@@ -58,9 +58,9 @@ final class ApiExceptionFormatter
     /**
      * Constrói uma resposta JSON padronizada a partir de uma exceção.
      *
-     * @param  Throwable  $e       Exceção original capturada pelo handler.
-     * @param  Request    $request Requisição atual (para correlação e hints).
-     * @return JsonResponse        Resposta JSON serializada pelo Laravel.
+     * @param  Throwable  $e  Exceção original capturada pelo handler.
+     * @param  Request  $request  Requisição atual (para correlação e hints).
+     * @return JsonResponse Resposta JSON serializada pelo Laravel.
      *
      * @phpstan-return JsonResponse
      */
@@ -178,18 +178,18 @@ final class ApiExceptionFormatter
     /**
      * Cria a resposta JSON final com payload padronizado.
      *
-     * @param  int         $status     Código HTTP.
-     * @param  string      $code       Código de erro estável (consumido por clientes).
-     * @param  string      $message    Mensagem amigável e genérica ao cliente.
-     * @param  string      $requestId  Identificador de correlação da requisição.
-     * @param  array|null  $details    Dados adicionais do erro (ex.: mapa de campos inválidos).
-     * @param  array|null  $headers    Cabeçalhos extras a aplicar na resposta.
-     * @param  array|null  $debug      Informações de debug (somente em ambiente com debug ativo).
-     * @return JsonResponse
+     * @param  int  $status  Código HTTP.
+     * @param  string  $code  Código de erro estável (consumido por clientes).
+     * @param  string  $message  Mensagem amigável e genérica ao cliente.
+     * @param  string  $requestId  Identificador de correlação da requisição.
+     * @param  array|null  $details  Dados adicionais do erro (ex.: mapa de campos inválidos).
+     * @param  array|null  $headers  Cabeçalhos extras a aplicar na resposta.
+     * @param  array|null  $debug  Informações de debug (somente em ambiente com debug ativo).
      *
      * @phpstan-param array<string, mixed>|null $details
      * @phpstan-param array<string, string>|null $headers
      * @phpstan-param DebugPayload|null $debug
+     *
      * @phpstan-return JsonResponse
      */
     private static function json(
@@ -228,7 +228,7 @@ final class ApiExceptionFormatter
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
 
-        if (!empty($headers)) {
+        if (! empty($headers)) {
             $response->withHeaders($headers);
         }
 
@@ -237,9 +237,6 @@ final class ApiExceptionFormatter
 
     /**
      * Obtém o identificador da requisição a partir do header ou gera um novo.
-     *
-     * @param  Request  $request
-     * @return string
      */
     private static function requestId(Request $request): string
     {
@@ -249,7 +246,6 @@ final class ApiExceptionFormatter
     /**
      * Constrói o bloco de informações de debug com metadados mínimos.
      *
-     * @param  Throwable  $e
      * @return array{exception:string,file:string,line:int,trace:list<string>}
      *
      * @phpstan-return DebugPayload
