@@ -17,11 +17,17 @@ use App\Domain\Inventory\Services\StockPolicy;
  */
 final class InventoryItem
 {
+    private StockPolicy $policy;
+
     public function __construct(
         public readonly int $productId,
-        private int $quantity
+        private int $quantity,
+        ?StockPolicy $policy = null
     ) {
-        (new StockPolicy)->assertNonNegative($quantity);
+        $this->policy = $policy ?? new StockPolicy();
+
+        // normalize / valida quantidade inicial via StockPolicy público
+        $this->quantity = $this->policy->adjust($quantity, 0);
     }
 
     public function quantity(): int
@@ -38,13 +44,7 @@ final class InventoryItem
      */
     public function decrement(int $qty): void
     {
-        $policy = new StockPolicy;
-
-        if (! $policy->canDecrement($this->quantity, $qty)) {
-            throw new \RuntimeException('Estoque insuficiente.');
-        }
-
-        $this->quantity -= $qty;
+        $this->quantity = $this->policy->decrease($this->quantity, $qty);
     }
 
     public function increment(int $qty): void
@@ -54,7 +54,6 @@ final class InventoryItem
          *
          * @param  int  $qty  Quantidade a adicionar (deve ser não-negativa)
          */
-        (new StockPolicy)->assertNonNegative($qty);
-        $this->quantity += $qty;
+        $this->quantity = $this->policy->increase($this->quantity, $qty);
     }
 }
