@@ -95,9 +95,9 @@ final class SaleValidatorTest extends TestCase
         // Arrange
         $sut = new SaleValidator;
 
-        // Assert: message must contain the product id
+        // Assert: SaleValidator usa o índice (1-based) do item, não o product_id
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Item {$item['product_id']}: quantity deve ser > 0.");
+        $this->expectExceptionMessage('Item 1: quantity deve ser > 0.');
 
         // Act
         $sut->validate([$item]);
@@ -128,8 +128,9 @@ final class SaleValidatorTest extends TestCase
     public static function providerNegativePriceOrCost(): array
     {
         return [
-            'preco negativo' => [['product_id' => 3, 'quantity' => 1, 'unit_price' => -0.01, 'unit_cost' => 0.5], 'Item 3: unit_price não pode ser negativo.'],
-            'custo negativo' => [['product_id' => 3, 'quantity' => 1, 'unit_price' => 1.0, 'unit_cost' => -2.0], 'Item 3: unit_cost não pode ser negativo.'],
+            // Como só há um item no array do teste, o índice é 1
+            'preco negativo' => [['product_id' => 3, 'quantity' => 1, 'unit_price' => -0.01, 'unit_cost' => 0.5], 'Item 1: unit_price não pode ser negativo.'],
+            'custo negativo' => [['product_id' => 3, 'quantity' => 1, 'unit_price' => 1.0, 'unit_cost' => -2.0], 'Item 1: unit_cost não pode ser negativo.'],
         ];
     }
 

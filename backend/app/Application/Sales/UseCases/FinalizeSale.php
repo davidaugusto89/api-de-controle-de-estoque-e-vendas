@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Sales\UseCases;
 
+use App\Domain\Sales\Enums\SaleStatus;
 use App\Domain\Sales\Services\MarginCalculator;
 use App\Domain\Sales\Services\SaleValidator;
 use App\Infrastructure\Events\SaleFinalized;
@@ -26,7 +27,6 @@ class FinalizeSale
     /**
      * Conclui a venda e persiste totais; idempotente para vendas já concluídas.
      *
-     *
      * @throws \Throwable
      */
     public function execute(int $saleId): void
@@ -34,7 +34,7 @@ class FinalizeSale
         $this->tx->run(function () use ($saleId): void {
             /** @var Sale $sale */
             $sale = Sale::query()->lockForUpdate()->findOrFail($saleId);
-            if ($sale->status === Sale::STATUS_COMPLETED) {
+            if ($sale->status === SaleStatus::COMPLETED->value) {
                 return;
             }
 
@@ -57,7 +57,7 @@ class FinalizeSale
             $sale->total_amount = round($totalAmount, 2);
             $sale->total_cost   = round($totalCost, 2);
             $sale->total_profit = round($totalProfit, 2);
-            $sale->status       = Sale::STATUS_COMPLETED;
+            $sale->status       = SaleStatus::COMPLETED->value;
             $sale->save();
 
             Event::dispatch(new SaleFinalized(
@@ -70,5 +70,15 @@ class FinalizeSale
                 )->all()
             ));
         });
+    }
+
+    /**
+     * Atalho invocável para permitir uso como callable nos testes.
+     *
+     * @throws \Throwable
+     */
+    public function __invoke(int $saleId): void
+    {
+        $this->execute($saleId);
     }
 }

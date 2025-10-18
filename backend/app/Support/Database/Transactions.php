@@ -24,7 +24,7 @@ use Throwable;
 class Transactions implements TransactionsContract
 {
     public function __construct(
-        private readonly DatabaseManager $db
+        private readonly ?DatabaseManager $db = null
     ) {}
 
     /**

@@ -60,8 +60,11 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\Models\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock) {
             $saleMock->id = 1001;
-
             return true;
+        });
+        // CreateSale faz $sale->getAttribute('id') primeiro; stubbamos para retornar o id
+        $saleMock->shouldReceive('getAttribute')->byDefault()->andReturnUsing(function ($key) use ($saleMock) {
+            return $key === 'id' ? ($saleMock->id ?? null) : null;
         });
 
         // Intercepta SaleItem::query()->insert($rows)
@@ -126,14 +129,15 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\Models\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock) {
             $saleMock->id = 2002;
-
             return true;
+        });
+        $saleMock->shouldReceive('getAttribute')->byDefault()->andReturnUsing(function ($key) use ($saleMock) {
+            return $key === 'id' ? ($saleMock->id ?? null) : null;
         });
 
         $saleItemQuery = Mockery::mock();
         $saleItemQuery->shouldReceive('insert')->once()->with(Mockery::on(function ($rows) {
             $row = $rows[0];
-
             // unit_price enviado no payload deve prevalecer
             return (float) $row['unit_price'] === 20.5;
         }))->andReturnTrue();
@@ -183,14 +187,15 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\Models\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock) {
             $saleMock->id = 3003;
-
             return true;
+        });
+        $saleMock->shouldReceive('getAttribute')->byDefault()->andReturnUsing(function ($key) use ($saleMock) {
+            return $key === 'id' ? ($saleMock->id ?? null) : null;
         });
 
         $saleItemQuery = Mockery::mock();
         $saleItemQuery->shouldReceive('insert')->once()->with(Mockery::on(function ($rows) {
             $row = $rows[0];
-
             // produto ausente => unit_price e unit_cost = 0
             return (float) $row['unit_price'] === 0.0 && (float) $row['unit_cost'] === 0.0;
         }))->andReturnTrue();
@@ -238,8 +243,10 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\Models\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock) {
             $saleMock->id = 4004;
-
             return true;
+        });
+        $saleMock->shouldReceive('getAttribute')->byDefault()->andReturnUsing(function ($key) use ($saleMock) {
+            return $key === 'id' ? ($saleMock->id ?? null) : null;
         });
 
         // Quando não há rows, SaleItem::query()->insert não deve ser chamado
@@ -275,7 +282,14 @@ final class CreateSaleTest extends TestCase
             ['product_id' => 1, 'quantity' => 1],
         ];
 
+        // Mock mínimo de Product para evitar chamadas em null antes da exception
+        $productQuery = Mockery::mock();
+        $productQuery->shouldReceive('whereIn')->andReturnSelf();
+        $productQuery->shouldReceive('get')->andReturn(new Collection([]));
+        Mockery::mock('alias:App\Models\Product')->shouldReceive('query')->andReturn($productQuery);
+
         $tx = Mockery::mock(Transactions::class);
+        // Garante que ao chamar run(), a exceção seja lançada imediatamente
         $tx->shouldReceive('run')->once()->andThrow(new \RuntimeException('DB transaction failed'));
 
         $finalize = Mockery::mock(FinalizeSale::class);
@@ -302,8 +316,11 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\\Models\\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock, $id) {
             $saleMock->id = $id;
-
             return true;
+        });
+        // Inclui getAttribute para compatibilidade com CreateSale
+        $saleMock->shouldReceive('getAttribute')->byDefault()->andReturnUsing(function ($key) use ($saleMock) {
+            return $key === 'id' ? ($saleMock->id ?? null) : null;
         });
 
         return $saleMock;
@@ -318,8 +335,4 @@ final class CreateSaleTest extends TestCase
 
         return $tx;
     }
-
-    /**
-     * @todo(Consolidar mocks estáticos de Eloquent: migrar alias/overload para repositório injetável para usar createMock)
-     */
 }

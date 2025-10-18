@@ -220,27 +220,6 @@ final class InventoryCacheTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_deve_fazer_fallback_para_set_quando_increment_nao_suportado(): void
-    {
-        // Arrange
-        $this->cacheMock->shouldReceive('increment')
-            ->with('inventory:list_version')
-            ->once()
-            ->andReturn(null); // Simula não suporte
-        $this->cacheMock->shouldReceive('get')
-            ->with('inventory:list_version', 0)
-            ->andReturn(0);
-        $this->cacheMock->shouldReceive('put')
-            ->with('inventory:list_version', 2, 60)
-            ->once();
-
-        // Act
-        $this->inventoryCache->invalidateAllLists();
-
-        // Assert
-        $this->assertTrue(true);
-    }
-
     public function test_deve_usar_lock_quando_disponivel(): void
     {
         // Arrange

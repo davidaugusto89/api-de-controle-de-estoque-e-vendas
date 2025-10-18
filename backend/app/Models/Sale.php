@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
+use Database\Factories\SaleFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,6 +42,11 @@ class Sale extends Model
         'updated_at'   => 'datetime',
         'sale_date'    => 'date',
     ];
+
+    protected static function newFactory(): SaleFactory
+    {
+        return SaleFactory::new();
+    }
 
     /** @return HasMany<\App\Models\SaleItem> */
     public function items(): HasMany

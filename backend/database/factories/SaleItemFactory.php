@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Product;
-use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -15,27 +13,17 @@ class SaleItemFactory extends Factory
 
     public function definition(): array
     {
-        // garante produto coerente; pode ser sobrescrito ao usar a factory
-        $product = Product::inRandomOrder()->first() ?? Product::factory()->create();
-
-        $qty       = fake()->numberBetween(1, 5);
-        $unitCost  = (float) $product->cost_price;
-        $unitPrice = (float) $product->sale_price;
-
+        // Quantidade pequena e preços com 2 casas.
         return [
-            'sale_id'    => Sale::factory(),
-            'product_id' => $product->id,
-            'quantity'   => $qty,
-            'unit_cost'  => $unitCost,
-            'unit_price' => $unitPrice,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'quantity'   => $this->faker->numberBetween(1, 5),
+            'unit_price' => $this->formatMoney($this->faker->randomFloat(2, 5, 50)),
+            'unit_cost'  => $this->formatMoney($this->faker->randomFloat(2, 2, 40)),
         ];
     }
 
-    /** Estado para quantidade maior (teste de volume) */
-    public function bulk(): static
+    private function formatMoney(float $v): string
     {
-        return $this->state(fn () => ['quantity' => fake()->numberBetween(6, 20)]);
+        // Garante string com 2 casas
+        return number_format($v, 2, '.', '');
     }
 }

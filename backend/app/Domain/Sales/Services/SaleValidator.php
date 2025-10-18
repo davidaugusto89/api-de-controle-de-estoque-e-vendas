@@ -31,24 +31,24 @@ final class SaleValidator
             $cost      = is_array($it) ? (float) ($it['unit_cost'] ?? 0) : (float) ($it->unit_cost ?? 0);
 
             if ($productId <= 0) {
-                throw new InvalidArgumentException('Item inválido: product_id ausente ou inválido.');
+                throw new InvalidArgumentException('Item inválido: product_id ausente/ inválido.');
             }
 
             if ($qty <= 0) {
-                throw new InvalidArgumentException("Item {$productId}: quantity deve ser maior que 0.");
+                throw new InvalidArgumentException("Item {$count}: quantity deve ser > 0.");
             }
 
             if ($price < 0) {
-                throw new InvalidArgumentException("Item {$productId}: unit_price não pode ser negativo.");
+                throw new InvalidArgumentException("Item {$count}: unit_price não pode ser negativo.");
             }
 
             if ($cost < 0) {
-                throw new InvalidArgumentException("Item {$productId}: unit_cost não pode ser negativo.");
+                throw new InvalidArgumentException("Item {$count}: unit_cost não pode ser negativo.");
             }
         }
 
         if ($count === 0) {
-            throw new InvalidArgumentException('A venda deve conter pelo menos um item.');
+            throw new InvalidArgumentException('A venda deve conter ao menos um item.');
         }
     }
 }

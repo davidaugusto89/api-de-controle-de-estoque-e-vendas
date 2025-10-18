@@ -13,7 +13,10 @@ final class EventServiceProviderTest extends TestCase
 {
     public function test_listen_contem_mapeamento_para_sale_finalized(): void
     {
-        $provider = $this->app->make(EventServiceProvider::class);
+    // Instancia diretamente passando o container para o construtor.
+    // Usar $this->app->make() tenta resolver dependências do ServiceProvider
+    // via auto-wiring e falha ao resolver o parâmetro `$app`.
+    $provider = new EventServiceProvider($this->app);
 
         $listen = $this->getProtectedProperty($provider, 'listen');
 

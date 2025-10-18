@@ -23,15 +23,9 @@ class ApiExceptionFormatterTest extends TestCase
     {
         $request = Request::create('/test');
 
-        $validator = new class
-        {
-            public function errors()
-            {
-                return ['field' => ['error']];
-            }
-        };
-
-        $e = new ValidationException($validator, response()->json([]));
+        // Criar um validator real via Validator facade para garantir compatibilidade
+        $validator = \Illuminate\Support\Facades\Validator::make(['field' => ''], ['field' => 'required']);
+        $e = new ValidationException($validator);
 
         $res = ApiExceptionFormatter::from($e, $request);
 

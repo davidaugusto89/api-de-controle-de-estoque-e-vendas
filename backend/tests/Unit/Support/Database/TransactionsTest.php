@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace Tests\Unit\Support\Database;
 
 use App\Support\Database\Transactions;
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\Facades\DB;
+use Mockery;
 use PHPUnit\Framework\TestCase;
 
 final class TransactionsTest extends TestCase
 {
     protected function tearDown(): void
     {
-        // Ensure facade state cleared
+        // Limpa o root do Facade para não vazar mocks entre testes
         DB::swap(null);
+        Mockery::close();
         parent::tearDown();
     }
 
@@ -21,13 +24,16 @@ final class TransactionsTest extends TestCase
     {
         $expected = 'ok-result';
 
-        DB::shouldReceive('transaction')
+        // Mock do DatabaseManager que o Transactions vai usar
+        $manager = Mockery::mock(DatabaseManager::class);
+        $manager->shouldReceive('transaction')
             ->once()
             ->andReturnUsing(function ($cb) {
                 return $cb();
             });
 
-        $tx = new Transactions;
+    // Injeta o DatabaseManager mock diretamente no Transactions
+    $tx = new Transactions($manager);
 
         $result = $tx->run(function () use ($expected) {
             return $expected;
@@ -38,13 +44,16 @@ final class TransactionsTest extends TestCase
 
     public function test_run_propagates_exceptions(): void
     {
-        DB::shouldReceive('transaction')
+        $manager = Mockery::mock(DatabaseManager::class);
+        $manager->shouldReceive('transaction')
             ->once()
             ->andReturnUsing(function ($cb) {
+                // O próprio callback lançará a exceção — deixamos propagar
                 return $cb();
             });
 
-        $tx = new Transactions;
+    // Injeta o DatabaseManager mock diretamente no Transactions
+    $tx = new Transactions($manager);
 
         $this->expectException(\RuntimeException::class);
 

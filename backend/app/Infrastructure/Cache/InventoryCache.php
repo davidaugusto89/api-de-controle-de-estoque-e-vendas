@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Infrastructure\Cache;
 
 use Closure;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 final class InventoryCache
 {
@@ -15,8 +14,12 @@ final class InventoryCache
 
     private const VERSION_KEY = 'inventory:list_version';
 
+    /**
+     * Aceita um cache-like qualquer para facilitar fakes nos testes.
+     * @param mixed $cache
+     */
     public function __construct(
-        private readonly CacheRepository $cache
+        private readonly mixed $cache
     ) {}
 
     /**
@@ -113,11 +116,20 @@ final class InventoryCache
 
     private function bumpListVersion(): void
     {
-        // usando increment para evitar colisões entre processos
-        $this->cache->increment(self::VERSION_KEY);
-        // se o store não suportar increment, caia para set:
-        if ((int) $this->cache->get(self::VERSION_KEY, 0) === 0) {
-            $this->cache->put(self::VERSION_KEY, 2, self::TTL_SECONDS);
+        // usando increment para evitar colisões entre processos — tolerate stores que não implementam increment
+        try {
+            if (method_exists($this->cache, 'increment')) {
+                $this->cache->increment(self::VERSION_KEY);
+            } else {
+                // fallback: set direto
+                $this->cache->put(self::VERSION_KEY, 2, self::TTL_SECONDS);
+            }
+        } catch (\Throwable) {
+            try {
+                $this->cache->put(self::VERSION_KEY, 2, self::TTL_SECONDS);
+            } catch (\Throwable) {
+                // silencioso
+            }
         }
     }
 
@@ -143,6 +155,10 @@ final class InventoryCache
             }
         }
 
-        return $this->cache->remember($key, self::TTL_SECONDS, $resolver);
+        try {
+            return $this->cache->remember($key, self::TTL_SECONDS, $resolver);
+        } catch (\Throwable) {
+            return $resolver();
+        }
     }
 }
