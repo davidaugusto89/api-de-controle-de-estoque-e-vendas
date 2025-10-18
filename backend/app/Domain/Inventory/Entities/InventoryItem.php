@@ -7,13 +7,8 @@ namespace App\Domain\Inventory\Entities;
 use App\Domain\Inventory\Services\StockPolicy;
 
 /**
- * Entidade de domínio imutável-parcial para raciocinar sobre o estoque de um produto.
- *
- * Responsabilidades:
- * - Representar a quantidade em estoque de um produto dentro do domínio,
- *   aplicando as regras de {@see App\Domain\Inventory\Services\StockPolicy}.
- * - Fornecer operações de incremento/decremento que validam e lançam erro em
- *   situações inválidas (p.ex. decremento maior que o disponível).
+ * Entidade de domínio para representar e manipular o estoque de um produto,
+ * aplicando regras de negócio definidas pela {@see StockPolicy}.
  */
 final class InventoryItem
 {
@@ -24,9 +19,7 @@ final class InventoryItem
         private int $quantity,
         ?StockPolicy $policy = null
     ) {
-        $this->policy = $policy ?? new StockPolicy();
-
-        // normalize / valida quantidade inicial via StockPolicy público
+        $this->policy = $policy ?? new StockPolicy;
         $this->quantity = $this->policy->adjust($quantity, 0);
     }
 
@@ -36,24 +29,21 @@ final class InventoryItem
     }
 
     /**
-     * Decrementa a quantidade em estoque.
+     * Reduz a quantidade em estoque.
      *
-     * @param  int  $qty  Quantidade a subtrair (deve ser positiva)
      *
-     * @throws \RuntimeException Quando não houver estoque suficiente conforme regras de {@see StockPolicy}
+     * @throws \RuntimeException
      */
     public function decrement(int $qty): void
     {
         $this->quantity = $this->policy->decrease($this->quantity, $qty);
     }
 
+    /**
+     * Aumenta a quantidade em estoque.
+     */
     public function increment(int $qty): void
     {
-        /**
-         * Incrementa a quantidade em estoque.
-         *
-         * @param  int  $qty  Quantidade a adicionar (deve ser não-negativa)
-         */
         $this->quantity = $this->policy->increase($this->quantity, $qty);
     }
 }

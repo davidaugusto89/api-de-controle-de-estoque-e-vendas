@@ -11,62 +11,30 @@ use App\Models\SaleItem;
 use App\Support\Database\Transactions;
 
 /**
- * Cria uma nova venda e enfileira a finalização assíncrona.
- *
- * Resumo:
- * - Persiste uma entidade `Sale` em estado enfileirado e insere os itens
- *   correspondentes em `sale_items` dentro de uma transação.
- * - Valida existência dos produtos usados no payload e normaliza preços (payload > preço do produto).
- * - Despacha um job (`FinalizeSaleJob`) na fila `sales` para realizar a finalização/conciliacão posteriormente.
- *
- * Contrato:
- * - Entrada: array<int, array{product_id:int, quantity:int, unit_price?:?float}> $items
- * - Saída: int ID da venda criada
- * - Efeitos colaterais: gravação em `sales`/`sale_items` e dispatch de job para fila
- *
- * Observações:
- * - A operação roda em transação via {@see App\Support\Database\Transactions} para garantir atomicidade.
- * - O preço unitário preferido é o enviado no payload; quando ausente, usa-se `product.sale_price`.
- * - A finalização da venda é delegada ao job enfileirado; escolha de prioridade/queue deve ser avaliada conforme carga.
+ * Cria uma venda e enfileira a finalização assíncrona.
  */
 final class CreateSale
 {
-    /**
-     * @param  Transactions  $tx  Helper de transações capaz de executar transactions no BD
-     * @param  FinalizeSale  $finalizeSale  Caso de uso responsável pela finalização da venda
-     */
     public function __construct(
-        private readonly Transactions $tx,
-        private readonly FinalizeSale $finalizeSale
+        private readonly Transactions $tx
     ) {}
 
     /**
-     * Cria uma nova venda com itens e enfileira o job de finalização.
+     * Persiste a venda e seus itens e despacha o job de finalização.
      *
-     * Contrato do parâmetro `$items`:
-     * - É um array indexado com chaves inteiras; cada item deve conter ao menos:
-     *   - product_id: int (ID do produto)
-     *   - quantity: int (quantidade)
-     *   - unit_price?: ?float (preço unitário opcional; quando informado, prevalece)
+     * @param  array<int, array{product_id:int, quantity:int, unit_price?:float|null}>  $items
+     * @return int ID da venda criada
      *
-     * Retorno:
-     * - int: ID da venda recém-criada (status inicial: queued)
-     *
-     * Efeitos colaterais e exceções:
-     * - Insere registros em `sale_items` e cria um `Sale` dentro de uma transação;
-     * - Despacha {@see App\Infrastructure\Jobs\FinalizeSaleJob} para a fila `sales`.
-     * - Não lança exceções explícitas aqui, mas falhas na transação/BD serão propagadas.
+     * @throws \Throwable
      */
     public function execute(array $items): int
     {
-        // valida existência básica de produtos e normaliza preços
         $productMap = Product::query()
             ->whereIn('id', array_column($items, 'product_id'))
             ->get(['id', 'sale_price', 'cost_price'])
             ->keyBy('id');
 
-        return $this->tx->run(function () use ($items, $productMap) {
-            /** @var Sale $sale */
+        return $this->tx->run(function () use ($items, $productMap): int {
             $sale = new Sale;
             $sale->status = Sale::STATUS_QUEUED;
             $sale->total_amount = 0;
@@ -77,8 +45,10 @@ final class CreateSale
             $rows = [];
             foreach ($items as $it) {
                 $p = $productMap[$it['product_id']] ?? null;
-                // preço unitário: payload > produto
-                $unitPrice = isset($it['unit_price']) ? (float) $it['unit_price'] : (float) ($p?->sale_price ?? 0);
+                $unitPrice = isset($it['unit_price'])
+                    ? (float) $it['unit_price']
+                    : (float) ($p?->sale_price ?? 0);
+
                 $rows[] = [
                     'sale_id' => $sale->id,
                     'product_id' => (int) $it['product_id'],
@@ -94,7 +64,6 @@ final class CreateSale
                 SaleItem::query()->insert($rows);
             }
 
-            // Despacha a FINALIZAÇÃO para a fila "sales"
             dispatch(new FinalizeSaleJob($sale->id))->onQueue('sales');
 
             return $sale->id;

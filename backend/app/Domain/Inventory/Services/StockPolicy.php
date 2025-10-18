@@ -8,28 +8,11 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Regras centrais de integridade de estoque (política de stock).
- *
- * Responsabilidade:
- * - Garantir operações seguras sobre quantidades de estoque por produto,
- *   incluindo validações de limites e normalização de entradas.
- *
- * Contrato resumido:
- * - Métodos aceitam inteiros e retornam inteiros normalizados.
- * - `increase` e `decrease` lançam {@see \InvalidArgumentException} para
- *   parâmetros inválidos e {@see \RuntimeException} quando a operação violaria
- *   as restrições (p.ex. underflow/overflow ou `maxPerProduct` excedido).
- *
- * Observações:
- * - `maxPerProduct` pode ser passado no construtor ou definido via variável de
- *   ambiente `STOCK_MAX_PER_PRODUCT`.
+ * Política de estoque: valida e aplica operações seguras sobre quantidades.
  */
 final class StockPolicy
 {
-    /**
-     * Upper bound for per-product stock. Can be overridden in runtime or
-     * via env var STOCK_MAX_PER_PRODUCT.
-     */
+    /** Limite máximo por produto (padrão: env STOCK_MAX_PER_PRODUCT ou 1_000_000). */
     private int $maxPerProduct;
 
     public function __construct(?int $maxPerProduct = null)
@@ -42,12 +25,9 @@ final class StockPolicy
     /**
      * Aumenta a quantidade atual por um delta positivo.
      *
-     * @param  int  $current  Quantidade atual (>= 0)
-     * @param  int  $delta  Quantidade positiva a adicionar
-     * @return int Nova quantidade após o aumento
      *
-     * @throws InvalidArgumentException Em caso de entradas inválidas
-     * @throws RuntimeException Se o resultado ficar fora dos limites permitidos
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function increase(int $current, int $delta): int
     {
@@ -68,12 +48,9 @@ final class StockPolicy
     /**
      * Diminui a quantidade atual por um delta positivo.
      *
-     * @param  int  $current  Quantidade atual (>= 0)
-     * @param  int  $delta  Quantidade positiva a subtrair
-     * @return int Nova quantidade após a diminuição
      *
-     * @throws InvalidArgumentException Em caso de entradas inválidas
-     * @throws RuntimeException Se não houver estoque suficiente
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function decrease(int $current, int $delta): int
     {
@@ -88,11 +65,11 @@ final class StockPolicy
     }
 
     /**
-     * Ajusta a quantidade por um delta assinado. Positivo aumenta, negativo diminui.
+     * Ajusta a quantidade por um delta assinado (positivo aumenta, negativo diminui).
      *
-     * @param  int  $current  Quantidade atual
-     * @param  int  $delta  Delta assinado
-     * @return int Nova quantidade
+     *
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function adjust(int $current, int $delta): int
     {
@@ -105,6 +82,9 @@ final class StockPolicy
             : $this->decrease($current, -$delta);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function normalize(int $q): int
     {
         if ($q < 0) {
@@ -114,6 +94,9 @@ final class StockPolicy
         return $q;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function normalizeDelta(int $delta): int
     {
         if ($delta <= 0) {

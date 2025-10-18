@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Shared\ValueObjects;
 
 /**
- * VO simples para valores monetários (não persistido).
- * Mantém invariante de 2 casas quando formatado.
+ * Value Object para representar valores monetários.
+ * Garante formatação consistente com duas casas decimais.
  */
 final class Money
 {
@@ -22,12 +22,12 @@ final class Money
         return $this->value;
     }
 
-    public function add(Money $other): Money
+    public function add(self $other): self
     {
         return new self($this->value + $other->value);
     }
 
-    public function sub(Money $other): Money
+    public function sub(self $other): self
     {
         return new self($this->value - $other->value);
     }
@@ -40,9 +40,9 @@ final class Money
     private function normalize(float|int|string $value): float
     {
         if (is_string($value)) {
-            $value = str_replace(['.', ','], ['.', '.'], str_replace(',', '.', $value));
+            $value = str_replace(',', '.', $value);
         }
 
-        return (float) $value;
+        return round((float) $value, 2);
     }
 }

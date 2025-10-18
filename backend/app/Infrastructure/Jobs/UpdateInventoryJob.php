@@ -13,55 +13,78 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
+/**
+ * Atualiza o estoque a partir de uma venda, garantindo consistência transacional
+ * e exclusão mútua por produto via lock distribuído.
+ */
 final class UpdateInventoryJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /** @var int Número máximo de tentativas antes de falhar. */
     public int $tries = 3;
 
+    /** @var array<int,int> Backoff em segundos entre tentativas. */
     public array $backoff = [5, 15, 60];
 
     /**
-     * @param  array<int, array{product_id:int, quantity:int, unit_price?:float, unit_cost?:float}>  $items
+     * @param  int  $saleId  ID da venda.
+     * @param array<int, array{
+     *   product_id:int,
+     *   quantity:int,
+     *   unit_price?:float,
+     *   unit_cost?:float
+     * }> $items Itens da venda.
      */
     public function __construct(
         public readonly int $saleId,
         public readonly array $items
-    ) {
-        // Defina fila/afterCommit no dispatch:
-        // UpdateInventoryJob::dispatch(...)->onQueue('inventory')->afterCommit();
-    }
+    ) {}
 
+    /**
+     * Executa a atualização de estoque com transação e lock por produto.
+     *
+     * @throws Throwable
+     */
     public function handle(
         Transactions $tx,
         InventoryLockService $locks,
         StockPolicy $policy
     ): void {
-        // $this->timeout = 90; // opcional
-
-        $tx->run(function () use ($locks, $policy) {
+        $tx->run(function () use ($locks, $policy): void {
             foreach ($this->items as $it) {
-                $pid = (int) $it['product_id'];
-                $qty = (int) $it['quantity'];
+                $productId = (int) $it['product_id'];
+                $quantity = (int) $it['quantity'];
 
-                // Usa o método disponível no serviço:
-                $locks->lock($pid, function () use ($policy, $pid, $qty) {
-                    $policy->decrease($pid, $qty);
-                }, 10, 5);
+                $locks->lock(
+                    $productId,
+                    function () use ($policy, $productId, $quantity): void {
+                        $policy->decrease($productId, $quantity);
+                    },
+                    10,
+                    5
+                );
             }
         });
 
         Log::info('Inventory updated from sale', [
             'sale_id' => $this->saleId,
             'items' => array_map(
-                fn ($i) => ['p' => (int) $i['product_id'], 'q' => (int) $i['quantity']],
+                static fn (array $i): array => [
+                    'p' => (int) $i['product_id'],
+                    'q' => (int) $i['quantity'],
+                ],
                 $this->items
             ),
         ]);
     }
 
-    public function failed(\Throwable $e): void
+    /**
+     * Callback após esgotar tentativas.
+     */
+    public function failed(Throwable $e): void
     {
         Log::error('UpdateInventoryJob failed', [
             'sale_id' => $this->saleId,

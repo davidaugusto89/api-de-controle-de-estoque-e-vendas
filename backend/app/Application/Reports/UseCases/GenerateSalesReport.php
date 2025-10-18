@@ -10,31 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Gera relatório de vendas agregadas e por produto com suporte a cache.
- *
- * Contrato de entrada (array $params):
- * - from|start_date?: string|null  Data inicial (ISO) do período
- * - to|end_date?: string|null      Data final (ISO) do período
- * - product_sku?: string|null      Filtra por SKU de produto
- * - top?: int|null                 Quantidade máxima de produtos no ranking (1-1000)
- * - order_by?: 'amount'|'quantity'|'profit'|'date'|'sku'|null  Ordenação dos top products
- * - cache_ttl?: int|null           TTL do cache em segundos (0 = sem cache)
- *
- * Saída:
- * - array contendo chaves: 'period' (from/to), 'totals' (totais agregados),
- *   'series' (séries diárias) e 'top_products' (lista dos principais produtos).
- *
- * Comportamento e garantias:
- * - Valida e normaliza datas; padrão é últimos 30 dias quando não informado.
- * - Limita `top` entre 1 e 1000 e normaliza `order_by` para valores permitidos.
- * - Usa cache taggeada (`sales`, `reports`) via facade `Cache::tags`. Se `cache_ttl` for 0,
- *   a consulta ainda passa pelo mecanismo de cache, mas o TTL será 0 (dependendo do driver,
- *   pode comportar-se como sem cache).
- * - Toda a lógica de agregação é delegada a {@see App\Infrastructure\Persistence\Queries\SalesReportQuery}.
- *
- * Observações:
- * - Esta classe produz um payload pensado para consumo por APIs ou exportadores;
- *   formatação adicional (monetária, localidade) deve ser feita pelo layer de apresentação.
+ * Gera relatório de vendas (agregado, séries diárias e ranking por produto) com cache.
  */
 final class GenerateSalesReport
 {
@@ -43,6 +19,8 @@ final class GenerateSalesReport
     ) {}
 
     /**
+     * Normaliza parâmetros, aplica cache e retorna o payload do relatório.
+     *
      * @param array{
      *   from?: string|null,
      *   to?: string|null,
@@ -53,6 +31,12 @@ final class GenerateSalesReport
      *   order_by?: 'amount'|'quantity'|'profit'|'date'|'sku'|null,
      *   cache_ttl?: int|null
      * } $params
+     * @return array{
+     *   period: array{from: string, to: string},
+     *   totals: array<string, mixed>,
+     *   series: array<int, array<string, mixed>>,
+     *   top_products: array<int, array<string, mixed>>
+     * }
      */
     public function handle(array $params): array
     {
@@ -76,9 +60,8 @@ final class GenerateSalesReport
         $ttl = max(0, (int) (Arr::get($params, 'cache_ttl', 300)));
 
         $allowedOrder = ['amount', 'quantity', 'profit', 'date', 'sku'];
-        $orderBy = in_array(Arr::get($params, 'order_by'), $allowedOrder, true)
-            ? Arr::get($params, 'order_by')
-            : 'amount';
+        $orderParam = Arr::get($params, 'order_by');
+        $orderBy = in_array($orderParam, $allowedOrder, true) ? $orderParam : 'amount';
 
         $cacheKey = sprintf(
             'sales_report:%s:%s:%s:%d:%s',
@@ -89,28 +72,38 @@ final class GenerateSalesReport
             $orderBy
         );
 
-        return Cache::tags(['sales', 'reports'])->remember($cacheKey, $ttl, function () use ($periodStart, $periodEnd, $sku, $top, $orderBy) {
-            $totals = $this->query->totals($periodStart, $periodEnd, $sku);
-            $byDay = $this->query->byDay($periodStart, $periodEnd, $sku)->all();
-            $topProducts = $this->query->topProducts($periodStart, $periodEnd, $top, $orderBy, $sku)->all();
+        return Cache::tags(['sales', 'reports'])->remember(
+            $cacheKey,
+            $ttl,
+            function () use ($periodStart, $periodEnd, $sku, $top, $orderBy): array {
+                $totals = $this->query->totals($periodStart, $periodEnd, $sku);
+                $byDay = $this->query->byDay($periodStart, $periodEnd, $sku)->all();
+                $topProducts = $this->query
+                    ->topProducts($periodStart, $periodEnd, $top, $orderBy, $sku)
+                    ->all();
 
-            return [
-                'period' => [
-                    'from' => $periodStart->toDateString(),
-                    'to' => $periodEnd->toDateString(),
-                ],
-                'totals' => $totals,
-                'series' => $byDay,
-                'top_products' => $topProducts,
-            ];
-        });
+                return [
+                    'period' => [
+                        'from' => $periodStart->toDateString(),
+                        'to' => $periodEnd->toDateString(),
+                    ],
+                    'totals' => $totals,
+                    'series' => $byDay,
+                    'top_products' => $topProducts,
+                ];
+            }
+        );
     }
 
+    /**
+     * Converte string ISO em CarbonImmutable, retornando null se inválida.
+     */
     private function parseDate(?string $value): ?CarbonImmutable
     {
         if (! $value) {
             return null;
         }
+
         try {
             return CarbonImmutable::parse($value);
         } catch (\Throwable) {

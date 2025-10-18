@@ -8,16 +8,7 @@ use App\Infrastructure\Persistence\Eloquent\SaleRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
- * Recupera detalhes de uma venda junto com os itens associados.
- *
- * Contrato:
- * - Entrada: int $saleId
- * - Saída: array com campos básicos da venda e uma lista de itens (ver phpdoc do método `execute`)
- * - Exceções: lança {@see \Illuminate\Database\Eloquent\ModelNotFoundException} quando não encontrar a venda
- *
- * Observações:
- * - A implementação delega a busca ao repositório {@see App\Infrastructure\Persistence\Eloquent\SaleRepository}
- *   que deve otimizar carregamento de items (eager loading) para evitar N+1.
+ * Retorna detalhes de uma venda e seus itens.
  */
 final class GetSaleDetails
 {
@@ -40,6 +31,8 @@ final class GetSaleDetails
      *     unit_cost:float
      *   }>
      * }
+     *
+     * @throws ModelNotFoundException
      */
     public function execute(int $saleId): array
     {
@@ -56,12 +49,14 @@ final class GetSaleDetails
             'total_profit' => (float) $sale->total_profit,
             'status' => (string) $sale->status,
             'created_at' => $sale->created_at?->toISOString() ?? '',
-            'items' => $sale->items->map(fn ($i) => [
-                'product_id' => (int) $i->product_id,
-                'quantity' => (int) $i->quantity,
-                'unit_price' => (float) $i->unit_price,
-                'unit_cost' => (float) $i->unit_cost,
-            ])->all(),
+            'items' => $sale->items
+                ->map(static fn ($i): array => [
+                    'product_id' => (int) $i->product_id,
+                    'quantity' => (int) $i->quantity,
+                    'unit_price' => (float) $i->unit_price,
+                    'unit_cost' => (float) $i->unit_cost,
+                ])
+                ->all(),
         ];
     }
 }
