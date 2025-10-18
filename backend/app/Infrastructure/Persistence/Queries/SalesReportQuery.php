@@ -144,7 +144,7 @@ final class SalesReportQuery
             ->selectRaw('si.product_id')
             ->selectRaw('SUM(si.quantity) as quantity')
             ->selectRaw('SUM(si.quantity * si.unit_price) as amount')
-            ->selectRaw('SUM(si.quantity * (si.unit_price - si.unit_cost)) as profit');
+            ->selectRaw('SUM(si.quantity * (CAST(si.unit_price AS DECIMAL(20,2)) - CAST(si.unit_cost AS DECIMAL(20,2)))) as profit');
 
         return Product::query()
             ->when($productSku, fn (EloquentBuilder $q) => $q->where('sku', $productSku))
