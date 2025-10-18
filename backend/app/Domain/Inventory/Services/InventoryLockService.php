@@ -10,10 +10,10 @@ use Closure;
 /**
  * Fornece locks de inventário por produto (individual e múltiplo).
  */
-final class InventoryLockService
+class InventoryLockService
 {
     public function __construct(
-        private readonly RedisLock $lock
+        private readonly ?RedisLock $lock = null
     ) {}
 
     /**
@@ -23,6 +23,10 @@ final class InventoryLockService
      */
     public function lock(int $productId, Closure $callback, int $ttlSeconds = 10, int $waitSeconds = 5): mixed
     {
+        if ($this->lock === null) {
+            throw new \RuntimeException('RedisLock is not configured for InventoryLockService');
+        }
+
         return $this->lock->run(
             $this->keyForProduct($productId),
             $ttlSeconds,
@@ -43,6 +47,10 @@ final class InventoryLockService
         sort($ids);
 
         $keys = array_map(fn (int $id): string => $this->keyForProduct($id), $ids);
+
+        if ($this->lock === null) {
+            throw new \RuntimeException('RedisLock is not configured for InventoryLockService');
+        }
 
         $runner = function (array $k, Closure $cb) use (&$runner, $ttlSeconds, $waitSeconds) {
             if ($k === []) {

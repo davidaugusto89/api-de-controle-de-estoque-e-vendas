@@ -10,7 +10,7 @@ use RuntimeException;
 /**
  * Política de estoque: valida e aplica operações seguras sobre quantidades.
  */
-final class StockPolicy
+class StockPolicy
 {
     /** Limite máximo por produto (padrão: env STOCK_MAX_PER_PRODUCT ou 1_000_000). */
     private int $maxPerProduct;

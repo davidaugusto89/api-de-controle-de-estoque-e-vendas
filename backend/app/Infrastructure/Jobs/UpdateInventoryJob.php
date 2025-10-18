@@ -12,7 +12,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Throwable;
 
 /**
@@ -51,8 +52,11 @@ final class UpdateInventoryJob implements ShouldQueue
     public function handle(
         Transactions $tx,
         InventoryLockService $locks,
-        StockPolicy $policy
+        StockPolicy $policy,
+        ?LoggerInterface $logger = null
     ): void {
+        $logger ??= new NullLogger();
+
         $tx->run(function () use ($locks, $policy): void {
             foreach ($this->items as $it) {
                 $productId = (int) $it['product_id'];
@@ -69,7 +73,7 @@ final class UpdateInventoryJob implements ShouldQueue
             }
         });
 
-        Log::info('Inventory updated from sale', [
+        $logger->info('Inventory updated from sale', [
             'sale_id' => $this->saleId,
             'items'   => array_map(
                 static fn (array $i): array => [
@@ -84,9 +88,11 @@ final class UpdateInventoryJob implements ShouldQueue
     /**
      * Callback após esgotar tentativas.
      */
-    public function failed(Throwable $e): void
+    public function failed(Throwable $e, ?LoggerInterface $logger = null): void
     {
-        Log::error('UpdateInventoryJob failed', [
+        $logger ??= new NullLogger();
+
+        $logger->error('UpdateInventoryJob failed', [
             'sale_id' => $this->saleId,
             'error'   => $e->getMessage(),
         ]);
