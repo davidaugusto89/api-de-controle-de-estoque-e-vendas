@@ -29,15 +29,15 @@ final class GetInventorySnapshotTest extends TestCase
         $realCache = new InventoryCache($cacheRepo);
 
         // Calcular a chave usada por rememberListAndTotalsUnpaged para search null
-        $ver = (int) $cacheRepo->get('inventory:list_version', 1);
+        $ver    = (int) $cacheRepo->get('inventory:list_version', 1);
         $suffix = 'list:unpaged:v'.$ver.':'.md5(json_encode(['q' => ''], JSON_THROW_ON_ERROR));
-        $key = 'inventory:'.$suffix;
+        $key    = 'inventory:'.$suffix;
 
         // Armazenar o valor no cache para simular cache hit
         $cacheRepo->put($key, [$items, $totals], 60);
 
         $useCase = new GetInventorySnapshot($realQuery, $realCache);
-        $res = $useCase->handle();
+        $res     = $useCase->handle();
 
         $this->assertSame($items, $res['items']);
         $this->assertSame($totals, $res['totals']);
@@ -84,9 +84,9 @@ final class GetInventorySnapshotTest extends TestCase
         $this->assertSame($totals, $res['totals']);
         // Verificar que o cache 'armazenou' chamando o resolver
         // Verificar que o cache store 'array' agora tem a chave populada
-        $ver2 = (int) $cacheRepo->get('inventory:list_version', 1);
+        $ver2    = (int) $cacheRepo->get('inventory:list_version', 1);
         $suffix2 = 'list:unpaged:v'.$ver2.':'.md5(json_encode(['q' => ''], JSON_THROW_ON_ERROR));
-        $key2 = 'inventory:'.$suffix2;
+        $key2    = 'inventory:'.$suffix2;
 
         $this->assertNotNull($cacheRepo->get($key2));
     }
@@ -94,12 +94,12 @@ final class GetInventorySnapshotTest extends TestCase
     public function test_handle_retorna_vazio_quando_nao_ha_itens(): void
     {
         $collection = new Collection([]);
-        $totals = ['total_cost' => 0.0, 'total_sale' => 0.0, 'projected_profit' => 0.0];
+        $totals     = ['total_cost' => 0.0, 'total_sale' => 0.0, 'projected_profit' => 0.0];
 
         $realQuery = new InventoryQuery;
         $cacheRepo = $this->app['cache']->store('array');
         $realCache = new InventoryCache($cacheRepo);
-        $useCase = new GetInventorySnapshot($realQuery, $realCache);
+        $useCase   = new GetInventorySnapshot($realQuery, $realCache);
 
         // Mock DB para retornar coleção vazia e totals zeros
         $mockQB = \Mockery::mock(\Illuminate\Database\Query\Builder::class);

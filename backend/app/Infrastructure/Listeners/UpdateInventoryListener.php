@@ -30,8 +30,8 @@ final class UpdateInventoryListener implements ShouldQueue
             // Log útil para diagnosticar rapidamente
             Log::error('Falha no UpdateInventoryListener', [
                 'sale_id' => $event->saleId,
-                'items' => $event->items,
-                'error' => $e->getMessage(),
+                'items'   => $event->items,
+                'error'   => $e->getMessage(),
             ]);
 
             // Repassa a exceção para o worker marcar como failed (e aparecer no Horizon/queue:failed)

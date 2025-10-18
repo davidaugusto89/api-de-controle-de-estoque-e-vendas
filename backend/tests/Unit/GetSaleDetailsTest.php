@@ -41,9 +41,9 @@ final class GetSaleDetailsTest extends TestCase
         $items = new Collection([
             (object) [
                 'product_id' => 10,
-                'quantity' => 2,
+                'quantity'   => 2,
                 'unit_price' => 25.5,
-                'unit_cost' => 15.0,
+                'unit_cost'  => 15.0,
             ],
         ]);
 
@@ -57,13 +57,13 @@ final class GetSaleDetailsTest extends TestCase
         };
 
         $sale = $this->makeSale([
-            'id' => 123,
+            'id'           => 123,
             'total_amount' => 51.0,
-            'total_cost' => 30.0,
+            'total_cost'   => 30.0,
             'total_profit' => 21.0,
-            'status' => 'paid',
-            'created_at' => $createdAt,
-            'items' => $items,
+            'status'       => 'paid',
+            'created_at'   => $createdAt,
+            'items'        => $items,
         ]);
 
         $repo->expects($this->once())
@@ -123,20 +123,20 @@ final class GetSaleDetailsTest extends TestCase
         $items = new Collection([
             (object) [
                 'product_id' => '7',
-                'quantity' => '3',
+                'quantity'   => '3',
                 'unit_price' => '9.99',
-                'unit_cost' => '5.00',
+                'unit_cost'  => '5.00',
             ],
         ]);
 
         $sale = $this->makeSale([
-            'id' => 321,
+            'id'           => 321,
             'total_amount' => '29.97',
-            'total_cost' => '15.00',
+            'total_cost'   => '15.00',
             'total_profit' => '14.97',
-            'status' => 'pending',
-            'created_at' => null,
-            'items' => $items,
+            'status'       => 'pending',
+            'created_at'   => null,
+            'items'        => $items,
         ]);
 
         $repo->expects($this->once())
@@ -210,25 +210,25 @@ final class GetSaleDetailsTest extends TestCase
     private function makeSale(array $overrides = []): object
     {
         $defaults = [
-            'id' => 1,
+            'id'           => 1,
             'total_amount' => 0.0,
-            'total_cost' => 0.0,
+            'total_cost'   => 0.0,
             'total_profit' => 0.0,
-            'status' => 'pending',
-            'created_at' => null,
-            'items' => new Collection([]),
+            'status'       => 'pending',
+            'created_at'   => null,
+            'items'        => new Collection([]),
         ];
 
         $data = array_merge($defaults, $overrides);
 
         return (object) [
-            'id' => $data['id'],
+            'id'           => $data['id'],
             'total_amount' => $data['total_amount'],
-            'total_cost' => $data['total_cost'],
+            'total_cost'   => $data['total_cost'],
             'total_profit' => $data['total_profit'],
-            'status' => $data['status'],
-            'created_at' => $data['created_at'],
-            'items' => $data['items'],
+            'status'       => $data['status'],
+            'created_at'   => $data['created_at'],
+            'items'        => $data['items'],
         ];
     }
 }

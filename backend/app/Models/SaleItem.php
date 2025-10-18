@@ -43,11 +43,11 @@ class SaleItem extends Model
     ];
 
     protected $casts = [
-        'sale_id' => 'integer',
+        'sale_id'    => 'integer',
         'product_id' => 'integer',
-        'quantity' => 'integer',
+        'quantity'   => 'integer',
         'unit_price' => 'float',
-        'unit_cost' => 'float',
+        'unit_cost'  => 'float',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

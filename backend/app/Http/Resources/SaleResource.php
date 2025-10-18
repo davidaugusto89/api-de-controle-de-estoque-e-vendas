@@ -31,14 +31,14 @@ final class SaleResource extends JsonResource
         $items = (array) ($this->resource['items'] ?? []);
 
         return [
-            'id' => (int) $this->resource['id'],
-            'status' => (string) $this->resource['status'],
+            'id'           => (int) $this->resource['id'],
+            'status'       => (string) $this->resource['status'],
             'total_amount' => (float) $this->resource['total_amount'],
-            'total_cost' => (float) $this->resource['total_cost'],
+            'total_cost'   => (float) $this->resource['total_cost'],
             'total_profit' => (float) $this->resource['total_profit'],
-            'created_at' => Carbon::parse($this->resource['created_at'])->toISOString(),
-            'updated_at' => Carbon::parse($this->resource['updated_at'])->toISOString(),
-            'items' => array_map(fn ($it) => (new SaleItemResource($it))->resolve(), $items),
+            'created_at'   => Carbon::parse($this->resource['created_at'])->toISOString(),
+            'updated_at'   => Carbon::parse($this->resource['updated_at'])->toISOString(),
+            'items'        => array_map(fn ($it) => (new SaleItemResource($it))->resolve(), $items),
         ];
     }
 }

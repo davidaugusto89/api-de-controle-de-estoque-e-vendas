@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Collection;
  * Responsável por operações de leitura e escrita no modelo Sale,
  * mantendo o controller/use-cases desacoplados do Eloquent.
  */
-final class SaleRepository
+class SaleRepository
 {
     /**
      * Recupera uma venda por id.
@@ -68,9 +68,9 @@ final class SaleRepository
         /** @var Sale $sale */
         $sale = Sale::query()->create([
             'total_amount' => $data['total_amount'],
-            'total_cost' => $data['total_cost'],
+            'total_cost'   => $data['total_cost'],
             'total_profit' => $data['total_profit'],
-            'status' => $data['status'],
+            'status'       => $data['status'],
         ]);
 
         return $sale;

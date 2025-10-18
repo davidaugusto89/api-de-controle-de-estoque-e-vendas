@@ -38,7 +38,7 @@ class InventoryRepository
         if (! $inv) {
             $inv = new Inventory([
                 'product_id' => $productId,
-                'quantity' => $quantity,
+                'quantity'   => $quantity,
             ]);
             $inv->version = 0;
         } else {
@@ -46,7 +46,7 @@ class InventoryRepository
         }
 
         $inv->last_updated = $lastUpdated;
-        $inv->version = (int) $inv->version + 1;
+        $inv->version      = (int) $inv->version + 1;
         $inv->save();
 
         return $inv;
@@ -62,10 +62,10 @@ class InventoryRepository
             ->where('product_id', $productId)
             ->where('quantity', '>=', $quantity)
             ->update([
-                'quantity' => DB::raw("quantity - {$quantity}"),
-                'version' => DB::raw('version + 1'),
+                'quantity'     => DB::raw("quantity - {$quantity}"),
+                'version'      => DB::raw('version + 1'),
                 'last_updated' => now(),
-                'updated_at' => now(),
+                'updated_at'   => now(),
             ]);
     }
 }

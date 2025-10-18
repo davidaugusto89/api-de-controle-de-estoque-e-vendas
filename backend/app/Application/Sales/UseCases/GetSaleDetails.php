@@ -43,18 +43,18 @@ final class GetSaleDetails
         }
 
         return [
-            'id' => $sale->id,
+            'id'           => $sale->id,
             'total_amount' => (float) $sale->total_amount,
-            'total_cost' => (float) $sale->total_cost,
+            'total_cost'   => (float) $sale->total_cost,
             'total_profit' => (float) $sale->total_profit,
-            'status' => (string) $sale->status,
-            'created_at' => $sale->created_at?->toISOString() ?? '',
-            'items' => $sale->items
+            'status'       => (string) $sale->status,
+            'created_at'   => $sale->created_at?->toISOString() ?? '',
+            'items'        => $sale->items
                 ->map(static fn ($i): array => [
                     'product_id' => (int) $i->product_id,
-                    'quantity' => (int) $i->quantity,
+                    'quantity'   => (int) $i->quantity,
                     'unit_price' => (float) $i->unit_price,
-                    'unit_cost' => (float) $i->unit_cost,
+                    'unit_cost'  => (float) $i->unit_cost,
                 ])
                 ->all(),
         ];

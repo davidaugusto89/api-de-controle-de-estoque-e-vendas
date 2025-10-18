@@ -62,7 +62,7 @@ final class WithQueryOptimizationTest extends TestCase
         };
 
         $called = false;
-        $ret = $obj->callWithoutModelEvents(function () use (&$called) {
+        $ret    = $obj->callWithoutModelEvents(function () use (&$called) {
             $called = true;
 
             return 123;

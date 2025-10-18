@@ -14,7 +14,7 @@ final class JsonResponseHelperTest extends TestCase
     public function test_ok_retorna_response_json_estruturado(): void
     {
         $data = ['id' => 1, 'name' => 'Produto'];
-        $res = JsonResponseHelper::ok($data, 201, ['page' => 1]);
+        $res  = JsonResponseHelper::ok($data, 201, ['page' => 1]);
 
         $this->assertInstanceOf(JsonResponse::class, $res);
         $this->assertSame(201, $res->getStatusCode());

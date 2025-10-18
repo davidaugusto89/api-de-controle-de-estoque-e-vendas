@@ -19,58 +19,20 @@ use Throwable;
 
 /**
  * Formata exceções de aplicação em respostas JSON consistentes para APIs.
- *
- * ### Objetivo
- * Centralizar o mapeamento de exceções comuns (validação, authZ/authN, HTTP, DB, rate limit)
- * para um payload JSON estável, adequado a clientes e observabilidade.
- *
- * ### Comportamento
- * - **Ordem de verificação importa**: casos mais específicos são tratados primeiro.
- * - **Sem vazamento de informação sensível**: mensagens de exceção originais são omitidas,
- *   exceto para `HttpExceptionInterface` (mantendo o status) e somente exibidas no bloco `debug`
- *   quando `app.debug=true`.
- * - **Metadado de correlação**: injeta `meta.request_id` (do cabeçalho `X-Request-Id` ou gera um id).
- * - **Cabeçalhos**: propaga cabeçalhos relevantes (ex.: `Allow`, `Retry-After`) quando presentes.
- *
- * ### Dependências
- * - **Request**: usado para extrair o `X-Request-Id`.
- * - **Exceções do Laravel/Symfony**: insumos para o mapeamento de status/códigos.
- *
- * @phpstan-type DebugPayload array{
- *   exception: string,
- *   file: string,
- *   line: int,
- *   trace: list<string>
- * }
- * @phpstan-type ErrorBody array{
- *   code: string,
- *   message: string,
- *   details?: array,
- *   debug?: DebugPayload
- * }
- * @phpstan-type ApiPayload array{
- *   error: ErrorBody,
- *   meta: array{request_id: string}
- * }
  */
 final class ApiExceptionFormatter
 {
     /**
      * Constrói uma resposta JSON padronizada a partir de uma exceção.
-     *
-     * @param  Throwable  $e  Exceção original capturada pelo handler.
-     * @param  Request  $request  Requisição atual (para correlação e hints).
-     * @return JsonResponse Resposta JSON serializada pelo Laravel.
-     *
-     * @phpstan-return JsonResponse
      */
     public static function from(Throwable $e, Request $request): JsonResponse
     {
-        $debug = (bool) config('app.debug', false);
+        $debug     = (bool) config('app.debug', false);
         $requestId = self::requestId($request);
 
-        // Validação (422)
+        // 422 Validation
         if ($e instanceof ValidationException) {
+            // Usa diretamente $e->errors() (array), sem tentar resumir a mensagem
             return self::json(
                 status: 422,
                 code: 'ValidationError',
@@ -80,7 +42,7 @@ final class ApiExceptionFormatter
             );
         }
 
-        // Não autenticado (401)
+        // 401 Unauthenticated
         if ($e instanceof AuthenticationException) {
             return self::json(
                 status: 401,
@@ -90,7 +52,7 @@ final class ApiExceptionFormatter
             );
         }
 
-        // Proibido (403)
+        // 403 Forbidden
         if ($e instanceof AuthorizationException) {
             return self::json(
                 status: 403,
@@ -100,7 +62,7 @@ final class ApiExceptionFormatter
             );
         }
 
-        // Model não encontrado (404)
+        // 404 Model not found
         if ($e instanceof ModelNotFoundException) {
             return self::json(
                 status: 404,
@@ -110,7 +72,7 @@ final class ApiExceptionFormatter
             );
         }
 
-        // Rota não encontrada (404)
+        // 404 Route not found
         if ($e instanceof NotFoundHttpException) {
             return self::json(
                 status: 404,
@@ -120,29 +82,36 @@ final class ApiExceptionFormatter
             );
         }
 
-        // Método não permitido (405) — inclui cabeçalho Allow
+        // 405 Method Not Allowed — normaliza header Allow
         if ($e instanceof MethodNotAllowedHttpException) {
+            $headers   = $e->getHeaders();
+            $allow     = $headers['Allow'] ?? null;
+            $allowList = is_array($allow) ? $allow : (is_string($allow) ? [$allow] : []);
+
             return self::json(
                 status: 405,
                 code: 'MethodNotAllowed',
                 message: 'Método HTTP não permitido para esta rota.',
                 requestId: $requestId,
-                headers: ['Allow' => implode(', ', $e->getHeaders()['Allow'] ?? [])],
+                headers: ['Allow' => implode(', ', $allowList)],
             );
         }
 
-        // Rate limit (429) — propaga cabeçalhos de throttling
+        // 429 Too Many Requests — propaga headers e inclui debug quando habilitado
         if ($e instanceof ThrottleRequestsException) {
+            $headers = $e->getHeaders() ?? [];
+
             return self::json(
                 status: 429,
                 code: 'TooManyRequests',
                 message: 'Muitas requisições. Tente novamente mais tarde.',
                 requestId: $requestId,
-                headers: $e->getHeaders(),
+                headers: $headers,
+                debug: $debug ? self::debugPayload($e) : null,
             );
         }
 
-        // Exceções HTTP (mantém status, mensagem opcional, e headers)
+        // Outras HTTP exceptions (mantém status, headers e debug opcional)
         if ($e instanceof HttpExceptionInterface) {
             return self::json(
                 status: $e->getStatusCode(),
@@ -154,7 +123,7 @@ final class ApiExceptionFormatter
             );
         }
 
-        // Erros de banco (500), sem detalhes sensíveis
+        // 500 Database error (sem detalhes sensíveis)
         if ($e instanceof QueryException) {
             return self::json(
                 status: 500,
@@ -165,7 +134,7 @@ final class ApiExceptionFormatter
             );
         }
 
-        // Fallback (500)
+        // 500 Fallback
         return self::json(
             status: 500,
             code: 'InternalServerError',
@@ -178,19 +147,9 @@ final class ApiExceptionFormatter
     /**
      * Cria a resposta JSON final com payload padronizado.
      *
-     * @param  int  $status  Código HTTP.
-     * @param  string  $code  Código de erro estável (consumido por clientes).
-     * @param  string  $message  Mensagem amigável e genérica ao cliente.
-     * @param  string  $requestId  Identificador de correlação da requisição.
-     * @param  array|null  $details  Dados adicionais do erro (ex.: mapa de campos inválidos).
-     * @param  array|null  $headers  Cabeçalhos extras a aplicar na resposta.
-     * @param  array|null  $debug  Informações de debug (somente em ambiente com debug ativo).
-     *
-     * @phpstan-param array<string, mixed>|null $details
-     * @phpstan-param array<string, string>|null $headers
-     * @phpstan-param DebugPayload|null $debug
-     *
-     * @phpstan-return JsonResponse
+     * @param  array<string,mixed>|null $details
+     * @param  array<string,string>|null $headers
+     * @param  array{exception:string,file:string,line:int,trace:list<string>}|null $debug
      */
     private static function json(
         int $status,
@@ -201,10 +160,9 @@ final class ApiExceptionFormatter
         ?array $headers = null,
         ?array $debug = null,
     ): JsonResponse {
-        /** @var ApiPayload $payload */
         $payload = [
             'error' => [
-                'code' => $code,
+                'code'    => $code,
                 'message' => $message,
             ],
             'meta' => [
@@ -220,7 +178,6 @@ final class ApiExceptionFormatter
             $payload['error']['debug'] = $debug;
         }
 
-        // Serialização pelo helper do Laravel, com flags para Unicode/URLs legíveis
         $response = response()->json(
             $payload,
             $status,
@@ -247,16 +204,14 @@ final class ApiExceptionFormatter
      * Constrói o bloco de informações de debug com metadados mínimos.
      *
      * @return array{exception:string,file:string,line:int,trace:list<string>}
-     *
-     * @phpstan-return DebugPayload
      */
     private static function debugPayload(Throwable $e): array
     {
         return [
             'exception' => get_class($e),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => collect(explode("\n", $e->getTraceAsString()))->take(20)->all(),
+            'file'      => $e->getFile(),
+            'line'      => $e->getLine(),
+            'trace'     => collect(explode("\n", $e->getTraceAsString()))->take(20)->all(),
         ];
     }
 }

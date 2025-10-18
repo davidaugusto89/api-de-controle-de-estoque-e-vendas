@@ -64,22 +64,22 @@ final class RegisterStockEntry
                     ->first();
 
                 if (! $inv) {
-                    $inv = new Inventory;
+                    $inv             = new Inventory;
                     $inv->product_id = $product->id;
-                    $inv->quantity = 0;
+                    $inv->quantity   = 0;
                 }
 
-                $newQty = $this->stockPolicy->increase((int) $inv->quantity, $quantity);
-                $inv->quantity = $newQty;
+                $newQty            = $this->stockPolicy->increase((int) $inv->quantity, $quantity);
+                $inv->quantity     = $newQty;
                 $inv->last_updated = Carbon::now();
                 $inv->save();
 
                 if ($unitCost !== null) {
                     $currentQty = (int) $newQty;
-                    $prevQty = max(0, $currentQty - $quantity);
-                    $prevCost = (float) $product->cost_price;
+                    $prevQty    = max(0, $currentQty - $quantity);
+                    $prevCost   = (float) $product->cost_price;
 
-                    $den = $prevQty + $quantity;
+                    $den     = $prevQty + $quantity;
                     $newCost = $den > 0
                         ? (($prevQty * $prevCost) + ($quantity * (float) $unitCost)) / $den
                         : (float) $unitCost;
@@ -89,13 +89,13 @@ final class RegisterStockEntry
                 }
 
                 return [
-                    'product_id' => $product->id,
-                    'sku' => $product->sku,
-                    'name' => $product->name,
-                    'quantity' => (int) $inv->quantity,
-                    'cost_price' => (float) $product->cost_price,
-                    'sale_price' => (float) $product->sale_price,
-                    'last_updated' => $inv->last_updated?->toISOString(),
+                    'product_id'       => $product->id,
+                    'sku'              => $product->sku,
+                    'name'             => $product->name,
+                    'quantity'         => (int) $inv->quantity,
+                    'cost_price'       => (float) $product->cost_price,
+                    'sale_price'       => (float) $product->sale_price,
+                    'last_updated'     => $inv->last_updated?->toISOString(),
                     'stock_cost_value' => (int) $inv->quantity * (float) $product->cost_price,
                     'stock_sale_value' => (int) $inv->quantity * (float) $product->sale_price,
                     'projected_profit' => ((int) $inv->quantity * (float) $product->sale_price)

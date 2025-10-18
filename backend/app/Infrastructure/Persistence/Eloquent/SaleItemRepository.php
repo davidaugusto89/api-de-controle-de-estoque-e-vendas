@@ -30,11 +30,11 @@ final class SaleItemRepository
     {
         /** @var SaleItem $item */
         $item = SaleItem::query()->create([
-            'sale_id' => $data['sale_id'],
+            'sale_id'    => $data['sale_id'],
             'product_id' => $data['product_id'],
-            'quantity' => $data['quantity'],
+            'quantity'   => $data['quantity'],
             'unit_price' => $data['unit_price'],
-            'unit_cost' => $data['unit_cost'],
+            'unit_cost'  => $data['unit_cost'],
         ]);
 
         return $item;

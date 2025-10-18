@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Event;
 /**
  * Finaliza uma venda: valida itens, calcula totais e emite evento.
  */
-final class FinalizeSale
+class FinalizeSale
 {
     public function __construct(
         private readonly Transactions $tx,
@@ -45,19 +45,19 @@ final class FinalizeSale
             $this->validator->validate($items);
 
             $totalAmount = 0.0;
-            $totalCost = 0.0;
+            $totalCost   = 0.0;
 
             foreach ($items as $it) {
                 $totalAmount += $it->unit_price * $it->quantity;
-                $totalCost += $it->unit_cost * $it->quantity;
+                $totalCost   += $it->unit_cost  * $it->quantity;
             }
 
             $totalProfit = $this->margin->profit($totalAmount, $totalCost);
 
             $sale->total_amount = round($totalAmount, 2);
-            $sale->total_cost = round($totalCost, 2);
+            $sale->total_cost   = round($totalCost, 2);
             $sale->total_profit = round($totalProfit, 2);
-            $sale->status = Sale::STATUS_COMPLETED;
+            $sale->status       = Sale::STATUS_COMPLETED;
             $sale->save();
 
             Event::dispatch(new SaleFinalized(
@@ -65,7 +65,7 @@ final class FinalizeSale
                 items: $items->map(
                     static fn ($i): array => [
                         'product_id' => (int) $i->product_id,
-                        'quantity' => (int) $i->quantity,
+                        'quantity'   => (int) $i->quantity,
                     ]
                 )->all()
             ));

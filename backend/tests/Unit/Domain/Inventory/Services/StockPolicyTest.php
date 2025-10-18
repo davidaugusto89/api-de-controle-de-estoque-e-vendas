@@ -41,8 +41,8 @@ final class StockPolicyTest extends TestCase
     {
         return [
             'incremento simples' => [0, 1, 1],
-            'incremento grande' => [100, 900, 1000],
-            'no limite' => [999_999, 1, 1_000_000],
+            'incremento grande'  => [100, 900, 1000],
+            'no limite'          => [999_999, 1, 1_000_000],
         ];
     }
 
@@ -102,7 +102,7 @@ final class StockPolicyTest extends TestCase
     {
         return [
             'diminuição simples' => [5, 1, 4],
-            'zerar estoque' => [3, 3, 0],
+            'zerar estoque'      => [3, 3, 0],
         ];
     }
 
@@ -168,9 +168,9 @@ final class StockPolicyTest extends TestCase
     public static function providerAdjust(): array
     {
         return [
-            'delta zero' => [10, 0, 10, null],
-            'delta positivo' => [5, 3, 8, null],
-            'delta negativo suficiente' => [5, -3, 2, null],
+            'delta zero'                  => [10, 0, 10, null],
+            'delta positivo'              => [5, 3, 8, null],
+            'delta negativo suficiente'   => [5, -3, 2, null],
             'delta negativo insuficiente' => [2, -3, 0, 'Estoque insuficiente para a operação.'],
         ];
     }

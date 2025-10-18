@@ -90,7 +90,7 @@ final class CreateSaleTest extends TestCase
         $useCase = new CreateSale($tx, $finalize);
 
         // Act
-        $sut = $useCase;
+        $sut      = $useCase;
         $resultId = $sut->execute($items);
 
         // Assert
@@ -151,7 +151,7 @@ final class CreateSaleTest extends TestCase
         $useCase = new CreateSale($tx, $finalize);
 
         // Act
-        $sut = $useCase;
+        $sut      = $useCase;
         $resultId = $sut->execute($items);
 
         // Assert
@@ -204,10 +204,10 @@ final class CreateSaleTest extends TestCase
         });
 
         $finalize = Mockery::mock(FinalizeSale::class);
-        $useCase = new CreateSale($tx, $finalize);
+        $useCase  = new CreateSale($tx, $finalize);
 
         // Act
-        $sut = $useCase;
+        $sut      = $useCase;
         $resultId = $sut->execute($items);
 
         // Assert
@@ -255,7 +255,7 @@ final class CreateSaleTest extends TestCase
         $useCase = new CreateSale($tx, $finalize);
 
         // Act
-        $sut = $useCase;
+        $sut      = $useCase;
         $resultId = $sut->execute($items);
 
         // Assert
@@ -279,7 +279,7 @@ final class CreateSaleTest extends TestCase
         $tx->shouldReceive('run')->once()->andThrow(new \RuntimeException('DB transaction failed'));
 
         $finalize = Mockery::mock(FinalizeSale::class);
-        $useCase = new CreateSale($tx, $finalize);
+        $useCase  = new CreateSale($tx, $finalize);
 
         // Assert exception
         $this->expectException(\RuntimeException::class);

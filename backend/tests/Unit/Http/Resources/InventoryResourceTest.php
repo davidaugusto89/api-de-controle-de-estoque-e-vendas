@@ -17,16 +17,16 @@ final class InventoryResourceTest extends TestCase
         // Arrange: montar um recurso com dados vindos da query
         $raw = [
             'product_id' => 123,
-            'sku' => 'ABC-123',
-            'name' => 'Produto de Teste',
-            'quantity' => 5,
+            'sku'        => 'ABC-123',
+            'name'       => 'Produto de Teste',
+            'quantity'   => 5,
             'cost_price' => 10.5,
             'sale_price' => 15.0,
             // valores calculados podem vir prontos
             'stock_cost_value' => 52.5,
             'stock_sale_value' => 75.0,
             'projected_profit' => 22.5,
-            'last_updated' => Carbon::now()->toIsoString(),
+            'last_updated'     => Carbon::now()->toIsoString(),
         ];
 
         $resource = new InventoryResource($raw);
@@ -54,13 +54,13 @@ final class InventoryResourceTest extends TestCase
         // Arrange: recurso sem valores calculados explicitamente
         $raw = [
             'product_id' => 5,
-            'product' => [
-                'sku' => 'XYZ-999',
-                'name' => 'Outro Produto',
+            'product'    => [
+                'sku'        => 'XYZ-999',
+                'name'       => 'Outro Produto',
                 'cost_price' => 2.0,
                 'sale_price' => 3.5,
             ],
-            'quantity' => 10,
+            'quantity'     => 10,
             'last_updated' => Carbon::create(2020, 1, 1, 12, 0, 0)->toIsoString(),
         ];
 

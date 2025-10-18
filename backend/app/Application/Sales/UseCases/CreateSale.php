@@ -35,26 +35,26 @@ final class CreateSale
             ->keyBy('id');
 
         return $this->tx->run(function () use ($items, $productMap): int {
-            $sale = new Sale;
-            $sale->status = Sale::STATUS_QUEUED;
+            $sale               = new Sale;
+            $sale->status       = Sale::STATUS_QUEUED;
             $sale->total_amount = 0;
-            $sale->total_cost = 0;
+            $sale->total_cost   = 0;
             $sale->total_profit = 0;
             $sale->save();
 
             $rows = [];
             foreach ($items as $it) {
-                $p = $productMap[$it['product_id']] ?? null;
+                $p         = $productMap[$it['product_id']] ?? null;
                 $unitPrice = isset($it['unit_price'])
                     ? (float) $it['unit_price']
                     : (float) ($p?->sale_price ?? 0);
 
                 $rows[] = [
-                    'sale_id' => $sale->id,
+                    'sale_id'    => $sale->id,
                     'product_id' => (int) $it['product_id'],
-                    'quantity' => (int) $it['quantity'],
+                    'quantity'   => (int) $it['quantity'],
                     'unit_price' => $unitPrice,
-                    'unit_cost' => (float) ($p?->cost_price ?? 0),
+                    'unit_cost'  => (float) ($p?->cost_price ?? 0),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

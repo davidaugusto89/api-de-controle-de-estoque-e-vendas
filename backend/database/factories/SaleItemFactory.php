@@ -18,15 +18,15 @@ class SaleItemFactory extends Factory
         // garante produto coerente; pode ser sobrescrito ao usar a factory
         $product = Product::inRandomOrder()->first() ?? Product::factory()->create();
 
-        $qty = fake()->numberBetween(1, 5);
-        $unitCost = (float) $product->cost_price;
+        $qty       = fake()->numberBetween(1, 5);
+        $unitCost  = (float) $product->cost_price;
         $unitPrice = (float) $product->sale_price;
 
         return [
-            'sale_id' => Sale::factory(),
+            'sale_id'    => Sale::factory(),
             'product_id' => $product->id,
-            'quantity' => $qty,
-            'unit_cost' => $unitCost,
+            'quantity'   => $qty,
+            'unit_cost'  => $unitCost,
             'unit_price' => $unitPrice,
             'created_at' => now(),
             'updated_at' => now(),

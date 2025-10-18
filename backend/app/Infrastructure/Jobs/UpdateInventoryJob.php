@@ -56,7 +56,7 @@ final class UpdateInventoryJob implements ShouldQueue
         $tx->run(function () use ($locks, $policy): void {
             foreach ($this->items as $it) {
                 $productId = (int) $it['product_id'];
-                $quantity = (int) $it['quantity'];
+                $quantity  = (int) $it['quantity'];
 
                 $locks->lock(
                     $productId,
@@ -71,7 +71,7 @@ final class UpdateInventoryJob implements ShouldQueue
 
         Log::info('Inventory updated from sale', [
             'sale_id' => $this->saleId,
-            'items' => array_map(
+            'items'   => array_map(
                 static fn (array $i): array => [
                     'p' => (int) $i['product_id'],
                     'q' => (int) $i['quantity'],
@@ -88,7 +88,7 @@ final class UpdateInventoryJob implements ShouldQueue
     {
         Log::error('UpdateInventoryJob failed', [
             'sale_id' => $this->saleId,
-            'error' => $e->getMessage(),
+            'error'   => $e->getMessage(),
         ]);
     }
 }

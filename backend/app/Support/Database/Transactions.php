@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\Database;
 
-use Closure;
-use Illuminate\Support\Facades\DB;
+use App\Support\Database\Contracts\Transactions as TransactionsContract;
+use Illuminate\Database\DatabaseManager;
 use Throwable;
 
 /**
@@ -21,20 +21,27 @@ use Throwable;
  * - Facilita testes e mocking
  * - Mantém consistência em casos de uso complexos (como CreateSale)
  */
-final class Transactions
+class Transactions implements TransactionsContract
 {
+    public function __construct(
+        private readonly DatabaseManager $db
+    ) {}
+
     /**
      * Executa o callback dentro de uma transação do banco.
      *
      * @template T
-     *
-     * @param  Closure(): T  $callback
+     * @param  callable(): T  $callback
      * @return T
      *
      * @throws Throwable
      */
-    public function run(Closure $callback): mixed
+    public function run(callable $callback): mixed
     {
-        return DB::transaction($callback);
+        if ($this->db === null) {
+            return $callback();
+        }
+
+        return $this->db->transaction($callback);
     }
 }

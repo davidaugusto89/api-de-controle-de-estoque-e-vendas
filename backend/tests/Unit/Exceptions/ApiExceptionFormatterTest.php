@@ -66,7 +66,7 @@ class ApiExceptionFormatterTest extends TestCase
     {
         $request = Request::create('/');
 
-        $e = new MethodNotAllowedHttpException(['GET', 'POST']);
+        $e   = new MethodNotAllowedHttpException(['GET', 'POST']);
         $res = ApiExceptionFormatter::from($e, $request);
         $this->assertSame(405, $res->getStatusCode());
         // header Allow deve existir e conter GET, POST
@@ -75,7 +75,7 @@ class ApiExceptionFormatterTest extends TestCase
         $this->assertStringContainsString('POST', $res->headers->get('Allow'));
 
         $throttle = new ThrottleRequestsException('Too many', null, ['Retry-After' => 60]);
-        $r2 = ApiExceptionFormatter::from($throttle, $request);
+        $r2       = ApiExceptionFormatter::from($throttle, $request);
         $this->assertSame(429, $r2->getStatusCode());
         $this->assertTrue($r2->headers->has('Retry-After'));
         $this->assertEquals(60, (int) $r2->headers->get('Retry-After'));
@@ -117,7 +117,7 @@ class ApiExceptionFormatterTest extends TestCase
         // Force debug on
         config(['app.debug' => true]);
 
-        $e = new HttpException(418, 'I am a teapot', null, ['X-Test' => '1']);
+        $e   = new HttpException(418, 'I am a teapot', null, ['X-Test' => '1']);
         $res = ApiExceptionFormatter::from($e, $request);
         $this->assertSame(418, $res->getStatusCode());
         $payload = $res->getData(true);
@@ -187,13 +187,13 @@ class ApiExceptionFormatterTest extends TestCase
 
         // headers como strings
         $headers = [
-            'Retry-After' => '60',
-            'X-RateLimit-Limit' => '100',
+            'Retry-After'           => '60',
+            'X-RateLimit-Limit'     => '100',
             'X-RateLimit-Remaining' => '0',
         ];
 
         $throttle = new ThrottleRequestsException('Too many', null, $headers);
-        $res = ApiExceptionFormatter::from($throttle, $request);
+        $res      = ApiExceptionFormatter::from($throttle, $request);
 
         $this->assertSame(429, $res->getStatusCode());
         $this->assertEquals('60', $res->headers->get('Retry-After'));
@@ -202,12 +202,12 @@ class ApiExceptionFormatterTest extends TestCase
 
         // headers como arrays
         $headers2 = [
-            'Retry-After' => ['60'],
+            'Retry-After'       => ['60'],
             'X-RateLimit-Limit' => ['100'],
         ];
 
         $throttle2 = new ThrottleRequestsException('Too many', null, $headers2);
-        $r2 = ApiExceptionFormatter::from($throttle2, $request);
+        $r2        = ApiExceptionFormatter::from($throttle2, $request);
 
         $this->assertSame(429, $r2->getStatusCode());
         // when headers provided as arrays, Laravel normalizes to strings when getting header
@@ -221,7 +221,7 @@ class ApiExceptionFormatterTest extends TestCase
         config(['app.debug' => true]);
 
         $throttle = new ThrottleRequestsException('Too many', new \Exception('prev'), ['Retry-After' => 10]);
-        $res = ApiExceptionFormatter::from($throttle, $request);
+        $res      = ApiExceptionFormatter::from($throttle, $request);
         $this->assertSame(429, $res->getStatusCode());
         $payload = $res->getData(true);
         $this->assertArrayHasKey('debug', $payload['error']);
@@ -234,8 +234,8 @@ class ApiExceptionFormatterTest extends TestCase
     public function test_request_id_e_usado_quando_header_presente()
     {
         $request = Request::create('/', 'GET', [], [], [], ['HTTP_X_REQUEST_ID' => 'myid']);
-        $ex = new \Exception('x');
-        $r = ApiExceptionFormatter::from($ex, $request);
+        $ex      = new \Exception('x');
+        $r       = ApiExceptionFormatter::from($ex, $request);
         $payload = $r->getData(true);
         $this->assertSame('myid', $payload['meta']['request_id']);
     }
