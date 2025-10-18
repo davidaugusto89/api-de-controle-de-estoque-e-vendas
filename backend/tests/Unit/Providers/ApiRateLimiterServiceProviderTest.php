@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Providers;
 
 use App\Providers\ApiRateLimiterServiceProvider;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
@@ -14,7 +13,7 @@ final class ApiRateLimiterServiceProviderTest extends TestCase
     public function test_boot_registra_chaves_do_rate_limiter(): void
     {
         // Expect RateLimiter::for called with specific keys and a closure
-        $expectedKeys = ['inventory-read','inventory-write','sales-write','sales-read','reports','api'];
+        $expectedKeys = ['inventory-read', 'inventory-write', 'sales-write', 'sales-read', 'reports', 'api'];
 
         foreach ($expectedKeys as $key) {
             RateLimiter::shouldReceive('for')

@@ -8,33 +8,51 @@ use App\Infrastructure\Cache\InventoryCache;
 use App\Infrastructure\Persistence\Eloquent\InventoryRepository;
 use App\Infrastructure\Persistence\Eloquent\ProductRepository;
 use App\Providers\RepositoryServiceProvider;
-use Illuminate\Contracts\Cache\Factory as CacheFactory;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Cache\Factory as CacheFactory;
 use Tests\TestCase;
 
 final class RepositoryServiceProviderTest extends TestCase
 {
     public function test_register_vincula_repositorios_e_inventory_cache_singleton(): void
     {
-        $app = new Container();
+        $app = new Container;
 
         // Fake cache factory and repository with minimal methods used by provider
-        $factory = new class {
+        $factory = new class
+        {
             public function store($name = null)
             {
-                return new class {
-                    public function tags($names) { return $this; }
+                return new class
+                {
+                    public function tags($names)
+                    {
+                        return $this;
+                    }
+
                     public function flush() {}
+
                     public function get($key, $default = null) {}
+
                     public function put($key, $value, $seconds = null) {}
-                    public function has($key) { return false; }
+
+                    public function has($key)
+                    {
+                        return false;
+                    }
+
                     public function pull($key, $default = null) {}
+
                     public function increment($key, $value = 1) {}
+
                     public function decrement($key, $value = 1) {}
+
                     public function forever($key, $value) {}
+
                     public function forget($key) {}
+
                     public function many($keys) {}
+
                     public function putMany($values, $seconds = null) {}
                 };
             }

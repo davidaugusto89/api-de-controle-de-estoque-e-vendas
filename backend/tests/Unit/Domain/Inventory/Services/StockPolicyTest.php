@@ -6,8 +6,8 @@ namespace Tests\Unit\Domain\Inventory\Services;
 
 use App\Domain\Inventory\Services\StockPolicy;
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 /**
@@ -193,7 +193,7 @@ final class StockPolicyTest extends TestCase
     private function makePolicy(?int $maxPerProduct = null): StockPolicy
     {
         if ($maxPerProduct === null) {
-            return new StockPolicy();
+            return new StockPolicy;
         }
 
         return new StockPolicy($maxPerProduct);

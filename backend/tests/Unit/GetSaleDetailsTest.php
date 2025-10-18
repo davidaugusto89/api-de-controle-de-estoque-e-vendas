@@ -7,8 +7,8 @@ namespace Tests\Unit;
 use App\Application\Sales\UseCases\GetSaleDetails;
 use App\Infrastructure\Persistence\Eloquent\SaleRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use PHPUnit\Framework\TestCase;
 use Illuminate\Support\Collection;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Cenário
@@ -48,7 +48,8 @@ final class GetSaleDetailsTest extends TestCase
         ]);
 
         // created_at precisa expor método toISOString() como no Eloquent/Carbon usado na aplicação.
-        $createdAt = new class {
+        $createdAt = new class
+        {
             public function toISOString(): string
             {
                 return '2025-10-18T12:00:00+00:00';

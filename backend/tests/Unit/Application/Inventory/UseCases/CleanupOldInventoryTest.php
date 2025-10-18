@@ -25,7 +25,6 @@ final class CleanupOldInventoryTest extends TestCase
      *  - Usamos mocks no facade DB para simular consultas encadeadas.
      *  - Espera-se que as tags `inventory` e `products` sejam flushadas no cache.
      */
-
     public function test_retorna_zeros_quando_nao_ha_alteracoes(): void
     {
         // Arrange
@@ -43,7 +42,7 @@ final class CleanupOldInventoryTest extends TestCase
 
         $this->expectCacheInvalidation();
 
-        $useCase = new CleanupOldInventory();
+        $useCase = new CleanupOldInventory;
 
         // Act
         $res = $useCase->handle(true);
@@ -73,7 +72,7 @@ final class CleanupOldInventoryTest extends TestCase
 
         $this->expectCacheInvalidation();
 
-        $useCase = new CleanupOldInventory();
+        $useCase = new CleanupOldInventory;
 
         // Act
         $res = $useCase->handle(true);
@@ -99,7 +98,7 @@ final class CleanupOldInventoryTest extends TestCase
 
         $this->expectCacheInvalidation();
 
-        $useCase = new CleanupOldInventory();
+        $useCase = new CleanupOldInventory;
 
         // Act
         $res = $useCase->handle(false);
@@ -112,13 +111,16 @@ final class CleanupOldInventoryTest extends TestCase
 
     /**
      * Constrói um mock de query encadeada para DB::table(...)
-     * @param int|null $deleteReturn valor retornado por delete()
-     * @param int|null $updateReturn valor retornado por update(), null significa que update não está presente
+     *
+     * @param  int|null  $deleteReturn  valor retornado por delete()
+     * @param  int|null  $updateReturn  valor retornado por update(), null significa que update não está presente
      */
     private function makeMockQuery(?int $deleteReturn = 0, ?int $updateReturn = 0): object
     {
-        return new class($deleteReturn, $updateReturn) {
+        return new class($deleteReturn, $updateReturn)
+        {
             private $deleteReturn;
+
             private $updateReturn;
 
             public function __construct($deleteReturn, $updateReturn)
@@ -127,10 +129,25 @@ final class CleanupOldInventoryTest extends TestCase
                 $this->updateReturn = $updateReturn;
             }
 
-            public function whereNotExists($cb) { return $this; }
-            public function delete() { return $this->deleteReturn; }
-            public function where($col, $op, $val = null) { return $this; }
-            public function update($arr) { return $this->updateReturn ?? 0; }
+            public function whereNotExists($cb)
+            {
+                return $this;
+            }
+
+            public function delete()
+            {
+                return $this->deleteReturn;
+            }
+
+            public function where($col, $op, $val = null)
+            {
+                return $this;
+            }
+
+            public function update($arr)
+            {
+                return $this->updateReturn ?? 0;
+            }
         };
     }
 

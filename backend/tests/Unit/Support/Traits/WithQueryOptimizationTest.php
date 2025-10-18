@@ -5,46 +5,74 @@ declare(strict_types=1);
 namespace Tests\Unit\Support\Traits;
 
 use App\Support\Traits\WithQueryOptimization;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 final class WithQueryOptimizationTest extends TestCase
 {
-    public function test_maybeWith_aplica_relacoes_quando_nao_vazio(): void
+    public function test_maybe_with_aplica_relacoes_quando_nao_vazio(): void
     {
         $qb = \Mockery::mock(Builder::class);
         $qb->shouldReceive('with')->with(['rel1', 'rel2'])->once()->andReturnSelf();
 
-        $obj = new class { use WithQueryOptimization; public function callMaybeWith($qb, $rel) { return $this->maybeWith($qb, $rel); } };
+        $obj = new class
+        {
+            use WithQueryOptimization;
+
+            public function callMaybeWith($qb, $rel)
+            {
+                return $this->maybeWith($qb, $rel);
+            }
+        };
         $res = $obj->callMaybeWith($qb, ['rel1', 'rel2']);
 
         $this->assertSame($qb, $res);
     }
 
-    public function test_maybeWith_retorna_qb_quando_vazio(): void
+    public function test_maybe_with_retorna_qb_quando_vazio(): void
     {
         $qb = \Mockery::mock(Builder::class);
         $qb->shouldReceive('with')->never();
 
-        $obj = new class { use WithQueryOptimization; public function callMaybeWith($qb, $rel) { return $this->maybeWith($qb, $rel); } };
+        $obj = new class
+        {
+            use WithQueryOptimization;
+
+            public function callMaybeWith($qb, $rel)
+            {
+                return $this->maybeWith($qb, $rel);
+            }
+        };
         $res = $obj->callMaybeWith($qb, []);
 
         $this->assertSame($qb, $res);
     }
 
-    public function test_withoutModelEvents_executa_callback_e_retorna_valor(): void
+    public function test_without_model_events_executa_callback_e_retorna_valor(): void
     {
-        $obj = new class { use WithQueryOptimization; public function callWithoutModelEvents($cb) { return $this->withoutModelEvents($cb); } };
+        $obj = new class
+        {
+            use WithQueryOptimization;
+
+            public function callWithoutModelEvents($cb)
+            {
+                return $this->withoutModelEvents($cb);
+            }
+        };
 
         $called = false;
-        $ret = $obj->callWithoutModelEvents(function () use (&$called) { $called = true; return 123; });
+        $ret = $obj->callWithoutModelEvents(function () use (&$called) {
+            $called = true;
+
+            return 123;
+        });
 
         $this->assertTrue($called);
         $this->assertSame(123, $ret);
     }
 
-    public function test_withSafeSqlMode_restoura_e_retorna_valor_do_callback(): void
+    public function test_with_safe_sql_mode_restoura_e_retorna_valor_do_callback(): void
     {
         DB::shouldReceive('transaction')->once()->andReturnUsing(function ($cb, $attempts = 1) {
             return $cb();
@@ -61,9 +89,19 @@ final class WithQueryOptimizationTest extends TestCase
             return $query === 'SET SESSION sql_mode = ?' && is_array($params) && ($params[0] ?? null) === 'ORIG_MODE';
         })->once()->andReturnTrue();
 
-        $obj = new class { use WithQueryOptimization; public function callWithSafeSqlMode($cb) { return $this->withSafeSqlMode($cb); } };
+        $obj = new class
+        {
+            use WithQueryOptimization;
 
-        $res = $obj->callWithSafeSqlMode(function () { return 'done'; });
+            public function callWithSafeSqlMode($cb)
+            {
+                return $this->withSafeSqlMode($cb);
+            }
+        };
+
+        $res = $obj->callWithSafeSqlMode(function () {
+            return 'done';
+        });
 
         $this->assertSame('done', $res);
     }

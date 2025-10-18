@@ -6,8 +6,8 @@ namespace Tests\Unit\Domain\Sales\Services;
 
 use App\Domain\Sales\Services\SaleValidator;
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Cenário
@@ -26,7 +26,7 @@ final class SaleValidatorTest extends TestCase
     public function test_validar_venda_sem_excecao_quando_items_sao_validos(iterable $items): void
     {
         // Arrange
-        $sut = new SaleValidator();
+        $sut = new SaleValidator;
 
         // Act
         $sut->validate($items);
@@ -61,7 +61,7 @@ final class SaleValidatorTest extends TestCase
     public function test_lancar_excecao_quando_product_id_invalido(iterable $items): void
     {
         // Arrange
-        $sut = new SaleValidator();
+        $sut = new SaleValidator;
 
         // Assert
         $this->expectException(InvalidArgumentException::class);
@@ -93,7 +93,7 @@ final class SaleValidatorTest extends TestCase
     public function test_lancar_excecao_quando_quantidade_invalida(array $item): void
     {
         // Arrange
-        $sut = new SaleValidator();
+        $sut = new SaleValidator;
 
         // Assert: message must contain the product id
         $this->expectException(InvalidArgumentException::class);
@@ -115,7 +115,7 @@ final class SaleValidatorTest extends TestCase
     public function test_lancar_excecao_quando_preco_ou_custo_negativo(array $item, string $expectedMessage): void
     {
         // Arrange
-        $sut = new SaleValidator();
+        $sut = new SaleValidator;
 
         // Assert
         $this->expectException(InvalidArgumentException::class);
@@ -136,7 +136,7 @@ final class SaleValidatorTest extends TestCase
     public function test_lancar_excecao_quando_lista_vazia(): void
     {
         // Arrange
-        $sut = new SaleValidator();
+        $sut = new SaleValidator;
 
         // Assert
         $this->expectException(InvalidArgumentException::class);
@@ -149,7 +149,7 @@ final class SaleValidatorTest extends TestCase
     public function test_nao_validar_estoque_ou_total_quando_servico_eh_dominio_puro(): void
     {
         // Arrange
-        $sut = new SaleValidator();
+        $sut = new SaleValidator;
 
         // item com quantidade extremamente alta (simulando > estoque)
         $item = ['product_id' => 99, 'quantity' => 1_000_000, 'unit_price' => 1.0, 'unit_cost' => 0.1];

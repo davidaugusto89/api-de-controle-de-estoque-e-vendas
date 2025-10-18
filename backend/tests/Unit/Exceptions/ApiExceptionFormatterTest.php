@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Tests\Unit\Exceptions;
 
 use App\Exceptions\ApiExceptionFormatter;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
 
 class ApiExceptionFormatterTest extends TestCase
@@ -23,7 +23,8 @@ class ApiExceptionFormatterTest extends TestCase
     {
         $request = Request::create('/test');
 
-        $validator = new class {
+        $validator = new class
+        {
             public function errors()
             {
                 return ['field' => ['error']];
@@ -44,19 +45,19 @@ class ApiExceptionFormatterTest extends TestCase
     {
         $request = Request::create('/');
 
-        $e1 = new AuthenticationException();
+        $e1 = new AuthenticationException;
         $r1 = ApiExceptionFormatter::from($e1, $request);
         $this->assertSame(401, $r1->getStatusCode());
 
-        $e2 = new AuthorizationException();
+        $e2 = new AuthorizationException;
         $r2 = ApiExceptionFormatter::from($e2, $request);
         $this->assertSame(403, $r2->getStatusCode());
 
-        $e3 = new ModelNotFoundException();
+        $e3 = new ModelNotFoundException;
         $r3 = ApiExceptionFormatter::from($e3, $request);
         $this->assertSame(404, $r3->getStatusCode());
 
-        $e4 = new NotFoundHttpException();
+        $e4 = new NotFoundHttpException;
         $r4 = ApiExceptionFormatter::from($e4, $request);
         $this->assertSame(404, $r4->getStatusCode());
     }
@@ -141,8 +142,8 @@ class ApiExceptionFormatterTest extends TestCase
     {
         $request = Request::create('/');
 
-    // QueryException constructor: (connectionName, sql, bindings, previous)
-    $qe = new QueryException('testing', 'select 1', [], new \PDOException('pdo error'));
+        // QueryException constructor: (connectionName, sql, bindings, previous)
+        $qe = new QueryException('testing', 'select 1', [], new \PDOException('pdo error'));
         $r1 = ApiExceptionFormatter::from($qe, $request);
         $this->assertSame(500, $r1->getStatusCode());
         $payload = $r1->getData(true);
@@ -232,7 +233,7 @@ class ApiExceptionFormatterTest extends TestCase
 
     public function test_request_id_is_used_when_header_present()
     {
-        $request = Request::create('/', 'GET', [], [], [], ['HTTP_X_REQUEST_ID' => 'myid'] );
+        $request = Request::create('/', 'GET', [], [], [], ['HTTP_X_REQUEST_ID' => 'myid']);
         $ex = new \Exception('x');
         $r = ApiExceptionFormatter::from($ex, $request);
         $payload = $r->getData(true);

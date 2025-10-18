@@ -17,8 +17,16 @@ final class WithCacheInvalidationTest extends TestCase
         Cache::shouldReceive('tags')->with(['reports'])->once()->andReturnSelf();
         Cache::shouldReceive('flush')->twice()->andReturnTrue();
 
-    $obj = new class { use WithCacheInvalidation; public function callBustSalesCaches(): void { $this->bustSalesCaches(); } };
-    $obj->callBustSalesCaches();
+        $obj = new class
+        {
+            use WithCacheInvalidation;
+
+            public function callBustSalesCaches(): void
+            {
+                $this->bustSalesCaches();
+            }
+        };
+        $obj->callBustSalesCaches();
     }
 
     public function test_invalidar_cache_de_inventario_chama_tags_e_flush(): void
@@ -27,7 +35,15 @@ final class WithCacheInvalidationTest extends TestCase
         Cache::shouldReceive('tags')->with(['products'])->once()->andReturnSelf();
         Cache::shouldReceive('flush')->twice()->andReturnTrue();
 
-    $obj = new class { use WithCacheInvalidation; public function callBustInventoryCaches(): void { $this->bustInventoryCaches(); } };
-    $obj->callBustInventoryCaches();
+        $obj = new class
+        {
+            use WithCacheInvalidation;
+
+            public function callBustInventoryCaches(): void
+            {
+                $this->bustInventoryCaches();
+            }
+        };
+        $obj->callBustInventoryCaches();
     }
 }

@@ -8,8 +8,8 @@ use App\Application\Sales\UseCases\CreateSale;
 use App\Application\Sales\UseCases\FinalizeSale;
 use App\Infrastructure\Jobs\FinalizeSaleJob;
 use App\Support\Database\Transactions;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Bus;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Tests\TestCase;
@@ -50,7 +50,7 @@ final class CreateSaleTest extends TestCase
             ->with('id', [1])->andReturnSelf();
         $productQuery->shouldReceive('get')->once()
             ->with(['id', 'sale_price', 'cost_price'])
-            ->andReturn(new Collection([(object)['id' => 1, 'sale_price' => 10.0, 'cost_price' => 5.0]]));
+            ->andReturn(new Collection([(object) ['id' => 1, 'sale_price' => 10.0, 'cost_price' => 5.0]]));
 
         // Alias mock para Product estático
         Mockery::mock('alias:App\Models\Product')->shouldReceive('query')
@@ -60,6 +60,7 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\Models\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock) {
             $saleMock->id = 1001;
+
             return true;
         });
 
@@ -67,10 +68,11 @@ final class CreateSaleTest extends TestCase
         $saleItemQuery = Mockery::mock();
         $saleItemQuery->shouldReceive('insert')->once()->with(Mockery::on(function ($rows) {
             // Verifica o formato básico da linha inserida
-            if (!is_array($rows) || count($rows) !== 1) {
+            if (! is_array($rows) || count($rows) !== 1) {
                 return false;
             }
             $row = $rows[0];
+
             return isset($row['sale_id'], $row['product_id'], $row['quantity'], $row['unit_price'], $row['unit_cost']);
         }))->andReturnTrue();
 
@@ -116,7 +118,7 @@ final class CreateSaleTest extends TestCase
         $productQuery->shouldReceive('whereIn')->once()->with('id', [2])->andReturnSelf();
         $productQuery->shouldReceive('get')->once()
             ->with(['id', 'sale_price', 'cost_price'])
-            ->andReturn(new Collection([(object)['id' => 2, 'sale_price' => 15.0, 'cost_price' => 7.5]]));
+            ->andReturn(new Collection([(object) ['id' => 2, 'sale_price' => 15.0, 'cost_price' => 7.5]]));
 
         Mockery::mock('alias:App\Models\Product')->shouldReceive('query')
             ->once()->andReturn($productQuery);
@@ -124,12 +126,14 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\Models\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock) {
             $saleMock->id = 2002;
+
             return true;
         });
 
         $saleItemQuery = Mockery::mock();
         $saleItemQuery->shouldReceive('insert')->once()->with(Mockery::on(function ($rows) {
             $row = $rows[0];
+
             // unit_price enviado no payload deve prevalecer
             return (float) $row['unit_price'] === 20.5;
         }))->andReturnTrue();
@@ -179,12 +183,14 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\Models\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock) {
             $saleMock->id = 3003;
+
             return true;
         });
 
         $saleItemQuery = Mockery::mock();
         $saleItemQuery->shouldReceive('insert')->once()->with(Mockery::on(function ($rows) {
             $row = $rows[0];
+
             // produto ausente => unit_price e unit_cost = 0
             return (float) $row['unit_price'] === 0.0 && (float) $row['unit_cost'] === 0.0;
         }))->andReturnTrue();
@@ -232,6 +238,7 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\Models\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock) {
             $saleMock->id = 4004;
+
             return true;
         });
 
@@ -295,8 +302,10 @@ final class CreateSaleTest extends TestCase
         $saleMock = Mockery::mock('overload:App\\Models\\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnUsing(function () use ($saleMock, $id) {
             $saleMock->id = $id;
+
             return true;
         });
+
         return $saleMock;
     }
 
@@ -306,6 +315,7 @@ final class CreateSaleTest extends TestCase
         $tx->shouldReceive('run')->once()->andReturnUsing(function ($cb) {
             return $cb();
         });
+
         return $tx;
     }
 

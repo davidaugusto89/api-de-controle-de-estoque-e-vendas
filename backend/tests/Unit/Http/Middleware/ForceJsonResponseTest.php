@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Middleware;
 
 use App\Http\Middleware\ForceJsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Tests\TestCase;
 
@@ -20,7 +20,7 @@ final class ForceJsonResponseTest extends TestCase
             return new SymfonyResponse('OK-H', 200, ['X-Orig' => '1']);
         };
 
-        $mw = new ForceJsonResponse();
+        $mw = new ForceJsonResponse;
 
         $res = $mw->handle($request, $next);
 
@@ -37,7 +37,7 @@ final class ForceJsonResponseTest extends TestCase
             return new SymfonyResponse('OK-H2', 201, ['X-Orig' => '2']);
         };
 
-        $mw = new ForceJsonResponse();
+        $mw = new ForceJsonResponse;
 
         $res = $mw->handle($request, $next);
 
@@ -56,10 +56,11 @@ final class ForceJsonResponseTest extends TestCase
         $capturedAccept = null;
         $next = function ($req) use (&$capturedAccept) {
             $capturedAccept = $req->headers->get('Accept');
+
             return new SymfonyResponse('plain', 200);
         };
 
-        $mw = new ForceJsonResponse();
+        $mw = new ForceJsonResponse;
         $mw->handle($request, $next);
 
         $this->assertSame('application/json', $capturedAccept);
@@ -74,10 +75,11 @@ final class ForceJsonResponseTest extends TestCase
         $capturedAccept = null;
         $next = function ($req) use (&$capturedAccept) {
             $capturedAccept = $req->headers->get('Accept');
+
             return new SymfonyResponse('plain', 200);
         };
 
-        $mw = new ForceJsonResponse();
+        $mw = new ForceJsonResponse;
         $mw->handle($request, $next);
 
         $this->assertSame('application/json', $capturedAccept);
@@ -94,14 +96,14 @@ final class ForceJsonResponseTest extends TestCase
             return new SymfonyResponse($json, 202, ['X-Custom' => 'v']);
         };
 
-        $mw = new ForceJsonResponse();
+        $mw = new ForceJsonResponse;
         $res = $mw->handle($request, $next);
 
         $this->assertInstanceOf(JsonResponse::class, $res);
         $this->assertSame(202, $res->getStatusCode());
         $this->assertSame('v', $res->headers->get('X-Custom'));
 
-    $this->assertSame($payload, json_decode($res->getContent(), true));
+        $this->assertSame($payload, json_decode($res->getContent(), true));
         $this->assertSame('application/json', $res->headers->get('Content-Type'));
     }
 
@@ -113,12 +115,12 @@ final class ForceJsonResponseTest extends TestCase
             return new SymfonyResponse('just a text', 418, ['X-T' => 'ok']);
         };
 
-        $mw = new ForceJsonResponse();
+        $mw = new ForceJsonResponse;
         $res = $mw->handle($request, $next);
 
         $this->assertInstanceOf(JsonResponse::class, $res);
         $this->assertSame(418, $res->getStatusCode());
-    $this->assertSame(['message' => 'just a text'], json_decode($res->getContent(), true));
+        $this->assertSame(['message' => 'just a text'], json_decode($res->getContent(), true));
         $this->assertSame('ok', $res->headers->get('X-T'));
         $this->assertSame('application/json', $res->headers->get('Content-Type'));
     }
@@ -131,12 +133,12 @@ final class ForceJsonResponseTest extends TestCase
             return response()->json(['ok' => true], 201, ['X-J' => '1']);
         };
 
-        $mw = new ForceJsonResponse();
+        $mw = new ForceJsonResponse;
         $res = $mw->handle($request, $next);
 
         $this->assertInstanceOf(JsonResponse::class, $res);
         $this->assertSame(201, $res->getStatusCode());
-    $this->assertSame(['ok' => true], json_decode($res->getContent(), true));
+        $this->assertSame(['ok' => true], json_decode($res->getContent(), true));
         $this->assertSame('1', $res->headers->get('X-J'));
         $this->assertSame('application/json', $res->headers->get('Content-Type'));
     }

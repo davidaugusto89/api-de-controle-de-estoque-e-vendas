@@ -24,7 +24,7 @@ final class SaleAggregateTest extends TestCase
     public function test_retornar_totais_zero_quando_nao_existirem_itens(): void
     {
         // Arrange
-        $sut = new SaleAggregate();
+        $sut = new SaleAggregate;
 
         // Act
         $amount = $sut->totalAmount();
@@ -89,7 +89,7 @@ final class SaleAggregateTest extends TestCase
     public function test_calcular_totais_corretamente_quando_itens_variados(array $itemsToAdd, float $expectedAmount, float $expectedCost, float $expectedProfit): void
     {
         // Arrange
-        $sut = new SaleAggregate();
+        $sut = new SaleAggregate;
 
         // Act - adiciona os itens fornecidos
         foreach ($itemsToAdd as $raw) {
@@ -110,7 +110,7 @@ final class SaleAggregateTest extends TestCase
     public function test_retornar_itens_preservando_ordem_e_estrutura(): void
     {
         // Arrange
-        $sut = new SaleAggregate();
+        $sut = new SaleAggregate;
         $sut->addItem(10, 1, 1.5, 0.5);
         $sut->addItem(20, 2, 2.0, 1.0);
 
@@ -131,7 +131,7 @@ final class SaleAggregateTest extends TestCase
     public function test_items_retornar_copia_e_nao_permitir_mutacao_externa(): void
     {
         // Arrange
-        $sut = new SaleAggregate();
+        $sut = new SaleAggregate;
         $sut->addItem(1, 1, 10.0, 5.0);
 
         // Act
@@ -148,7 +148,7 @@ final class SaleAggregateTest extends TestCase
     public function test_total_profit_ser_consistente_com_amount_menos_cost_quando_casos_complexos(): void
     {
         // Arrange
-        $sut = new SaleAggregate();
+        $sut = new SaleAggregate;
         $sut->addItem(1, 3, 9.99, 4.33);
         $sut->addItem(2, 7, 1.25, 0.75);
 

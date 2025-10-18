@@ -14,7 +14,7 @@ final class HandleInertiaRequestsTest extends TestCase
     {
         $request = Request::create('/');
 
-        $middleware = new HandleInertiaRequests();
+        $middleware = new HandleInertiaRequests;
 
         $version = $middleware->version($request);
 
@@ -29,7 +29,7 @@ final class HandleInertiaRequestsTest extends TestCase
         $request = Request::create('/');
         $request->setUserResolver(fn () => $user);
 
-        $middleware = new HandleInertiaRequests();
+        $middleware = new HandleInertiaRequests;
 
         $shared = $middleware->share($request);
 
@@ -53,7 +53,7 @@ final class HandleInertiaRequestsTest extends TestCase
         $request = Request::create('/');
         $request->setUserResolver(fn () => null);
 
-        $middleware = new HandleInertiaRequests();
+        $middleware = new HandleInertiaRequests;
 
         $shared = $middleware->share($request);
 

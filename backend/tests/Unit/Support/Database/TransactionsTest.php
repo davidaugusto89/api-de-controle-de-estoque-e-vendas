@@ -23,11 +23,11 @@ final class TransactionsTest extends TestCase
 
         DB::shouldReceive('transaction')
             ->once()
-            ->andReturnUsing(function ($cb) use ($expected) {
+            ->andReturnUsing(function ($cb) {
                 return $cb();
             });
 
-        $tx = new Transactions();
+        $tx = new Transactions;
 
         $result = $tx->run(function () use ($expected) {
             return $expected;
@@ -44,7 +44,7 @@ final class TransactionsTest extends TestCase
                 return $cb();
             });
 
-        $tx = new Transactions();
+        $tx = new Transactions;
 
         $this->expectException(\RuntimeException::class);
 

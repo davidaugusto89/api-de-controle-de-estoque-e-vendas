@@ -14,7 +14,7 @@ final class CreateSaleRequestTest extends TestCase
     public function test_autorizar_por_padrao(): void
     {
         // Arrange
-        $sut = new CreateSaleRequest();
+        $sut = new CreateSaleRequest;
 
         // Act & Assert
         $this->assertTrue($sut->authorize());
@@ -23,7 +23,7 @@ final class CreateSaleRequestTest extends TestCase
     public function test_rules_definem_items_e_campos_do_item(): void
     {
         // Arrange
-        $sut = new CreateSaleRequest();
+        $sut = new CreateSaleRequest;
 
         // Act
         $rules = $sut->rules();
@@ -38,7 +38,7 @@ final class CreateSaleRequestTest extends TestCase
     public function test_messages_contem_mensagem_customizada_para_items_required(): void
     {
         // Arrange
-        $sut = new CreateSaleRequest();
+        $sut = new CreateSaleRequest;
 
         // Act
         $messages = $sut->messages();
