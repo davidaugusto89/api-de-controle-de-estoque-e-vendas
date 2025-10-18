@@ -82,12 +82,4 @@ RUN mkdir -p bootstrap/cache storage/framework storage/logs \
  && chown -R www-data:www-data bootstrap/cache storage \
  && chmod -R 775 bootstrap/cache storage
 
-
-# ------------------------------------------------------------
-# 🚀 Entrypoint
-# ------------------------------------------------------------
-# COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-# RUN chmod +x /usr/local/bin/entrypoint.sh
-# ENTRYPOINT ["entrypoint.sh"]
-
 CMD ["php-fpm"]

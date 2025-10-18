@@ -1,5 +1,5 @@
 version: "3.9"
-name: app
+name: api
 
 x-php-base: &php-base
   image: app-backend:latest
@@ -7,6 +7,8 @@ x-php-base: &php-base
   env_file: [./backend/.env]
   volumes:
     - ./backend:/var/www/html
+    - ./deploy/php/opcache.ini:/usr/local/etc/php/conf.d/zz-opcache.ini:ro
+    - ./deploy/php/fpm.conf:/usr/local/etc/php-fpm.d/zz.conf:ro
   networks: [appnet]
   restart: unless-stopped
   logging:
@@ -32,8 +34,6 @@ services:
       redis: { condition: service_healthy }
     security_opt: [no-new-privileges:true]
     expose: ["9000"]
-    # command: >
-    #   sh -c "php artisan migrate --force --seed && php-fpm"
     command: >
       sh -c "php -d memory_limit=1G artisan migrate --force --seed && php-fpm"
     healthcheck:

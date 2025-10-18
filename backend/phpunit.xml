@@ -2,8 +2,8 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         colors="true"
->
+         colors="true">
+
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
@@ -12,12 +12,8 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+
     <source>
-        <include>
-            <directory>app</directory>
-        </include>
-    </source>
-    <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">app</directory>
         </include>
@@ -31,7 +27,15 @@
             <directory>storage</directory>
             <directory>tests</directory>
         </exclude>
+    </source>
+
+    <coverage>
+        <report>
+            <html outputDirectory="coverage/html"/>
+            <clover outputFile="coverage/clover.xml"/>
+        </report>
     </coverage>
+
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
