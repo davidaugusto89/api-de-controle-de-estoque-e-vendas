@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
 final class SaleRepository
 {
     /**
-     * Retorna uma venda pelo ID (sem itens carregados).
+     * Recupera uma venda por id.
      */
     public function findById(int $id): ?Sale
     {
@@ -25,7 +25,7 @@ final class SaleRepository
     }
 
     /**
-     * Retorna uma venda pelo ID com relacionamento de itens carregado.
+     * Recupera uma venda por id com itens carregados (eager-load).
      */
     public function findWithItems(int $id): ?Sale
     {
@@ -35,14 +35,9 @@ final class SaleRepository
     }
 
     /**
-     * Lista vendas paginadas, com filtros simples (opcional).
+     * Pagina vendas com filtros opcionais.
      *
-     * @param  array{
-     *   status?: string|null,
-     *   date_start?: string|null,
-     *   date_end?: string|null,
-     *   per_page?: int|null
-     * }  $filters
+     * @param  array{status?: string|null, date_start?: string|null, date_end?: string|null, per_page?: int|null}  $filters
      */
     public function paginate(array $filters = []): LengthAwarePaginator
     {
@@ -64,14 +59,9 @@ final class SaleRepository
     }
 
     /**
-     * Cria uma nova venda.
+     * Cria um novo registro de venda.
      *
-     * @param  array{
-     *   total_amount: float|int|string,
-     *   total_cost: float|int|string,
-     *   total_profit: float|int|string,
-     *   status: string
-     * }  $data
+     * @param  array{total_amount: float|int|string, total_cost: float|int|string, total_profit: float|int|string, status: string}  $data
      */
     public function create(array $data): Sale
     {
@@ -87,10 +77,10 @@ final class SaleRepository
     }
 
     /**
-     * Atualiza campos da venda.
+     * Atualiza campos da venda por id.
      *
      * @param  array<string, mixed>  $data
-     * @return bool true se houve atualização
+     * @return bool True se a atualização afetou uma linha
      */
     public function update(int $id, array $data): bool
     {
@@ -100,9 +90,9 @@ final class SaleRepository
     }
 
     /**
-     * Remove uma venda.
+     * Remove venda por id.
      *
-     * @return bool|null true em sucesso, false em falha, null se modelo não existir
+     * @return bool|null True em sucesso, false em falha, null se não existir
      */
     public function delete(int $id): ?bool
     {
@@ -112,9 +102,9 @@ final class SaleRepository
     }
 
     /**
-     * Retorna coleção de vendas por IDs.
+     * Retorna coleção de vendas por ids.
      *
-     * @param  array<int>  $ids
+     * @param  int[]  $ids
      * @return Collection<int, Sale>
      */
     public function findMany(array $ids): Collection

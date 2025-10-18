@@ -12,6 +12,40 @@ use App\Support\Database\Transactions;
 use Carbon\Carbon;
 use InvalidArgumentException;
 
+/**
+ * Registra uma entrada de estoque e atualiza custo médio móvel (quando aplicável).
+ *
+ * Resumo:
+ * - Aumenta a quantidade em `inventory` para o produto informado e, se
+ *   fornecido, recalcula o `cost_price` do produto usando média ponderada.
+ *
+ * Contrato:
+ * - Entrada: int $productId, int $quantity (deve ser positivo), ?float $unitCost
+ * - Saída: array<string,mixed> contendo os dados do produto e métricas de estoque
+ *   (p.ex. product_id, sku, name, quantity, cost_price, sale_price, last_updated,
+ *   stock_cost_value, stock_sale_value, projected_profit)
+ * - Exceções: lança {@see \InvalidArgumentException} quando $quantity <= 0;
+ *   {@see \Illuminate\Database\Eloquent\ModelNotFoundException} se o produto
+ *   não existir; e propaga outros {@see \Throwable} em falhas de transação.
+ *
+ * Garantias e comportamento concorrente:
+ * - Executa dentro de {@see App\Support\Database\Transactions} para garantir
+ *   atomicidade.
+ * - Evita condições de corrida com lock por `product_id` via
+ *   {@see App\Domain\Inventory\Services\InventoryLockService} e utiliza
+ *   `lockForUpdate()` nas linhas relevantes (`products` e `inventory`).
+ * - A política de quantidade é aplicada através de
+ *   {@see App\Domain\Inventory\Services\StockPolicy}.
+ *
+ * Observações de implementação:
+ * - O cálculo do novo `cost_price` usa média ponderada entre estoque anterior
+ *   e a entrada; o valor é arredondado para 2 casas antes de persistir.
+ * - Esta classe é responsável apenas pela lógica de domínio/persistência;
+ *   autenticação e autorização devem ser tratadas pelo chamador (Controller).
+ *
+ * Exemplo curto:
+ * {@code $result = $useCase->execute(123, 10, 12.5);}
+ */
 final class RegisterStockEntry
 {
     public function __construct(
@@ -97,7 +131,6 @@ final class RegisterStockEntry
                     'cost_price' => (float) $product->cost_price,
                     'sale_price' => (float) $product->sale_price,
                     'last_updated' => $inv->last_updated?->toISOString(),
-                    // valores calculados por item (o Resource também sabe lidar)
                     'stock_cost_value' => (int) $inv->quantity * (float) $product->cost_price,
                     'stock_sale_value' => (int) $inv->quantity * (float) $product->sale_price,
                     'projected_profit' => ((int) $inv->quantity * (float) $product->sale_price)

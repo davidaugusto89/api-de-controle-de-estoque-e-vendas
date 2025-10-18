@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             InventorySeeder::class,
             SaleSeeder::class,
-            //BigSalesSeeder::class,
+            // BigSalesSeeder::class,
         ];
 
         $this->call($seeders);

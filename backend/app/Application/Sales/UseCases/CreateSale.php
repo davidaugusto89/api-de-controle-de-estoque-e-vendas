@@ -11,15 +11,29 @@ use App\Models\SaleItem;
 use App\Support\Database\Transactions;
 
 /**
- * Caso de uso para criar uma nova venda.
+ * Cria uma nova venda e enfileira a finalização assíncrona.
  *
- * Gerencia a criação de uma venda com itens, valida produtos e despacha o job de finalização.
+ * Resumo:
+ * - Persiste uma entidade `Sale` em estado enfileirado e insere os itens
+ *   correspondentes em `sale_items` dentro de uma transação.
+ * - Valida existência dos produtos usados no payload e normaliza preços (payload > preço do produto).
+ * - Despacha um job (`FinalizeSaleJob`) na fila `sales` para realizar a finalização/conciliacão posteriormente.
+ *
+ * Contrato:
+ * - Entrada: array<int, array{product_id:int, quantity:int, unit_price?:?float}> $items
+ * - Saída: int ID da venda criada
+ * - Efeitos colaterais: gravação em `sales`/`sale_items` e dispatch de job para fila
+ *
+ * Observações:
+ * - A operação roda em transação via {@see App\Support\Database\Transactions} para garantir atomicidade.
+ * - O preço unitário preferido é o enviado no payload; quando ausente, usa-se `product.sale_price`.
+ * - A finalização da venda é delegada ao job enfileirado; escolha de prioridade/queue deve ser avaliada conforme carga.
  */
 final class CreateSale
 {
     /**
-     * @param  Transactions  $tx  Manipulador de transações de banco de dados
-     * @param  FinalizeSale  $finalizeSale  Caso de uso para finalizar a venda
+     * @param  Transactions  $tx  Helper de transações capaz de executar transactions no BD
+     * @param  FinalizeSale  $finalizeSale  Caso de uso responsável pela finalização da venda
      */
     public function __construct(
         private readonly Transactions $tx,
@@ -27,10 +41,21 @@ final class CreateSale
     ) {}
 
     /**
-     * Executa o processo de criação da venda.
+     * Cria uma nova venda com itens e enfileira o job de finalização.
      *
-     * @param  array<int, array{product_id: int, quantity: int, unit_price?: ?float}>  $items  Dados dos itens da venda
-     * @return int O ID da venda criada
+     * Contrato do parâmetro `$items`:
+     * - É um array indexado com chaves inteiras; cada item deve conter ao menos:
+     *   - product_id: int (ID do produto)
+     *   - quantity: int (quantidade)
+     *   - unit_price?: ?float (preço unitário opcional; quando informado, prevalece)
+     *
+     * Retorno:
+     * - int: ID da venda recém-criada (status inicial: queued)
+     *
+     * Efeitos colaterais e exceções:
+     * - Insere registros em `sale_items` e cria um `Sale` dentro de uma transação;
+     * - Despacha {@see App\Infrastructure\Jobs\FinalizeSaleJob} para a fila `sales`.
+     * - Não lança exceções explícitas aqui, mas falhas na transação/BD serão propagadas.
      */
     public function execute(array $items): int
     {

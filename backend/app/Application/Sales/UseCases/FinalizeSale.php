@@ -13,9 +13,26 @@ use App\Support\Database\Transactions;
 use Illuminate\Support\Facades\Event;
 
 /**
- * Caso de uso para finalizar uma venda.
+ * Finaliza uma venda: valida, calcula totais e emite evento de pós-processamento.
  *
- * Calcula totais, valida regras de negócio e despacha eventos pós-finalização.
+ * Resumo:
+ * - Carrega a venda (com lock), valida itens via {@see App\Domain\Sales\Services\SaleValidator},
+ *   calcula totais e margens via {@see App\Domain\Sales\Services\MarginCalculator} e
+ *   marca a venda como `completed` persistindo totals.
+ * - Emite {@see App\Infrastructure\Events\SaleFinalized} após confirmação para
+ *   acionar listeners (p.ex. atualização de inventário, geração de notas, integrações).
+ *
+ * Contrato:
+ * - Entrada: int $saleId
+ * - Saída: void
+ * - Efeitos colaterais: persistência de totais em `sales`, mudança de estado e dispatch de evento
+ *
+ * Garantias e observações:
+ * - Opera dentro de {@see App\Support\Database\Transactions} para garantir atomicidade.
+ * - Utiliza `lockForUpdate()` para evitar condições de corrida; o método é idempotente
+ *   (retorna sem ação se a venda já estiver em status `completed`).
+ * - A atualização efetiva do inventário é responsabilidade dos listeners do evento `SaleFinalized`;
+ *   em ambientes distribuídos, estes listeners devem garantir execução transacional ou compensatória.
  */
 final class FinalizeSale
 {

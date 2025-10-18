@@ -8,7 +8,16 @@ use App\Infrastructure\Persistence\Eloquent\SaleRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
- * Caso de uso para recuperar detalhes de uma venda.
+ * Recupera detalhes de uma venda junto com os itens associados.
+ *
+ * Contrato:
+ * - Entrada: int $saleId
+ * - Saída: array com campos básicos da venda e uma lista de itens (ver phpdoc do método `execute`)
+ * - Exceções: lança {@see \Illuminate\Database\Eloquent\ModelNotFoundException} quando não encontrar a venda
+ *
+ * Observações:
+ * - A implementação delega a busca ao repositório {@see App\Infrastructure\Persistence\Eloquent\SaleRepository}
+ *   que deve otimizar carregamento de items (eager loading) para evitar N+1.
  */
 final class GetSaleDetails
 {

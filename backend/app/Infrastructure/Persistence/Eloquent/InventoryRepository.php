@@ -6,14 +6,17 @@ namespace App\Infrastructure\Persistence\Eloquent;
 
 use App\Models\Inventory;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Repositório Eloquent para Inventory.
+ * Repositório Eloquent para o modelo Inventory.
+ *
+ * Fornece operações de busca/upsert e decremento atômico usadas pelos serviços de domínio.
  */
 class InventoryRepository
 {
     /**
-     * Recupera o registro de inventário por product_id.
+     * Recupera registro de inventário pelo id do produto.
      */
     public function findByProductId(int $productId): ?Inventory
     {
@@ -24,7 +27,7 @@ class InventoryRepository
     }
 
     /**
-     * Cria ou atualiza (UPSERT) o inventário para um product_id, ajustando version e last_updated.
+     * Insere ou atualiza o inventário de um produto e atualiza version/last_updated.
      */
     public function upsertByProductId(int $productId, int $quantity, ?Carbon $lastUpdated = null): Inventory
     {
@@ -49,16 +52,18 @@ class InventoryRepository
         return $inv;
     }
 
+    /**
+     * Decrementa atomica mente a quantidade se houver estoque suficiente.
+     * Retorna true quando a atualização afetou uma linha.
+     */
     public function decrementIfEnough(int $productId, int $quantity): bool
     {
-        // UPDATE inventory SET quantity = quantity - :q, version = version+1
-        // WHERE product_id = :id AND quantity >= :q
-        return (bool) \DB::table('inventory')
+        return (bool) DB::table('inventory')
             ->where('product_id', $productId)
             ->where('quantity', '>=', $quantity)
             ->update([
-                'quantity' => \DB::raw("quantity - {$quantity}"),
-                'version' => \DB::raw('version + 1'),
+                'quantity' => DB::raw("quantity - {$quantity}"),
+                'version' => DB::raw('version + 1'),
                 'last_updated' => now(),
                 'updated_at' => now(),
             ]);

@@ -11,16 +11,12 @@ use App\Infrastructure\Persistence\Queries\SaleDetailsQuery;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Controller responsável por operações relacionadas a vendas.
+ * Controller de vendas.
  */
 final class SaleController extends Controller
 {
     /**
-     * Recebe uma requisição de venda e dispara o caso de uso de criação.
-     *
-     * @param  CreateSaleRequest  $request  Request validado contendo os itens da venda
-     * @param  CreateSale  $useCase  Caso de uso responsável por criar a venda (assíncrono/reativo no domínio)
-     * @return JsonResponse Retorna 202 Accepted com o identificador da venda e status pendente
+     * Recebe uma requisição de venda e aciona o caso de uso CreateSale.
      */
     public function store(CreateSaleRequest $request, CreateSale $useCase): JsonResponse
     {
@@ -34,11 +30,7 @@ final class SaleController extends Controller
     }
 
     /**
-     * Recupera os detalhes de uma venda por ID.
-     *
-     * @param  int  $id  ID da venda
-     * @param  SaleDetailsQuery  $query  Query para recuperar detalhes de venda com joins apropriados
-     * @return JsonResponse 200 com recurso de venda ou 404 se não existir
+     * Recupera detalhes da venda por id.
      */
     public function show(int $id, SaleDetailsQuery $query): JsonResponse
     {

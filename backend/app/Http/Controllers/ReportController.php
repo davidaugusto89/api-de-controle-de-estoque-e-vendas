@@ -24,9 +24,9 @@ final class ReportController extends Controller
     ) {}
 
     /**
-     * GET /api/reports/sales
-     * Query params obrigatórios do teste: start_date (YYYY-MM-DD), end_date (YYYY-MM-DD), product_sku (opcional)
-     * Extras opcionais: top (int), order_by (string), cache_ttl (int seconds)
+     * Endpoint GET /api/reports/sales
+     * Parâmetros de query obrigatórios: start_date (YYYY-MM-DD), end_date (YYYY-MM-DD), product_sku (opcional)
+     * Extras opcionais: top (int), order_by (string), cache_ttl (int segundos)
      */
     public function sales(Request $request): JsonResponse
     {

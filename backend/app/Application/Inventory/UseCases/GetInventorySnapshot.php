@@ -8,10 +8,18 @@ use App\Infrastructure\Cache\InventoryCache;
 use App\Infrastructure\Persistence\Queries\InventoryQuery;
 
 /**
- * Caso de uso para recuperar um snapshot do inventário.
+ * Recupera um snapshot do inventário (lista e totais) com cache.
  *
- * Utiliza caching através de {@see InventoryCache} para evitar consultas repetidas
- * e delega a recuperação dos dados para {@see InventoryQuery} quando necessário.
+ * Contrato:
+ * - Entrada: nenhum parâmetro
+ * - Saída: array{items: array<int, array<string,mixed>>, totals: array{total_cost: float, total_sale: float, projected_profit: float}}
+ * - Efeitos colaterais: leitura de cache/consulta ao repositório quando necessário
+ *
+ * Comportamento:
+ * - Tenta obter o snapshot via {@see App\Infrastructure\Cache\InventoryCache}.
+ * - Caso não exista entrada em cache, gera o snapshot via {@see App\Infrastructure\Persistence\Queries\InventoryQuery}
+ *   e persiste o resultado no cache para leituras subsequentes.
+ * - O formato retornado é independente do Resource e está pensado para serialização direta.
  */
 final class GetInventorySnapshot
 {

@@ -7,13 +7,25 @@ namespace App\Domain\Sales\Services;
 use InvalidArgumentException;
 
 /**
- * Valida itens da venda antes da finalização.
- * Lança InvalidArgumentException em caso de falha.
+ * Valida itens de venda antes da finalização.
+ *
+ * Contrato:
+ * - Entrada: iterable de arrays ou objetos representando itens (product_id, quantity, unit_price, unit_cost)
+ * - Comportamento: lança {@see \InvalidArgumentException} em caso de qualquer violação (IDs inválidos,
+ *   quantidades não-positivas, preços/custos negativos ou venda sem itens).
+ *
+ * Observações:
+ * - Aceita tanto coleções Eloquent quanto arrays simples; normaliza internamente para extração de campos.
  */
 final class SaleValidator
 {
     /**
-     * @param  iterable<array|object>  $items  (Eloquent\Collection, array de arrays, etc.)
+     * Valida coleção de itens da venda.
+     * Aceita arrays ou objetos (ex.: modelos/coleções Eloquent).
+     *
+     * @param  iterable<array|object>  $items
+     *
+     * @throws InvalidArgumentException Em caso de validação inválida
      */
     public function validate(iterable $items): void
     {
@@ -23,7 +35,6 @@ final class SaleValidator
         foreach ($items as $it) {
             $count++;
 
-            // suporte a array ou objeto Eloquent
             $productId = is_array($it) ? (int) ($it['product_id'] ?? 0) : (int) ($it->product_id ?? 0);
             $qty = is_array($it) ? (int) ($it['quantity'] ?? 0) : (int) ($it->quantity ?? 0);
             $price = is_array($it) ? (float) ($it['unit_price'] ?? 0) : (float) ($it->unit_price ?? 0);

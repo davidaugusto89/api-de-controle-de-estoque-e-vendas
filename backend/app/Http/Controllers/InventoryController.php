@@ -15,24 +15,18 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * Controller responsável pelas operações relacionadas ao inventário.
+ * Controller de inventário.
  *
- * Fornece endpoints para listar itens de inventário, exibir um item
- * por produto e registrar entradas de estoque. Utiliza `InventoryQuery`
- * para leitura persistente e `InventoryCache` para cache de listas e itens.
+ * Endpoints para consulta e criação de registros de inventário. Utiliza
+ * InventoryQuery para leitura e InventoryCache para cache/invalidação.
  */
 final class InventoryController extends Controller
 {
     /**
-     * Listar registros de inventário.
+     * Lista registros de inventário.
      *
-     * Suporta paginação via query params `per_page` e `page`. Quando `per_page=0`
-     * retorna uma lista não paginada (até um limite máximo) e inclui totais.
-     *
-     * @param  Request  $request  Instância de request HTTP com parâmetros de busca e paginação
-     * @param  InventoryQuery  $query  Objeto de consulta para recuperar dados do repositório
-     * @param  InventoryCache  $cache  Serviço de cache para listas e itens de inventário
-     * @return JsonResponse Resposta JSON contendo os dados, metadados de paginação e totais
+     * Suporta paginação via `per_page` e `page`. Quando `per_page=0` retorna
+     * uma lista não paginada (limitada por um cap do servidor) e inclui totais.
      */
     public function index(Request $request, InventoryQuery $query, InventoryCache $cache): JsonResponse
     {
@@ -107,12 +101,7 @@ final class InventoryController extends Controller
     }
 
     /**
-     * Exibir inventário por produto.
-     *
-     * @param  int  $productId  ID do produto
-     * @param  InventoryQuery  $query  Objeto de consulta para recuperar o inventário
-     * @param  InventoryCache  $cache  Serviço de cache para o item solicitado
-     * @return JsonResponse Retorna 200 com o recurso de inventário ou 404 se não encontrado
+     * Exibe inventário para um dado produto.
      */
     public function show(int $productId, InventoryQuery $query, InventoryCache $cache): JsonResponse
     {
@@ -134,16 +123,10 @@ final class InventoryController extends Controller
     }
 
     /**
-     * Registrar uma entrada de estoque.
+     * Registra uma entrada de estoque.
      *
-     * Valida o request via `RegisterInventoryRequest`, executa o caso de uso
-     * `RegisterStockEntry` e invalida cache relevante. Em caso de erro, registra
-     * a exceção no logger e retorna erro 500 genérico.
-     *
-     * @param  RegisterInventoryRequest  $request  Request validado contendo product_id, quantity e opcional unit_cost
-     * @param  RegisterStockEntry  $useCase  Caso de uso que registra a entrada de estoque
-     * @param  InventoryCache  $cache  Serviço de cache para invalidação pós-gravação
-     * @return JsonResponse 201 com recurso criado ou 500 em caso de falha
+     * Executa RegisterStockEntry e invalida caches relacionados. Exceções são
+     * registradas e retornam resposta genérica 500.
      */
     public function store(
         RegisterInventoryRequest $request,

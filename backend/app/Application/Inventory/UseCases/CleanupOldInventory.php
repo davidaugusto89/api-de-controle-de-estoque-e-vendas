@@ -9,23 +9,47 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Limpa e normaliza o inventário.
+ * Limpeza e normalização do inventário.
  *
- * - Remove órfãos em `inventory` cujo `product_id` não existe em `products`
- * - Remove registros "antigos" (last_updated < agora - 90 dias)
- * - Normaliza quantidades negativas para zero (opcional)
- * - Invalida caches relacionados ao inventário
+ * Resumo:
+ * - Remove registros órfãos em `inventory` cujo `product_id` não existe em `products`.
+ * - Remove registros considerados antigos (last_updated anterior a 90 dias).
+ * - Opcionalmente normaliza quantidades negativas para zero.
+ * - Invalida caches relacionados ao inventário após a operação.
+ *
+ * Contrato:
+ * - Entrada: bool $normalizeNegativeToZero (default: true)
+ * - Saída: array{removed_orphans:int, removed_stale:int, normalized:int} com estatísticas
+ * - Efeitos colaterais: alterações em `inventory` e invalidação de caches associados
+ *
+ * Garantias e recomendações:
+ * - A operação é executada dentro de uma transação via `DB::transaction` para
+ *   garantir atomicidade das remoções/atualizações.
+ * - A invalidação de cache é executada dentro do escopo da transação. Para
+ *   garantir invalidação estrita pós-commit em ambientes com listeners/filas,
+ *   considere mover a invalidação para um listener de `afterCommit`.
+ * - A rotina foi escrita para ser portável entre bancos (usa `whereNotExists`),
+ *   mas revise índices e performance em bases grandes antes de executar em produção.
+ *
+ * Observações operacionais:
+ * - Chame esta use-case através de comandos agendados (cron) ou jobs com baixa
+ *   prioridade; em cargas pesadas, execute em janelas de manutenção ou pagine
+ *   as remoções para evitar bloqueios longos.
  */
 final class CleanupOldInventory
 {
     use WithCacheInvalidation;
 
     /**
-     * @return array{
-     *   removed_orphans:int,
-     *   removed_stale:int,
-     *   normalized:int
-     * }
+     * Executa a limpeza e normalização do inventário dentro de uma transação.
+     *
+     * - Remove registros órfãos (inventory.product_id sem produto correspondente).
+     * - Remove registros considerados antigos (last_updated anterior ao corte de 90 dias).
+     * - Opcionalmente normaliza quantidades negativas para zero.
+     * - Invalida caches relacionados após a operação.
+     *
+     * @param  bool  $normalizeNegativeToZero  Quando true, quantidades negativas são ajustadas para zero
+     * @return array{removed_orphans: int, removed_stale: int, normalized: int} Estatísticas das operações executadas
      */
     public function handle(bool $normalizeNegativeToZero = true): array
     {

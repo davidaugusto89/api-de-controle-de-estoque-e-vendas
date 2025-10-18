@@ -9,6 +9,33 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Gera relatório de vendas agregadas e por produto com suporte a cache.
+ *
+ * Contrato de entrada (array $params):
+ * - from|start_date?: string|null  Data inicial (ISO) do período
+ * - to|end_date?: string|null      Data final (ISO) do período
+ * - product_sku?: string|null      Filtra por SKU de produto
+ * - top?: int|null                 Quantidade máxima de produtos no ranking (1-1000)
+ * - order_by?: 'amount'|'quantity'|'profit'|'date'|'sku'|null  Ordenação dos top products
+ * - cache_ttl?: int|null           TTL do cache em segundos (0 = sem cache)
+ *
+ * Saída:
+ * - array contendo chaves: 'period' (from/to), 'totals' (totais agregados),
+ *   'series' (séries diárias) e 'top_products' (lista dos principais produtos).
+ *
+ * Comportamento e garantias:
+ * - Valida e normaliza datas; padrão é últimos 30 dias quando não informado.
+ * - Limita `top` entre 1 e 1000 e normaliza `order_by` para valores permitidos.
+ * - Usa cache taggeada (`sales`, `reports`) via facade `Cache::tags`. Se `cache_ttl` for 0,
+ *   a consulta ainda passa pelo mecanismo de cache, mas o TTL será 0 (dependendo do driver,
+ *   pode comportar-se como sem cache).
+ * - Toda a lógica de agregação é delegada a {@see App\Infrastructure\Persistence\Queries\SalesReportQuery}.
+ *
+ * Observações:
+ * - Esta classe produz um payload pensado para consumo por APIs ou exportadores;
+ *   formatação adicional (monetária, localidade) deve ser feita pelo layer de apresentação.
+ */
 final class GenerateSalesReport
 {
     public function __construct(

@@ -22,7 +22,9 @@ return new class extends Migration
             $table->decimal('sale_price', 10, 2)->unsigned();
             $table->timestamps();
 
-            $table->fullText(['name', 'description']);
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->fullText(['name', 'description']);
+            }
         });
     }
 

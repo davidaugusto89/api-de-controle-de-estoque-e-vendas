@@ -8,18 +8,27 @@ use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * StockPolicy
+ * Regras centrais de integridade de estoque (política de stock).
  *
- * Regras centrais de integridade de estoque.
- * - Garante quantidades inteiras e não-negativas.
- * - Impede underflow/overflow.
- * - Expõe operações de aumento/diminuição usadas por Inventory e Sales.
+ * Responsabilidade:
+ * - Garantir operações seguras sobre quantidades de estoque por produto,
+ *   incluindo validações de limites e normalização de entradas.
+ *
+ * Contrato resumido:
+ * - Métodos aceitam inteiros e retornam inteiros normalizados.
+ * - `increase` e `decrease` lançam {@see \InvalidArgumentException} para
+ *   parâmetros inválidos e {@see \RuntimeException} quando a operação violaria
+ *   as restrições (p.ex. underflow/overflow ou `maxPerProduct` excedido).
+ *
+ * Observações:
+ * - `maxPerProduct` pode ser passado no construtor ou definido via variável de
+ *   ambiente `STOCK_MAX_PER_PRODUCT`.
  */
 final class StockPolicy
 {
     /**
-     * Limite superior de segurança por produto.
-     * Ajuste via env se quiser: STOCK_MAX_PER_PRODUCT
+     * Upper bound for per-product stock. Can be overridden in runtime or
+     * via env var STOCK_MAX_PER_PRODUCT.
      */
     private int $maxPerProduct;
 
@@ -31,9 +40,14 @@ final class StockPolicy
     }
 
     /**
-     * Aumenta a quantidade atual em $delta (>0).
+     * Aumenta a quantidade atual por um delta positivo.
      *
-     * @throws InvalidArgumentException|RuntimeException
+     * @param  int  $current  Quantidade atual (>= 0)
+     * @param  int  $delta  Quantidade positiva a adicionar
+     * @return int Nova quantidade após o aumento
+     *
+     * @throws InvalidArgumentException Em caso de entradas inválidas
+     * @throws RuntimeException Se o resultado ficar fora dos limites permitidos
      */
     public function increase(int $current, int $delta): int
     {
@@ -42,7 +56,6 @@ final class StockPolicy
 
         $new = $current + $delta;
         if ($new < 0) {
-            // overflow de inteiro (muito improvável em PHP 64 bits, mas deixamos a guarda)
             throw new RuntimeException('Overflow ao aumentar estoque.');
         }
         if ($new > $this->maxPerProduct) {
@@ -53,9 +66,14 @@ final class StockPolicy
     }
 
     /**
-     * Diminui a quantidade atual em $delta (>0).
+     * Diminui a quantidade atual por um delta positivo.
      *
-     * @throws InvalidArgumentException|RuntimeException
+     * @param  int  $current  Quantidade atual (>= 0)
+     * @param  int  $delta  Quantidade positiva a subtrair
+     * @return int Nova quantidade após a diminuição
+     *
+     * @throws InvalidArgumentException Em caso de entradas inválidas
+     * @throws RuntimeException Se não houver estoque suficiente
      */
     public function decrease(int $current, int $delta): int
     {
@@ -70,9 +88,11 @@ final class StockPolicy
     }
 
     /**
-     * Ajuste genérico por delta (positivo aumenta, negativo diminui).
+     * Ajusta a quantidade por um delta assinado. Positivo aumenta, negativo diminui.
      *
-     * @throws InvalidArgumentException|RuntimeException
+     * @param  int  $current  Quantidade atual
+     * @param  int  $delta  Delta assinado
+     * @return int Nova quantidade
      */
     public function adjust(int $current, int $delta): int
     {
