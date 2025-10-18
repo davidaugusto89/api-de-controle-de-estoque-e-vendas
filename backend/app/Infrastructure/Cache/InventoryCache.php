@@ -9,9 +9,9 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 final class InventoryCache
 {
-    private const TTL_SECONDS = 60;          // ajuste conforme necessidade
+    private const TTL_SECONDS = 60;
 
-    private const NS = 'inventory'; // namespace base de chaves
+    private const NS = 'inventory';
 
     private const VERSION_KEY = 'inventory:list_version';
 
