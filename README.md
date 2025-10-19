@@ -12,6 +12,7 @@ Aplicação backend desenvolvida em **Laravel** para gerenciamento de **produtos
 - [Como Executar (Docker)](#-como-executar-docker)
 - [Execução Local (sem Docker)](#-execução-local-sem-docker)
 - [Testes e Cobertura](#-testes-e-cobertura)
+ - [Cobertura de Código (atual)](#-cobertura-de-código-atual)
 - [Filas e Agendador](#-filas-e-agendador)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Serviços adicionais e como acessar](#-serviços-adicionais-e-como-acessar)
@@ -389,6 +390,19 @@ Essas práticas asseguram **consistência**, **baixa latência** e **facilidade 
 
 ---
 
+## ✅ Cobertura de Código (atual)
+
+No último relatório de cobertura gerado (veja `coverage/`), a cobertura total está em aproximadamente **80.7%**. Um screenshot anexo mostra que pastas como `Http` e `Infrastructure` têm cobertura mais baixa e são bons alvos para priorização.
+
+![Coverage screenshot](https://raw.githubusercontent.com/davidaugusto89/api-de-controle-de-estoque-e-vendas/refs/heads/main/docs/coverage-screenshot.png)
+
+
+> ⚠️ **Atenção**
+> **Recomendação:** aumentar a cobertura para **90%+** como meta de médio prazo,
+> priorizando **testes de integração** e **casos de borda** nas camadas com menor cobertura.
+
+
+
 ## 🚧 Melhorias Futuras
 
 - Integração com **Prometheus** ou **Grafana** para métricas avançadas.
@@ -396,6 +410,7 @@ Essas práticas asseguram **consistência**, **baixa latência** e **facilidade 
 - Configuração de **Sentry** para monitoramento de exceções.
 - Exposição de **API Docs (Swagger)** automatizada.
 - Adição de **autenticação JWT** e controle de permissões.
+- Aumentar cobertura de testes para **90%+**; priorizar pastas com baixa cobertura (`Http`, `Infrastructure`) e criar testes de integração para fluxos críticos (vendas, atualização de estoque, jobs idempotentes).
 
 ---
 
