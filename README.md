@@ -1,51 +1,129 @@
-# API de Controle de Estoque e Vendas
+# 🧾 API de Controle de Estoque e Vendas
 
-Projeto backend em Laravel que implementa endpoints para gerenciamento de produtos, inventário e vendas, com processamento assíncrono, cache e observability mínima.
+Aplicação backend desenvolvida em **Laravel** para gerenciamento de **produtos**, **estoque** e **vendas**, com foco em **performance**, **concorrência**, **processamento assíncrono** e **observabilidade**.
 
-## Sumário
+---
 
-- Quickstart (Docker)
-- Desenvolvimento local
-- Testes
-- Fila & Scheduler
-- Observability
-- Otimizações implementadas
-- Para avaliadores
-- Troubleshooting
-- Contribuição
+## 📚 Sumário
 
-## Requisitos
+- [Visão Geral](#-visão-geral)
+- [Arquitetura e Tecnologias](#-arquitetura-e-tecnologias)
+- [Requisitos](#-requisitos)
+- [Como Executar (Docker)](#-como-executar-docker)
+- [Execução Local (sem Docker)](#-execução-local-sem-docker)
+- [Testes e Cobertura](#-testes-e-cobertura)
+- [Filas e Agendador](#-filas-e-agendador)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Observabilidade e Métricas](#-observabilidade-e-métricas)
+- [Endpoints Principais](#-endpoints-principais)
+- [Otimizações e Estratégias](#-otimizações-e-estratégias)
+- [Validação Local](#-validação-local)
+- [Melhorias Futuras](#-melhorias-futuras)
+- [Autor](#-autor)
+
+---
+
+## 🎯 Visão Geral
+
+Esta API foi projetada para demonstrar boas práticas de desenvolvimento backend em **Laravel 12**, implementando recursos modernos como **processamento em filas**, **cache inteligente**, **transações idempotentes** e **mecanismos de concorrência** para garantir integridade dos dados em operações críticas.
+
+O sistema simula o módulo de controle de estoque e vendas de um ERP, oferecendo endpoints para:
+- Registro e consulta de produtos e inventário
+- Processamento de vendas com múltiplos itens
+- Relatórios filtráveis por data e SKU
+- Métricas e observabilidade simplificadas
+
+---
+
+## 🧩 Arquitetura e Tecnologias
+
+- **Framework:** Laravel 10+
+- **Linguagem:** PHP 8.1+
+- **Banco de Dados:** MySQL / PostgreSQL / SQLite
+- **Filas e Cache:** Redis
+- **Testes:** PHPUnit
+- **Scheduler:** Cron Jobs via Laravel Scheduler
+- **Observabilidade:** Métricas via endpoint Prometheus-style
+
+---
+
+## 🧱 Arquitetura Hexagonal (Ports & Adapters)
+
+A aplicação segue **Arquitetura Hexagonal** para isolar o **Domínio** das preocupações de infraestrutura, promovendo testabilidade e facilidade de evolução. Em alto nível:
+
+```
+[Drivers/Entradas] → Application (Use Cases) → Domain (Entities/Services) → [Ports] → Adapters (Infra)
+```
+
+### Camadas e mapeamento de pastas
+
+- **Domain** (`app/Domain`)
+  - **Entities**: modelos ricos de domínio (ex.: `InventoryItem`, `SaleAggregate`).
+  - **Services**: regras de negócio puras (`StockPolicy`, `MarginCalculator`, `SaleValidator`).
+  - **ValueObjects**: tipos imutáveis (`Money`, `DateRange`).
+  - **Enums/Exceptions**: estados e falhas de domínio (`SaleStatus`, `InventoryInsufficientException`).
+
+- **Shared/Contracts (Ports)** (`app/Domain/Shared/Contracts`)
+  - **RepositoryInterface**, **CacheInterface**: definem contratos que a camada de aplicação usa sem conhecer a implementação.
+
+- **Application (Use Cases)** (`app/Application/**/UseCases`)
+  - Orquestram fluxos, transações e integração com portas: `CreateSale`, `FinalizeSale`, `GetSaleDetails`, `GetInventorySnapshot`, `RegisterStockEntry`, `CleanupOldInventory`, `GenerateSalesReport`.
+  - Coordenam **eventos** e **jobs** sem conter regra de negócio detalhada.
+
+- **Adapters/Infra** (`app/Infrastructure`)
+  - **Persistence/Eloquent**: repositórios concretos (`ProductRepository`, `InventoryRepository`, `SaleRepository`, `SaleItemRepository`).
+  - **Queries (read models)**: consultas otimizadas para endpoints (`InventoryQuery`, `SaleDetailsQuery`, `SalesReportQuery`).
+  - **Cache**: `InventoryCache` implementa caching com versionamento.
+  - **Locks**: `RedisLock` para controle de concorrência.
+  - **Events/Listeners/Jobs**: integração assíncrona (`SaleFinalized`, `UpdateInventoryListener`, `FinalizeSaleJob`, `UpdateInventoryJob`).
+  - **Metrics**: `MetricsCollector` para observabilidade mínima.
+
+- **Drivers (Primary Adapters)**
+  - **HTTP** (`app/Http`): controllers, requests e resources (`InventoryController`, `SaleController`, etc.)
+  - **Providers** (`app/Providers`): IoC/DI e rate limiting.
+
+### Fluxo típico (exemplo de venda)
+
+1. **HTTP** chama `POST /api/sales` → `SaleController` valida `CreateSaleRequest`.
+2. **Application** executa `CreateSale` (orquestração) e publica evento `SaleFinalized`.
+3. **Listener** aciona `UpdateInventoryJob` em **fila**.
+4. **Job** usa **portas** (repositórios, cache, locks) para atualizar estoque:
+   - Decremento atômico no banco com **WHERE quantity >= ?**.
+   - **RedisLock** por SKU opcional para serializar contenda.
+   - **Transação + idempotência** para reprocessamentos seguros.
+5. **Cache** de inventário é invalidado por **versionamento**.
+
+### Benefícios práticos
+
+- **Testabilidade**: Domínio e casos de uso testados sem subir framework/banco.
+- **Evolução segura**: troca de adapters (p.ex., Eloquent → outro ORM) sem afetar o domínio.
+- **Performance e resiliência**: separação explícita de **read models** (`Queries`) e **write models** (regras de domínio), com filas e locks para cenários concorrentes.
+- **Claridade arquitetural**: cada mudança tem lugar definido (regra de negócio no domínio, orquestração na aplicação, integração na infraestrutura).
+
+---
+
+## ⚙️ Requisitos
 
 - PHP 8.1+
 - Composer
 - Docker & Docker Compose (recomendado)
-- SQLite/MySQL (usado em testes e produção)
+- Banco de dados configurado (MySQL/PostgreSQL/SQLite)
 
-## Quickstart (Docker)
+---
 
-1. Copie o arquivo de ambiente e ajuste as variáveis se necessário:
+## 🚀 Como Executar (Docker)
 
 ```bash
 cp backend/.env.example backend/.env
-```
-
-2. Subir os serviços com Docker Compose:
-
-```bash
 docker-compose up -d --build
-```
-
-3. Executar migrations e seeders (dentro do container `backend`):
-
-```bash
 docker compose exec backend php artisan migrate --seed
 ```
 
-4. A API ficará exposta conforme configuração do `docker-compose.yml` (verifique a porta configurada).
+A API ficará disponível conforme definido no arquivo `docker-compose.yml` (porta padrão: `8000`).
 
-## Desenvolvimento local
+---
 
-Instalação e execução local:
+## 💻 Execução Local (sem Docker)
 
 ```bash
 cd backend
@@ -56,16 +134,18 @@ php artisan migrate --seed
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-## Testes
+---
 
-Executar toda a suíte PHPUnit:
+## 🧪 Testes e Cobertura
+
+Rodar todos os testes unitários e de integração:
 
 ```bash
 cd backend
 ./vendor/bin/phpunit
 ```
 
-Executar apenas os testes de integração mais relevantes:
+Testes principais de integração e concorrência:
 
 ```bash
 ./vendor/bin/phpunit tests/Feature/Integration/SaleFlowIntegrationTest.php \
@@ -73,133 +153,117 @@ Executar apenas os testes de integração mais relevantes:
   tests/Feature/Integration/IdempotentRetryJobTest.php
 ```
 
-## Fila & Scheduler
+---
 
-Instruções rápidas para trabalhar com filas e scheduler.
+## 🕓 Filas e Agendador
 
-Local (sem Docker):
+### Local (sem Docker)
 
 ```bash
-# Inicia um worker para processar filas (use a conexão definida em QUEUE_CONNECTION)
-cd backend
 php artisan queue:work --tries=3 --sleep=3 --queue=default,inventory,sales
-
-# Para rodar o agendador manualmente (útil para desenvolvimento)
 php artisan schedule:run
 ```
 
-Com Docker Compose (container `backend` já configurado):
+### Com Docker
 
 ```bash
-# Execute um worker dentro do container
 docker compose exec backend php artisan queue:work --tries=3 --sleep=3 --queue=default,inventory,sales
-
-# Rodar o scheduler uma vez (cronagem real deve executar `php artisan schedule:run` a cada minuto)
 docker compose exec backend php artisan schedule:run
 ```
 
-Observações:
-
-- O projeto usa Redis como driver de fila/cache por padrão (ver `backend/.env.example`).
-- Use Horizon (se configurado) para observar filas em produção/local.
-- Certifique-se de executar `php artisan migrate --seed` antes de processar filas que dependam de dados.
- - O projeto usa Redis como driver de fila/cache por padrão (ver `backend/.env.example`).
- - Use Horizon (se configurado) para observar filas em produção/local.
- - Certifique-se de executar `php artisan migrate --seed` antes de processar filas que dependam de dados.
-
-## Estrutura principal
-
-- `app/` - Código da aplicação (Domain, Application, Infrastructure)
-- `routes/` - Rotas da aplicação
-- `database/` - Migrations, factories e seeders
-- `tests/` - Testes automatizados
-
-## Observability
-
-- Endpoint prometheus-style: `GET /api/v1/observability/metrics` — expõe métricas simples armazenadas em cache.
-- Proteção: por padrão o endpoint está protegido por IP (ver `config/observability.php` > `allowed_ips`). Em dev deixe vazio.
-- Para produção: proteja via firewall/ACL e exporte métricas para Prometheus.
-
-### Como habilitar scraping local
-
-1. Garanta que `OBS_ALLOWED_IPS` inclua o IP do seu Prometheus (ou deixe vazio para dev).
-2. Configure Prometheus para raspar `http://<host>/api/v1/observability/metrics`.
-
-## Próximos passos recomendados
-
-- Adicionar CI (GitHub Actions) que execute `composer install`, `pint` e `phpunit`.
-- Integrar `MetricsCollector` com um backend real (Prometheus Pushgateway ou exporter).
-- Configurar Sentry para captura de exceções em jobs/queues.
-
-## Otimizações implementadas
-
-Esta seção descreve as decisões de arquitetura e otimizações aplicadas no código para garantir performance, consistência e observabilidade.
-
-- Decremento atômico no banco de dados
-	- `InventoryRepository::decrementIfEnough` utiliza um `UPDATE ... WHERE quantity >= ?` atômico para evitar double-decrement em cenários concorrentes sem precisar de locks pesados.
-
-- Locks por produto (opcional)
-	- `InventoryLockService` fornece uma abstração de lock distribuído (Redis lock) usada pelo `UpdateInventoryJob` para serializar atualizações por produto quando necessário.
-
-- Transações e idempotência
-	- `UpdateInventoryJob` executa operações de decremento dentro de uma transação (`Transactions::run`) garantindo rollback em caso de falhas; testes de idempotência/ retry cobrem esse comportamento.
-
-- Cache com Versioning para listagens
-	- `InventoryCache` armazena itens individuais e listas; para invalidar listas ao atualizar qualquer produto, a estratégia é `bumpListVersion()` — incrementa uma chave `inventory:list_version`, tornando chaves de listagem antigas obsoletas sem precisar deletar múltiplas chaves.
-
-- TTLs configuráveis
-	- TTLs de item e versão são configuráveis via `config/inventory.php` (`item_ttl`, `version_ttl`) para ajustar trade-offs entre frescor e carga no banco.
-
-- Filas e processamento assíncrono
-	- Criação de vendas enfileira o processamento de inventário; isso desacopla latência da API do trabalho custoso e melhora throughput.
-
-- Observabilidade mínima
-	- Métricas básicas (`MetricsCollector`) e exposição via `/api/v1/observability/metrics` permitem monitorar contadores críticos (jobs start/completed/failure, item.decrement, cache invalidations).
-
-- Testes de concorrência e integração
-	- Testes automatizados cobrem cenários concorrentes, rollback e idempotência garantindo que as otimizações funcionem sob carga simulada.
-
-Essas otimizações priorizam segurança de dados (consistência) e facilidade operacional. Para cenários de altíssima escala, recomenda-se migrar o `MetricsCollector` para um backend de métricas real (Prometheus, InfluxDB) e usar filas/consumers horizontalizados (Horizon, supervisord) com monitoramento de latência e retries.
-
-## Para avaliadores
-
-Seção curta com passos práticos que o avaliador pode seguir para verificar requisitos do teste:
-
-1. Rodar migrations e seed:
-
-```bash
-docker compose exec backend php artisan migrate --seed
-```
-
-2. Criar uma venda via API (exemplo):
-
-```bash
-curl -X POST http://localhost:8000/api/v1/sales \
-	-H 'Content-Type: application/json' \
-	-d '{"items":[{"product_id":1,"quantity":2,"unit_price":100.0}]}'
-```
-
-3. Processar fila (ou conferir jobs enfileirados) e validar inventário:
-
-```bash
-docker compose exec backend php artisan queue:work --once
-```
-
-4. Conferir métricas (se necessário):
-
-```bash
-curl http://localhost:8000/api/v1/observability/metrics
-```
-
-## Troubleshooting rápido
-
-- Se os testes falharem localmente, verifique variáveis de ambiente em `backend/.env` e se o DB (sqlite/mysql) está configurado.
-- Se usar Redis, confirme `REDIS_HOST` e `REDIS_PASSWORD` no `.env`.
-- Se o endpoint `/api/v1/observability/metrics` retornar 403, configure `OBS_ALLOWED_IPS` ou deixe vazio para desenvolvimento.
+> O projeto utiliza **Redis** como driver de fila/cache. Horizon pode ser configurado para monitoramento em produção.
 
 ---
 
-## Contato
+## 🧱 Estrutura do Projeto
 
-Autor: David Augusto
+```
+app/           -> Código principal (Domain, Application, Infrastructure)
+routes/        -> Definição de rotas
+config/        -> Configurações da aplicação
+database/      -> Migrations, factories e seeders
+tests/         -> Testes automatizados
+```
+
+---
+
+## 📊 Observabilidade e Métricas
+
+Endpoint de métricas estilo Prometheus:
+```bash
+GET /api/v1/observability/metrics
+```
+
+- Protegido por IP (`config/observability.php > allowed_ips`)
+- Pode ser configurado via variável `OBS_ALLOWED_IPS`
+- Ideal para scraping por Prometheus local ou remoto
+
+---
+
+## 🔗 Endpoints Principais
+
+| Método | Endpoint | Descrição |
+|--------|-----------|------------|
+| `POST` | `/api/inventory` | Registrar entrada de produtos no estoque |
+| `GET` | `/api/inventory` | Consultar situação atual do estoque (cacheada) |
+| `POST` | `/api/sales` | Registrar nova venda (processamento assíncrono) |
+| `GET` | `/api/sales/{id}` | Detalhar uma venda específica |
+| `GET` | `/api/reports/sales` | Gerar relatório de vendas com filtros |
+
+---
+
+## ⚡ Otimizações e Estratégias
+
+- **Decremento atômico:** evita race conditions em atualizações concorrentes de estoque (`UPDATE ... WHERE quantity >= ?`).
+- **Locks por produto:** via `InventoryLockService` (Redis lock) para serializar atualizações.
+- **Transações e idempotência:** todas as operações críticas executadas com rollback seguro.
+- **Cache versionado:** invalidação de listas via chave `inventory:list_version`.
+- **Processamento assíncrono:** filas para vendas e atualização de estoque.
+- **Observabilidade mínima:** métricas de jobs, cache e inventário expostas via endpoint.
+- **Testes de concorrência:** garantem integridade e rollback correto sob carga.
+
+Essas práticas asseguram **consistência**, **baixa latência** e **facilidade operacional**.
+
+---
+
+## 🧭 Validação Local
+
+1. Migrar e popular banco:
+   ```bash
+   docker compose exec backend php artisan migrate --seed
+   ```
+
+2. Criar uma venda:
+   ```bash
+   curl -X POST http://localhost:8000/api/v1/sales \
+   -H 'Content-Type: application/json' \
+   -d '{"items":[{"product_id":1,"quantity":2,"unit_price":100.0}]}'
+   ```
+
+3. Processar fila e validar estoque:
+   ```bash
+   docker compose exec backend php artisan queue:work --once
+   ```
+
+4. Consultar métricas:
+   ```bash
+   curl http://localhost:8000/api/v1/observability/metrics
+   ```
+
+---
+
+## 🚧 Melhorias Futuras
+
+- Integração com **Prometheus** ou **Grafana** para métricas avançadas.
+- Implementação de **CI/CD** (GitHub Actions) com PHPUnit e Pint.
+- Configuração de **Sentry** para monitoramento de exceções.
+- Exposição de **API Docs (Swagger)** automatizada.
+- Adição de **autenticação JWT** e controle de permissões.
+
+---
+
+## 👨‍💻 Autor
+
+**David Augusto**
+Desenvolvedor Backend | Laravel & PHP
 
