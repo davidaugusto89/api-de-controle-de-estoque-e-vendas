@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Jobs;
 
-use App\Infrastructure\Jobs\UpdateInventoryJob;
 use App\Domain\Inventory\Services\InventoryLockService;
 use App\Domain\Inventory\Services\StockPolicy;
+use App\Infrastructure\Jobs\UpdateInventoryJob;
 use App\Support\Database\Transactions;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -63,11 +62,21 @@ final class UpdateInventoryJobTest extends TestCase
             ->onlyMethods(['decrease'])
             ->getMock();
 
+        $inventoryRepo = $this->getMockBuilder(\App\Infrastructure\Persistence\Eloquent\InventoryRepository::class)
+            ->onlyMethods(['decrementIfEnough'])
+            ->getMock();
+
+        // Use a real InventoryCache but mock the underlying cache store (Repository)
+        $cacheStore = $this->getMockBuilder(\Illuminate\Contracts\Cache\Repository::class)
+            ->getMock();
+
+        $cache = new \App\Infrastructure\Cache\InventoryCache($cacheStore);
+
         // Espera que Transactions::run seja chamado uma vez e execute o callback
         $tx->expects($this->once())
             ->method('run')
             ->with($this->isType('callable'))
-            ->willReturnCallback(function (callable $cb) use ($locks, $policy) {
+            ->willReturnCallback(function (callable $cb) {
                 // Simula execução do callback exatamente como o job faria
                 $cb();
             });
@@ -77,33 +86,42 @@ final class UpdateInventoryJobTest extends TestCase
         $locks->expects($this->exactly(count($items)))
             ->method('lock')
             ->with($this->isType('int'), $this->isType('callable'), $this->isType('int'), $this->isType('int'))
-            ->willReturnCallback(function (int $productId, callable $cb) use ($policy) {
+            ->willReturnCallback(function (int $productId, callable $cb) {
                 // Executa o callback que chama policy->decrease
                 $cb();
             });
 
-        // policy->decrease deve ser chamado com os pares corretos em ordem
+        // inventoryRepo->decrementIfEnough deve ser chamado com os pares corretos em ordem
         $callIndex = 0;
         $expected = [
             [7, 3],
             [8, 1],
         ];
 
-        $policy->expects($this->exactly(2))
-            ->method('decrease')
-            ->willReturnCallback(function (int $productId, int $quantity) use (&$callIndex, $expected): int {
+        $inventoryRepo->expects($this->exactly(2))
+            ->method('decrementIfEnough')
+            ->willReturnCallback(function (int $productId, int $quantity) use (&$callIndex, $expected): bool {
                 $exp = $expected[$callIndex++] ?? null;
                 TestCase::assertNotNull($exp);
                 TestCase::assertSame($exp[0], $productId);
                 TestCase::assertSame($exp[1], $quantity);
 
-                return 0;
+                return true;
             });
+
+        // Expect underlying cache operations: forget for each product item and an increment for list version
+        $cacheStore->expects($this->exactly(2))
+            ->method('forget')
+            ->with($this->isType('string'));
+
+        $cacheStore->expects($this->once())
+            ->method('increment')
+            ->with('inventory:list_version');
 
         $job = new UpdateInventoryJob(123, $items);
 
         // Executa handle; não deve lançar exceção
-        $job->handle($tx, $locks, $policy);
+        $job->handle($tx, $locks, $policy, $inventoryRepo, $cache);
     }
 
     public function test_failed_registra_erro_sem_excecao(): void

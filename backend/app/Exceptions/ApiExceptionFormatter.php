@@ -27,7 +27,7 @@ final class ApiExceptionFormatter
      */
     public static function from(Throwable $e, Request $request): JsonResponse
     {
-        $debug     = (bool) config('app.debug', false);
+        $debug = (bool) config('app.debug', false);
         $requestId = self::requestId($request);
 
         // 422 Validation
@@ -84,8 +84,8 @@ final class ApiExceptionFormatter
 
         // 405 Method Not Allowed — normaliza header Allow
         if ($e instanceof MethodNotAllowedHttpException) {
-            $headers   = $e->getHeaders();
-            $allow     = $headers['Allow'] ?? null;
+            $headers = $e->getHeaders();
+            $allow = $headers['Allow'] ?? null;
             $allowList = is_array($allow) ? $allow : (is_string($allow) ? [$allow] : []);
 
             return self::json(
@@ -147,9 +147,9 @@ final class ApiExceptionFormatter
     /**
      * Cria a resposta JSON final com payload padronizado.
      *
-     * @param  array<string,mixed>|null $details
-     * @param  array<string,string>|null $headers
-     * @param  array{exception:string,file:string,line:int,trace:list<string>}|null $debug
+     * @param  array<string,mixed>|null  $details
+     * @param  array<string,string>|null  $headers
+     * @param  array{exception:string,file:string,line:int,trace:list<string>}|null  $debug
      */
     private static function json(
         int $status,
@@ -162,7 +162,7 @@ final class ApiExceptionFormatter
     ): JsonResponse {
         $payload = [
             'error' => [
-                'code'    => $code,
+                'code' => $code,
                 'message' => $message,
             ],
             'meta' => [
@@ -209,9 +209,9 @@ final class ApiExceptionFormatter
     {
         return [
             'exception' => get_class($e),
-            'file'      => $e->getFile(),
-            'line'      => $e->getLine(),
-            'trace'     => collect(explode("\n", $e->getTraceAsString()))->take(20)->all(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => collect(explode("\n", $e->getTraceAsString()))->take(20)->all(),
         ];
     }
 }

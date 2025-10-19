@@ -16,7 +16,6 @@ final class InventoryCache
 
     /**
      * Aceita um cache-like qualquer para facilitar fakes nos testes.
-     * @param mixed $cache
      */
     public function __construct(
         private readonly mixed $cache
@@ -121,12 +120,14 @@ final class InventoryCache
             if (method_exists($this->cache, 'increment')) {
                 $this->cache->increment(self::VERSION_KEY);
             } else {
-                // fallback: set direto
-                $this->cache->put(self::VERSION_KEY, 2, self::TTL_SECONDS);
+                // fallback: ler versão atual e setar v+1 para preservar monotonicidade
+                $current = (int) ($this->cache->get(self::VERSION_KEY) ?? 1);
+                $this->cache->put(self::VERSION_KEY, $current + 1, self::TTL_SECONDS);
             }
         } catch (\Throwable) {
             try {
-                $this->cache->put(self::VERSION_KEY, 2, self::TTL_SECONDS);
+                $current = (int) ($this->cache->get(self::VERSION_KEY) ?? 1);
+                $this->cache->put(self::VERSION_KEY, $current + 1, self::TTL_SECONDS);
             } catch (\Throwable) {
                 // silencioso
             }

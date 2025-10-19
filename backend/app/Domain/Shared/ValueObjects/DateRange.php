@@ -16,9 +16,9 @@ final class DateRange
         public readonly CarbonImmutable $from,
         public readonly CarbonImmutable $to
     ) {
-            if ($from->gt($to)) {
-                throw new InvalidArgumentException('DateRange inválido: from > to.');
-            }
+        if ($from->gt($to)) {
+            throw new InvalidArgumentException('DateRange inválido: from > to.');
+        }
     }
 
     /**

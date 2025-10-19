@@ -20,7 +20,7 @@ final class RegisterInventoryRequestTest extends TestCase
 
     public function test_regras_definem_produto_quantidade_e_custo_unitario(): void
     {
-        $req   = new RegisterInventoryRequest;
+        $req = new RegisterInventoryRequest;
         $rules = $req->rules();
 
         $this->assertArrayHasKey('product_id', $rules);
@@ -30,7 +30,7 @@ final class RegisterInventoryRequestTest extends TestCase
 
     public function test_messages_contem_mensagens_customizadas(): void
     {
-        $req      = new RegisterInventoryRequest;
+        $req = new RegisterInventoryRequest;
         $messages = $req->messages();
 
         $this->assertArrayHasKey('product_id.required', $messages);

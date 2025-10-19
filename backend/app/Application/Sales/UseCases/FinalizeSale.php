@@ -45,19 +45,19 @@ class FinalizeSale
             $this->validator->validate($items);
 
             $totalAmount = 0.0;
-            $totalCost   = 0.0;
+            $totalCost = 0.0;
 
             foreach ($items as $it) {
                 $totalAmount += $it->unit_price * $it->quantity;
-                $totalCost   += $it->unit_cost  * $it->quantity;
+                $totalCost += $it->unit_cost * $it->quantity;
             }
 
             $totalProfit = $this->margin->profit($totalAmount, $totalCost);
 
             $sale->total_amount = round($totalAmount, 2);
-            $sale->total_cost   = round($totalCost, 2);
+            $sale->total_cost = round($totalCost, 2);
             $sale->total_profit = round($totalProfit, 2);
-            $sale->status       = SaleStatus::COMPLETED->value;
+            $sale->status = SaleStatus::COMPLETED->value;
             $sale->save();
 
             Event::dispatch(new SaleFinalized(
@@ -65,7 +65,7 @@ class FinalizeSale
                 items: $items->map(
                     static fn ($i): array => [
                         'product_id' => (int) $i->product_id,
-                        'quantity'   => (int) $i->quantity,
+                        'quantity' => (int) $i->quantity,
                     ]
                 )->all()
             ));

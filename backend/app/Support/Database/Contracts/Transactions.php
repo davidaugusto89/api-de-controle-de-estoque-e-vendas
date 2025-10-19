@@ -13,6 +13,7 @@ interface Transactions
      * Executa o callback dentro de uma transação e retorna seu resultado.
      *
      * @template TReturn
+     *
      * @param  callable():TReturn  $callback
      * @return TReturn
      */

@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Queue;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Tests\TestCase;
 
 /**
@@ -38,7 +38,7 @@ final class UpdateInventoryListenerTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
     }
@@ -55,7 +55,7 @@ final class UpdateInventoryListenerTest extends TestCase
         ];
 
         $event = new SaleFinalized($saleId, $items);
-        $listener = new UpdateInventoryListener();
+        $listener = new UpdateInventoryListener;
 
         // Act
         $listener->handle($event);
@@ -83,7 +83,7 @@ final class UpdateInventoryListenerTest extends TestCase
         ];
 
         $event = new SaleFinalized($saleId, $items);
-        $listener = new UpdateInventoryListener();
+        $listener = new UpdateInventoryListener;
 
         // Mock do UpdateInventoryJob estático via alias — precisa rodar em processo separado
         $exception = new \RuntimeException('dispatch-failed');

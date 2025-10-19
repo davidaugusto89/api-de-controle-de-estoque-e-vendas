@@ -32,8 +32,8 @@ final class TransactionsTest extends TestCase
                 return $cb();
             });
 
-    // Injeta o DatabaseManager mock diretamente no Transactions
-    $tx = new Transactions($manager);
+        // Injeta o DatabaseManager mock diretamente no Transactions
+        $tx = new Transactions($manager);
 
         $result = $tx->run(function () use ($expected) {
             return $expected;
@@ -52,8 +52,8 @@ final class TransactionsTest extends TestCase
                 return $cb();
             });
 
-    // Injeta o DatabaseManager mock diretamente no Transactions
-    $tx = new Transactions($manager);
+        // Injeta o DatabaseManager mock diretamente no Transactions
+        $tx = new Transactions($manager);
 
         $this->expectException(\RuntimeException::class);
 

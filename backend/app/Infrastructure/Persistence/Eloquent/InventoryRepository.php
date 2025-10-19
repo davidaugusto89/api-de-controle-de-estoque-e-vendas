@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Eloquent;
 
+use App\Domain\Inventory\Exceptions\InventoryInsufficientException;
 use App\Models\Inventory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Repositório Eloquent para o modelo Inventory.
@@ -38,7 +40,7 @@ class InventoryRepository
         if (! $inv) {
             $inv = new Inventory([
                 'product_id' => $productId,
-                'quantity'   => $quantity,
+                'quantity' => $quantity,
             ]);
             $inv->version = 0;
         } else {
@@ -46,7 +48,7 @@ class InventoryRepository
         }
 
         $inv->last_updated = $lastUpdated;
-        $inv->version      = (int) $inv->version + 1;
+        $inv->version = (int) $inv->version + 1;
         $inv->save();
 
         return $inv;
@@ -58,14 +60,34 @@ class InventoryRepository
      */
     public function decrementIfEnough(int $productId, int $quantity): bool
     {
-        return (bool) DB::table('inventory')
-            ->where('product_id', $productId)
-            ->where('quantity', '>=', $quantity)
-            ->update([
-                'quantity'     => DB::raw("quantity - {$quantity}"),
-                'version'      => DB::raw('version + 1'),
-                'last_updated' => now(),
-                'updated_at'   => now(),
-            ]);
+        // Usar uma query parametrizada para evitar interpolação direta e permitir bindings.
+        $now = now();
+
+        $sql = 'UPDATE inventory SET quantity = quantity - ?, version = version + 1, last_updated = ?, updated_at = ? WHERE product_id = ? AND quantity >= ?';
+
+        $affected = DB::update($sql, [$quantity, $now, $now, $productId, $quantity]);
+
+        // Log para auditoria rápida em ambiente de debug/produção.
+        if ($affected) {
+            Log::info('InventoryRepository: decrementIfEnough applied', ['product_id' => $productId, 'quantity' => $quantity, 'affected' => $affected]);
+        } else {
+            Log::warning('InventoryRepository: decrementIfEnough no rows affected (possible insufficient stock)', ['product_id' => $productId, 'quantity' => $quantity]);
+        }
+
+        return (bool) $affected;
+    }
+
+    /**
+     * Decrementa a quantidade ou lança DomainException se não for possível.
+     * Método utilitário para tornar o uso no job mais explícito e legível.
+     *
+     * @throws \DomainException
+     */
+    public function decrementOrFail(int $productId, int $quantity): void
+    {
+        if (! $this->decrementIfEnough($productId, $quantity)) {
+            Log::warning('InventoryRepository: decrementOrFail throwing insufficient exception', ['product_id' => $productId, 'quantity' => $quantity]);
+            throw InventoryInsufficientException::forProduct($productId);
+        }
     }
 }

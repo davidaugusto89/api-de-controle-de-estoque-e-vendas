@@ -85,8 +85,8 @@ final class InventoryQuery
         $totalSale = (float) ($totals->total_sale ?? 0);
 
         return [
-            'total_cost'       => $totalCost,
-            'total_sale'       => $totalSale,
+            'total_cost' => $totalCost,
+            'total_sale' => $totalSale,
             'projected_profit' => $totalSale - $totalCost,
         ];
     }

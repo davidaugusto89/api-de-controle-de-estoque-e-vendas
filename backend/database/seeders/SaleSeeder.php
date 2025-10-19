@@ -32,10 +32,10 @@ class SaleSeeder extends Seeder
                     $qty = fake()->numberBetween(1, 10);
 
                     SaleItem::create([
-                        'sale_id'    => $sale->id,
+                        'sale_id' => $sale->id,
                         'product_id' => $product->id,
-                        'quantity'   => $qty,
-                        'unit_cost'  => $product->cost_price,
+                        'quantity' => $qty,
+                        'unit_cost' => $product->cost_price,
                         'unit_price' => $product->sale_price,
                     ]);
                 }
@@ -46,12 +46,12 @@ class SaleSeeder extends Seeder
                     ->first();
 
                 $totalAmount = (float) ($totals->total_amount ?? 0);
-                $totalCost   = (float) ($totals->total_cost ?? 0);
+                $totalCost = (float) ($totals->total_cost ?? 0);
                 $totalProfit = $totalAmount - $totalCost;
 
                 $sale->forceFill([
                     'total_amount' => $totalAmount,
-                    'total_cost'   => $totalCost,
+                    'total_cost' => $totalCost,
                     'total_profit' => $totalProfit,
                 ])->save();
             });

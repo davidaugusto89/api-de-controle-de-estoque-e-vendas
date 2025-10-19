@@ -23,6 +23,9 @@ final class UpdateInventoryListener implements ShouldQueue
     public function handle(SaleFinalized $event): void
     {
         try {
+            // Log antes do dispatch para ter contexto no worker
+            Log::info('Dispatching UpdateInventoryJob from listener', ['sale_id' => $event->saleId, 'items_count' => count($event->items)]);
+
             // Use o helper/dispatch estático do Job (retorna PendingDispatch → permite onQueue)
             UpdateInventoryJob::dispatch($event->saleId, $event->items)
                 ->onQueue($this->queue);
@@ -30,8 +33,8 @@ final class UpdateInventoryListener implements ShouldQueue
             // Log útil para diagnosticar rapidamente
             Log::error('Falha no UpdateInventoryListener', [
                 'sale_id' => $event->saleId,
-                'items'   => $event->items,
-                'error'   => $e->getMessage(),
+                'items' => $event->items,
+                'error' => $e->getMessage(),
             ]);
 
             // Repassa a exceção para o worker marcar como failed (e aparecer no Horizon/queue:failed)

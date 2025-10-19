@@ -83,7 +83,7 @@ final class MarginCalculatorTest extends TestCase
         $sut = new MarginCalculator;
 
         // Act
-        $profit  = $sut->profit($totalAmount, $totalCost);
+        $profit = $sut->profit($totalAmount, $totalCost);
         $percent = $sut->marginPercent($totalAmount, $totalCost);
 
         // Assert - profit arredondado a 2 casas conforme implementação
@@ -113,7 +113,7 @@ final class MarginCalculatorTest extends TestCase
 
         // Act
         $percentZero = $sut->marginPercent(0.0, 10.0);
-        $profitZero  = $sut->profit(0.0, 10.0);
+        $profitZero = $sut->profit(0.0, 10.0);
 
         // Assert
         $this->assertSame(0.0, $percentZero, 'marginPercent deve retornar 0.0 quando totalAmount == 0.');
@@ -127,7 +127,7 @@ final class MarginCalculatorTest extends TestCase
 
         // Act
         $percentNegative = $sut->marginPercent(-1.0, 0.0);
-        $profitNegative  = $sut->profit(-1.0, 0.0);
+        $profitNegative = $sut->profit(-1.0, 0.0);
 
         // Assert
         $this->assertSame(0.0, $percentNegative, 'marginPercent deve retornar 0.0 quando totalAmount < 0.');

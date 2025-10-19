@@ -54,7 +54,7 @@ final class ForceJsonResponseTest extends TestCase
         $this->assertFalse($request->expectsJson());
 
         $capturedAccept = null;
-        $next           = function ($req) use (&$capturedAccept) {
+        $next = function ($req) use (&$capturedAccept) {
             $capturedAccept = $req->headers->get('Accept');
 
             return new SymfonyResponse('plain', 200);
@@ -73,7 +73,7 @@ final class ForceJsonResponseTest extends TestCase
         $this->assertTrue($request->expectsJson());
 
         $capturedAccept = null;
-        $next           = function ($req) use (&$capturedAccept) {
+        $next = function ($req) use (&$capturedAccept) {
             $capturedAccept = $req->headers->get('Accept');
 
             return new SymfonyResponse('plain', 200);
@@ -90,13 +90,13 @@ final class ForceJsonResponseTest extends TestCase
         $request = Request::create('/api/x', 'GET');
 
         $payload = ['a' => 1, 'b' => 'c'];
-        $json    = json_encode($payload);
+        $json = json_encode($payload);
 
         $next = function ($req) use ($json) {
             return new SymfonyResponse($json, 202, ['X-Custom' => 'v']);
         };
 
-        $mw  = new ForceJsonResponse;
+        $mw = new ForceJsonResponse;
         $res = $mw->handle($request, $next);
 
         $this->assertInstanceOf(JsonResponse::class, $res);
@@ -115,7 +115,7 @@ final class ForceJsonResponseTest extends TestCase
             return new SymfonyResponse('just a text', 418, ['X-T' => 'ok']);
         };
 
-        $mw  = new ForceJsonResponse;
+        $mw = new ForceJsonResponse;
         $res = $mw->handle($request, $next);
 
         $this->assertInstanceOf(JsonResponse::class, $res);
@@ -133,7 +133,7 @@ final class ForceJsonResponseTest extends TestCase
             return response()->json(['ok' => true], 201, ['X-J' => '1']);
         };
 
-        $mw  = new ForceJsonResponse;
+        $mw = new ForceJsonResponse;
         $res = $mw->handle($request, $next);
 
         $this->assertInstanceOf(JsonResponse::class, $res);

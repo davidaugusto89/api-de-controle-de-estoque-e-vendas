@@ -37,12 +37,12 @@ final class SaleControllerTest extends TestCase
 
         Route::post('/_test/sales', function () use ($fakeItems) {
             $useCase = app(CreateSale::class);
-            $saleId  = $useCase->execute($fakeItems);
+            $saleId = $useCase->execute($fakeItems);
 
             return response()->json([
                 'message' => 'Venda recebida e será processada.',
                 'sale_id' => $saleId,
-                'status'  => 'pending',
+                'status' => 'pending',
             ], 202);
         });
 
@@ -84,7 +84,7 @@ final class SaleControllerTest extends TestCase
         });
 
         $realQuery = new SaleDetailsQuery;
-        $sut       = new SaleController;
+        $sut = new SaleController;
 
         // Act
         $res = $sut->show(999, $realQuery);

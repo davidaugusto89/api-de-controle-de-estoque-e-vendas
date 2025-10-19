@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\Sales\UseCases;
 
-use App\Application\Sales\UseCases\FinalizeSaleUseCase;
 use App\Infrastructure\Events\SaleFinalized;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -17,7 +16,6 @@ interface SaleRepositoryInterface
 {
     /**
      * Persists a sale (object or array) in the repository.
-     * @param mixed $sale
      */
     public function save(mixed $sale): void;
 }
@@ -50,19 +48,22 @@ interface StockServiceInterface
 final class FinalizeSaleUseCaseTest extends TestCase
 {
     private MockObject $saleRepository;
+
     private MockObject $stockService;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->saleRepository = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['save'])
-            ->getMock();
+        // Cria mocks baseados nas interfaces locais definidas acima para evitar
+        // o uso de MockBuilder::addMethods() (deprecado).
+        $this->saleRepository = $this->getMockBuilder(\Tests\Unit\Application\Sales\UseCases\SaleRepositoryInterface::class)
+            ->onlyMethods(['save'])
+            ->getMockForAbstractClass();
 
-        $this->stockService = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['reserve'])
-            ->getMock();
+        $this->stockService = $this->getMockBuilder(\Tests\Unit\Application\Sales\UseCases\StockServiceInterface::class)
+            ->onlyMethods(['reserve'])
+            ->getMockForAbstractClass();
     }
 
     public static function validSaleProvider(): array
@@ -87,8 +88,7 @@ final class FinalizeSaleUseCaseTest extends TestCase
     /**
      * Cenário: finalização bem-sucedida com estoque disponível.
      *
-     * @param int $saleId
-     * @param array<int,array{product_id:int,quantity:int}> $items
+     * @param  array<int,array{product_id:int,quantity:int}>  $items
      */
     #[DataProvider('validSaleProvider')]
     public function test_finalizar_venda_atualiza_estoque_e_persiste(int $saleId, array $items): void
@@ -109,6 +109,7 @@ final class FinalizeSaleUseCaseTest extends TestCase
                 TestCase::assertSame($expected['quantity'], $quantity);
 
                 $callIndex++;
+
                 return true;
             });
 
@@ -131,12 +132,12 @@ final class FinalizeSaleUseCaseTest extends TestCase
                 return false;
             }));
 
-    // Instancia usando FQCN para evitar dependência direta no autoload durante análise estática
-    $useCaseClass = '\\App\\Application\\Sales\\UseCases\\FinalizeSaleUseCase';
-    if (!class_exists($useCaseClass)) {
-        $this->markTestSkipped(sprintf('UseCase não encontrado: %s', $useCaseClass));
-    }
-    $useCase = new $useCaseClass($this->saleRepository, $this->stockService);
+        // Instancia usando FQCN para evitar dependência direta no autoload durante análise estática
+        $useCaseClass = '\\App\\Application\\Sales\\UseCases\\FinalizeSaleUseCase';
+        if (! class_exists($useCaseClass)) {
+            $this->markTestSkipped(sprintf('UseCase não encontrado: %s', $useCaseClass));
+        }
+        $useCase = new $useCaseClass($this->saleRepository, $this->stockService);
 
         $result = $useCase->handle(['sale_id' => $saleId, 'items' => $items]);
 
@@ -151,7 +152,7 @@ final class FinalizeSaleUseCaseTest extends TestCase
         return [
             'estoque insuficiente' => [
                 3,
-                [ ['product_id' => 99, 'quantity' => 1000] ],
+                [['product_id' => 99, 'quantity' => 1000]],
             ],
         ];
     }
@@ -159,8 +160,7 @@ final class FinalizeSaleUseCaseTest extends TestCase
     /**
      * Cenário: falha por estoque insuficiente.
      *
-     * @param int $saleId
-     * @param array<int,array{product_id:int,quantity:int}> $items
+     * @param  array<int,array{product_id:int,quantity:int}>  $items
      */
     #[DataProvider('insufficientStockProvider')]
     public function test_finalizar_venda_lanca_excecao_quando_estoque_insuficiente(int $saleId, array $items): void
@@ -176,7 +176,7 @@ final class FinalizeSaleUseCaseTest extends TestCase
             ->method('save');
 
         $useCaseClass = '\\App\\Application\\Sales\\UseCases\\FinalizeSaleUseCase';
-        if (!class_exists($useCaseClass)) {
+        if (! class_exists($useCaseClass)) {
             $this->markTestSkipped(sprintf('UseCase não encontrado: %s', $useCaseClass));
         }
         $useCase = new $useCaseClass($this->saleRepository, $this->stockService);

@@ -47,14 +47,14 @@ final class SaleDetailsQuery
             ->all();
 
         return [
-            'id'           => $sale->id,
-            'status'       => $sale->status,
+            'id' => $sale->id,
+            'status' => $sale->status,
             'total_amount' => (float) $sale->total_amount,
-            'total_cost'   => (float) $sale->total_cost,
+            'total_cost' => (float) $sale->total_cost,
             'total_profit' => (float) $sale->total_profit,
-            'created_at'   => (string) $sale->created_at,
-            'updated_at'   => (string) $sale->updated_at,
-            'items'        => $items,
+            'created_at' => (string) $sale->created_at,
+            'updated_at' => (string) $sale->updated_at,
+            'items' => $items,
         ];
     }
 }

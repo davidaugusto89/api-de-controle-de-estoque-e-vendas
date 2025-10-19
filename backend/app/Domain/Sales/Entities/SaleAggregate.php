@@ -19,9 +19,9 @@ final class SaleAggregate
     {
         $this->items[] = [
             'product_id' => $productId,
-            'quantity'   => $qty,
+            'quantity' => $qty,
             'unit_price' => $price,
-            'unit_cost'  => $cost,
+            'unit_cost' => $cost,
         ];
     }
 

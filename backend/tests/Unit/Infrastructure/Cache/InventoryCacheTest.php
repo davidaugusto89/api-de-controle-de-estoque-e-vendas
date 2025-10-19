@@ -26,7 +26,7 @@ final class InventoryCacheTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->cacheMock      = Mockery::mock(CacheRepository::class);
+        $this->cacheMock = Mockery::mock(CacheRepository::class);
         $this->inventoryCache = new InventoryCache($this->cacheMock);
     }
 
@@ -38,9 +38,9 @@ final class InventoryCacheTest extends TestCase
     public function test_deve_retornar_dados_do_cache_em_hit_para_lista_paginada(): void
     {
         // Arrange
-        $search     = 'produto';
-        $perPage    = 10;
-        $page       = 1;
+        $search = 'produto';
+        $perPage = 10;
+        $page = 1;
         $cachedData = [['item1'], ['meta'], ['totals']];
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
@@ -59,11 +59,11 @@ final class InventoryCacheTest extends TestCase
     public function test_deve_chamar_resolver_em_cache_miss_para_lista_paginada(): void
     {
         // Arrange
-        $search       = null;
-        $perPage      = 5;
-        $page         = 2;
+        $search = null;
+        $perPage = 5;
+        $page = 2;
         $resolverData = [['item2'], ['meta2'], ['totals2']];
-        $resolver     = fn () => $resolverData;
+        $resolver = fn () => $resolverData;
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
             ->andReturn(1);
@@ -83,9 +83,9 @@ final class InventoryCacheTest extends TestCase
     public function test_deve_normalizar_query_para_lista_paginada(): void
     {
         // Arrange
-        $search  = '  PRODUTO TESTE  ';
+        $search = '  PRODUTO TESTE  ';
         $perPage = 10;
-        $page    = 1;
+        $page = 1;
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
             ->andReturn(1);
@@ -103,7 +103,7 @@ final class InventoryCacheTest extends TestCase
     public function test_deve_retornar_dados_do_cache_em_hit_para_lista_nao_paginada(): void
     {
         // Arrange
-        $search     = 'busca';
+        $search = 'busca';
         $cachedData = [['item3'], ['totals3']];
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
@@ -122,9 +122,9 @@ final class InventoryCacheTest extends TestCase
     public function test_deve_chamar_resolver_em_cache_miss_para_lista_nao_paginada(): void
     {
         // Arrange
-        $search       = '';
+        $search = '';
         $resolverData = [['item4'], ['totals4']];
-        $resolver     = fn () => $resolverData;
+        $resolver = fn () => $resolverData;
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
             ->andReturn(1);
@@ -144,7 +144,7 @@ final class InventoryCacheTest extends TestCase
     public function test_deve_retornar_dados_do_cache_em_hit_para_item(): void
     {
         // Arrange
-        $productId  = 123;
+        $productId = 123;
         $cachedData = ['product' => 'data'];
         $this->cacheMock->shouldReceive('remember')
             ->once()
@@ -160,9 +160,9 @@ final class InventoryCacheTest extends TestCase
     public function test_deve_chamar_resolver_em_cache_miss_para_item(): void
     {
         // Arrange
-        $productId    = 456;
+        $productId = 456;
         $resolverData = ['product' => 'new data'];
-        $resolver     = fn () => $resolverData;
+        $resolver = fn () => $resolverData;
         $this->cacheMock->shouldReceive('remember')
             ->once()
             ->andReturnUsing(function ($key, $ttl, $callback) {

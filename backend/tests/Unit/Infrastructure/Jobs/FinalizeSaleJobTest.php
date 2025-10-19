@@ -65,7 +65,9 @@ final class FinalizeSaleJobTest extends TestCase
         $this->expectException(\TypeError::class);
 
         // Evita detecção estática do literal para que o TypeError ocorra em runtime
-        $bad = (static function () { return 'x'; })();
+        $bad = (static function () {
+            return 'x';
+        })();
 
         call_user_func(function () use ($bad) {
             new FinalizeSaleJob($bad);

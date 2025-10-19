@@ -36,11 +36,11 @@ class Sale extends Model
 
     protected $casts = [
         'total_amount' => 'decimal:2',
-        'total_cost'   => 'decimal:2',
+        'total_cost' => 'decimal:2',
         'total_profit' => 'decimal:2',
-        'created_at'   => 'datetime',
-        'updated_at'   => 'datetime',
-        'sale_date'    => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'sale_date' => 'date',
     ];
 
     protected static function newFactory(): SaleFactory

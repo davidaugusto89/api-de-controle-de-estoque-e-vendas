@@ -80,13 +80,20 @@ final class GetSaleDetailsTest extends TestCase
     {
         // Arrange: mock do repositório retornando instância de Model compatível
         // Criar instância de Sale sem invocar o construtor do Eloquent/Container
-        $sale = new class() extends Sale {
+        $sale = new class extends Sale
+        {
             public $id;
+
             public $total_amount;
+
             public $total_cost;
+
             public $total_profit;
+
             public $status;
+
             public $created_at;
+
             public $items;
 
             // evita chamada ao Model::__construct que depende do container

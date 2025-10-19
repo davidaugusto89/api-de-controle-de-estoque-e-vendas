@@ -31,6 +31,7 @@ class Transactions implements TransactionsContract
      * Executa o callback dentro de uma transação do banco.
      *
      * @template T
+     *
      * @param  callable(): T  $callback
      * @return T
      *

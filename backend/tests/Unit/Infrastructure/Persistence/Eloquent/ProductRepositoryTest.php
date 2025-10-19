@@ -27,7 +27,7 @@ final class ProductRepositoryTest extends TestCase
 {
     public function test_metodos_existem_e_tem_assinatura_esperada(): void
     {
-        $repo = new ProductRepository();
+        $repo = new ProductRepository;
 
         // Verifica que os métodos existem
         $this->assertTrue(method_exists($repo, 'findBySku'));

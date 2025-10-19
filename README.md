@@ -62,6 +62,37 @@ cd backend
 ./vendor/bin/phpunit
 ```
 
+## Fila & Scheduler
+
+Instruções rápidas para trabalhar com filas e scheduler.
+
+Local (sem Docker):
+
+```bash
+# Inicia um worker para processar filas (use a conexão definida em QUEUE_CONNECTION)
+cd backend
+php artisan queue:work --tries=3 --sleep=3 --queue=default,inventory,sales
+
+# Para rodar o agendador manualmente (útil para desenvolvimento)
+php artisan schedule:run
+```
+
+Com Docker Compose (container `backend` já configurado):
+
+```bash
+# Execute um worker dentro do container
+docker compose exec backend php artisan queue:work --tries=3 --sleep=3 --queue=default,inventory,sales
+
+# Rodar o scheduler uma vez (cronagem real deve executar `php artisan schedule:run` a cada minuto)
+docker compose exec backend php artisan schedule:run
+```
+
+Observações:
+
+- O projeto usa Redis como driver de fila/cache por padrão (ver `backend/.env.example`).
+- Use Horizon (se configurado) para observar filas em produção/local.
+- Certifique-se de executar `php artisan migrate --seed` antes de processar filas que dependam de dados.
+
 ## Estrutura principal
 
 - `app/` - Código da aplicação (Domain, Application, Infrastructure)

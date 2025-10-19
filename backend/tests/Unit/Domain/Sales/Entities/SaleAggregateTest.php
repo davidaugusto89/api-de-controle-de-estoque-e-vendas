@@ -28,9 +28,9 @@ final class SaleAggregateTest extends TestCase
 
         // Act
         $amount = $sut->totalAmount();
-        $cost   = $sut->totalCost();
+        $cost = $sut->totalCost();
         $profit = $sut->totalProfit();
-        $items  = $sut->items();
+        $items = $sut->items();
 
         // Assert
         $this->assertEqualsWithDelta(0.0, $amount, 0.00001, 'totalAmount() deve ser 0.0 para agregado vazio.');
@@ -79,7 +79,7 @@ final class SaleAggregateTest extends TestCase
                     [2, -1, 20.00, -8.00], // negative qty and negative cost (odd but allowed)
                 ],
                 (2 * -10.00) + (-1 * 20.00),
-                (2 * 5.00)   + (-1 * -8.00),
+                (2 * 5.00) + (-1 * -8.00),
                 ((2 * -10.00) + (-1 * 20.00)) - ((2 * 5.00) + (-1 * -8.00)),
             ],
         ];
@@ -98,7 +98,7 @@ final class SaleAggregateTest extends TestCase
         }
 
         $amount = $sut->totalAmount();
-        $cost   = $sut->totalCost();
+        $cost = $sut->totalCost();
         $profit = $sut->totalProfit();
 
         // Assert usando delta para tolerância de ponto flutuante
@@ -135,9 +135,9 @@ final class SaleAggregateTest extends TestCase
         $sut->addItem(1, 1, 10.0, 5.0);
 
         // Act
-        $itemsCopy                = $sut->items();
+        $itemsCopy = $sut->items();
         $itemsCopy[0]['quantity'] = 999; // muta a cópia retornada
-        $itemsCopy[]              = ['product_id' => 999, 'quantity' => 1, 'unit_price' => 1.0, 'unit_cost' => 0.5];
+        $itemsCopy[] = ['product_id' => 999, 'quantity' => 1, 'unit_price' => 1.0, 'unit_cost' => 0.5];
 
         // Assert - o agregado original não deve refletir estas mudanças
         $originalItems = $sut->items();
@@ -154,7 +154,7 @@ final class SaleAggregateTest extends TestCase
 
         // Act
         $amount = $sut->totalAmount();
-        $cost   = $sut->totalCost();
+        $cost = $sut->totalCost();
         $profit = $sut->totalProfit();
 
         // Assert
