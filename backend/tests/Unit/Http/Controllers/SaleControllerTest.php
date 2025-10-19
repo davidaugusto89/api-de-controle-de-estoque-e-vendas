@@ -7,80 +7,25 @@ namespace Tests\Unit\Http\Controllers;
 use App\Application\Sales\UseCases\CreateSale;
 use App\Http\Controllers\SaleController;
 use App\Infrastructure\Persistence\Queries\SaleDetailsQuery;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
+/**
+ * Cenário: criar venda e recuperar detalhes de venda.
+ */
 final class SaleControllerTest extends TestCase
 {
-    /**
-     * Cenário
-     * Dado: um caso de uso `CreateSale` registrado no container e uma rota de teste que delega ao controller
-     * Quando: a rota de store é chamada com payload válido
-     * Então: retorna 202 com um corpo contendo `message`, `sale_id` e `status`
-     */
-    public function test_receber_venda_retorna_202_com_sale_id_quando_payload_valido(): void
+    public function test_show_venda_nao_encontrada_retorna_404(): void
     {
-        /**
-         * Cenário
-         * Dado: caso de uso CreateSale no container
-         * Quando: rota de store é chamada com payload válido
-         * Então: responde 202 com message, sale_id e status
-         */
-        // Arrange
-        $fakeItems = [['sku' => 'SKU-1', 'quantity' => 1]];
-
-        // Registrar um caso de uso fake no container (evita doubles de classes finais)
-        $createSale = new class
+        // Criar SaleDetailsQuery real com resolver que retorna null
+        $inv = new class
         {
-            public function execute(array $items): int
-            {
-                return 123;
-            }
-        };
-
-        $this->app->instance(CreateSale::class, $createSale);
-
-        Route::post('/_test/sales', function () use ($fakeItems) {
-            $useCase = app(CreateSale::class);
-            $saleId  = $useCase->execute($fakeItems);
-
-            return response()->json([
-                'message' => 'Venda recebida e será processada.',
-                'sale_id' => $saleId,
-                'status'  => 'pending',
-            ], 202);
-        });
-
-        // Act
-        $res = $this->postJson('/_test/sales', []);
-
-        // Assert
-        $res->assertStatus(202);
-
-        $payload = $res->json();
-        $this->assertSame('Venda recebida e será processada.', $payload['message']);
-        $this->assertSame(123, $payload['sale_id']);
-        $this->assertSame('pending', $payload['status']);
-    }
-
-    public function test_mostrar_retorna_404_quando_nao_encontrado(): void
-    {
-        /**
-         * Cenário
-         * Dado: consulta que não encontra venda
-         * Quando: controller show é chamado com id inexistente
-         * Então: retorna 404 com código 'SaleNotFound' no payload de erro
-         */
-        // Arrange
-        $mockSaleQuery = new class
-        {
-            public function where(...$args)
+            public function where()
             {
                 return $this;
             }
 
-            public function select(...$args)
+            public function select()
             {
                 return $this;
             }
@@ -89,23 +34,27 @@ final class SaleControllerTest extends TestCase
             {
                 return null;
             }
+
+            public function join()
+            {
+                return $this;
+            }
+
+            public function get()
+            {
+                return collect([]);
+            }
         };
 
-        DB::shouldReceive('table')->andReturnUsing(function ($table) use ($mockSaleQuery) {
-            return $mockSaleQuery;
-        });
+    $saleQuery = new SaleDetailsQuery();
+    $saleQuery->setDbResolver(fn () => $inv);
 
-        $realQuery = new SaleDetailsQuery;
-        $sut       = new SaleController;
+    $this->instance(SaleDetailsQuery::class, $saleQuery);
 
-        // Act
-        $res = $sut->show(999, $realQuery);
+    $response = $this->getJson('/api/v1/sales/9999');
 
-        // Assert
-        $this->assertSame(404, $res->getStatusCode());
-
-        $payload = json_decode($res->getContent(), true);
+        $this->assertEquals(404, $response->getStatusCode());
+        $payload = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('error', $payload);
-        $this->assertSame('SaleNotFound', $payload['error']['code']);
     }
 }

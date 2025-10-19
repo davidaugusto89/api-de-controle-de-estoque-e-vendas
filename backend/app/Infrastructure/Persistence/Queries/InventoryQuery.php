@@ -110,7 +110,7 @@ final class InventoryQuery
     {
         $qb = $this->dbResolver ? ($this->dbResolver)() : DB::table('inventory as i');
         $qb = $qb->join('products as p', 'p.id', '=', 'i.product_id')
-            ->select([
+            ->selectRaw(implode(', ', [
                 'p.id as product_id',
                 'p.sku',
                 'p.name',
@@ -120,7 +120,7 @@ final class InventoryQuery
                 '(i.quantity * p.cost_price)  as stock_cost_value',
                 '(i.quantity * p.sale_price)  as stock_sale_value',
                 '(i.quantity * p.sale_price) - (i.quantity * p.cost_price) as projected_profit',
-            ])
+            ]))
             ->orderBy('p.sku');
 
         if ($search !== null && $search !== '') {
