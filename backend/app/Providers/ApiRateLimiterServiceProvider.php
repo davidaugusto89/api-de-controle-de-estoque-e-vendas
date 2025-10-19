@@ -63,6 +63,15 @@ final class ApiRateLimiterServiceProvider extends ServiceProvider
 
             return [Limit::perMinute(60)->by($key)->response($this->tooMany())];
         });
+
+        // Observability endpoint: métricas prometheus-style, exposto
+        // internamente; proteger com limite moderado por IP para evitar scraping
+        // agressivo em ambientes públicos.
+        RateLimiter::for('observability', function (Request $request) use ($by) {
+            $key = 'observability:'.$by($request);
+
+            return [Limit::perMinute(60)->by($key)->response($this->tooMany())];
+        });
     }
 
     private function tooMany(): \Closure

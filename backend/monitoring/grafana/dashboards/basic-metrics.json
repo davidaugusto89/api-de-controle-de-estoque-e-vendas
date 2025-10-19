@@ -1,0 +1,16 @@
+{
+  "annotations": {"list": []},
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Inventory job starts",
+      "targets": [
+        {"expr": "inventory_job_start_total", "legendFormat": "job_starts"}
+      ],
+      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 9}
+    }
+  ],
+  "title": "Basic Metrics",
+  "schemaVersion": 30,
+  "version": 1
+}

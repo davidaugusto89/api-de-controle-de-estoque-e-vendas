@@ -14,6 +14,8 @@ Aplicação backend desenvolvida em **Laravel** para gerenciamento de **produtos
 - [Testes e Cobertura](#-testes-e-cobertura)
 - [Filas e Agendador](#-filas-e-agendador)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Serviços adicionais e como acessar](#-serviços-adicionais-e-como-acessar)
+- [Estrutura do Projeto (detalhada)](#-estrutura-do-projeto-detalhada)
 - [Observabilidade e Métricas](#-observabilidade-e-métricas)
 - [Endpoints Principais](#-endpoints-principais)
 - [Otimizações e Estratégias](#-otimizações-e-estratégias)
@@ -184,6 +186,141 @@ config/        -> Configurações da aplicação
 database/      -> Migrations, factories e seeders
 tests/         -> Testes automatizados
 ```
+
+## 🛠️ Serviços adicionais e como acessar
+
+O projeto traz configurações e/ou exemplos para executar serviços que tipicamente acompanham uma aplicação Laravel em produção e em ambiente de desenvolvimento com Docker. Abaixo estão os serviços com instruções rápidas de acesso, portas padrão (quando aplicável) e variáveis de ambiente relevantes.
+
+- MySQL
+  - Uso: banco de dados principal da aplicação.
+  - Porta padrão (host): 3306 (pode ser mapeada no `docker-compose.yml`).
+  - Variáveis importantes: `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` (arquivo `backend/.env`).
+  - Acessar via CLI do container:
+
+    ```bash
+    docker compose exec backend mysql -h$DB_HOST -P$DB_PORT -u$DB_USERNAME -p$DB_PASSWORD $DB_DATABASE
+    ```
+
+- Redis
+  - Uso: driver de cache, sessão e filas (queues/Horizon).
+  - Porta padrão (host): 6379.
+  - Variáveis: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`.
+  - Exemplo para checar chaves:
+
+    ```bash
+    docker compose exec redis redis-cli -h 127.0.0.1 -p 6379 ping
+    ```
+
+- Nginx (proxy reverso)
+  - Uso: servir `public/` e rotear para o container PHP-FPM em produção/local via Docker.
+  - Configuração: `deploy/nginx/default.conf` contém um exemplo de configuração.
+  - Porta padrão (host): 80/443 (ajustável no `docker-compose.yml`).
+
+- PHP-FPM / Backend container
+  - Uso: executa o Laravel (arquivo `backend/Dockerfile`, `deploy/php/fpm.conf`).
+  - Entrypoint: `backend/entrypoint.sh`.
+  - Para executar comandos artisan:
+
+    ```bash
+    docker compose exec backend php artisan migrate --seed
+    docker compose exec backend php artisan queue:work --once
+    ```
+
+- Horizon (opcional)
+  - Uso: painel e processo de filas para Redis (se estiver habilitado).
+  - Como rodar: dentro do container `backend` execute `php artisan horizon` ou configure no `docker-compose`.
+  - URL de monitoramento (se exposto): normalmente algo como `http://localhost:8080/horizon` dependendo do mapeamento.
+
+- Observability stack (Prometheus, Grafana, Alertmanager)
+  - Prometheus
+    - Uso: coletor/raspador de métricas (ex.: endpoint `/api/v1/observability/metrics`).
+    - Arquivo de exemplo na pasta `monitoring/prometheus/`.
+    - Porta padrão: 9090.
+  - Grafana
+    - Uso: dashboard visual (ex.: importar `monitoring/grafana/dashboards/` quando disponível).
+    - Porta padrão: 3000.
+  - Alertmanager
+    - Uso: gerenciar alertas enviados pelo Prometheus.
+    - Porta padrão: 9093.
+
+- Acesso aos serviços via Docker Compose
+  - Subir tudo:
+
+    ```bash
+    docker-compose up -d --build
+    ```
+
+  - Verificar logs:
+
+    ```bash
+    docker compose logs -f backend
+    docker compose logs -f redis
+    docker compose logs -f mysql
+    ```
+
+## 🔍 Estrutura do Projeto (detalhada)
+
+Uma visão expandida das pastas principais e seus propósitos para facilitar navegação e contribuição:
+
+```
+backend/                       -> Container/backend Laravel
+  ├─ app/                       -> Código principal da aplicação
+  │   ├─ Application/           -> Casos de uso / orquestração (Use Cases)
+  │   │   ├─ Inventory/         -> Use cases relacionados a inventário
+  │   │   ├─ Reports/           -> Use cases para geração de relatórios
+  │   │   └─ Sales/             -> Use cases relacionados a vendas
+  │   ├─ Domain/                -> Entidades, Value Objects e regras de negócio
+  │   │   ├─ Inventory/
++  │   │   ├─ Sales/
+  │   │   └─ Shared/
+  │   ├─ Exceptions/            -> Formatação e tratamento de exceções
+  │   ├─ Http/                  -> Controllers, Requests, Resources, Middleware
+  │   │   ├─ Controllers/
+  │   │   ├─ Middleware/
+  │   │   ├─ Requests/
+  │   │   └─ Resources/
+  │   ├─ Infrastructure/        -> Adapters para infra (cache, persistence, locks, jobs)
+  │   │   ├─ Cache/
+  │   │   ├─ Events/
+  │   │   ├─ Jobs/
+  │   │   ├─ Listeners/
+  │   │   ├─ Locks/
+  │   │   ├─ Metrics/
+  │   │   └─ Persistence/
+  │   ├─ Models/                -> Eloquent models (Product, Inventory, Sale, SaleItem, User)
+  │   └─ Providers/             -> Service providers e bindings de IoC
+  ├─ bootstrap/                 -> bootstrap do framework e cache de providers
+  ├─ config/                    -> Arquivos de configuração (database, queue, cache, observability)
+  ├─ database/                  -> Migrations, factories e seeders
+  │   ├─ factories/
+  │   ├─ migrations/
+  │   └─ seeders/
+  ├─ public/                    -> Ponto de entrada web (index.php)
+  ├─ resources/                 -> Views, assets e lang (se aplicável)
+  ├─ routes/                    -> Arquivos de rotas (`api.php`, `web.php`, `console.php`)
+  ├─ storage/                   -> Logs, cache, uploads temporários
+  └─ tests/                     -> Testes Unitários e de Feature
+      ├─ Feature/
+      └─ Unit/
+
+deploy/                        -> Configurações para deploy (Nginx, PHP-FPM, opcache)
+  ├─ nginx/
+  │   └─ default.conf
+  └─ php/
+      ├─ fpm.conf
+      └─ opcache.ini
+
+monitoring/                    -> Configs e dashboards para Prometheus/Grafana/Alertmanager
+  ├─ alertmanager/
+  ├─ grafana/
+  └─ prometheus/
+
+docs/                          -> Documentação adicional e notas arquiteturais
+coverage/                      -> Resultados de cobertura gerados pelo PHPUnit
+
+README.md                      -> Este arquivo
+docker-compose.yml             -> Definições dos serviços para desenvolvimento e integração
+"""
 
 ---
 

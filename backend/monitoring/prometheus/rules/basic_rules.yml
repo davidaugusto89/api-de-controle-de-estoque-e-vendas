@@ -1,0 +1,11 @@
+groups:
+  - name: basic-rules
+    rules:
+      - alert: ObservabilityEndpointDown
+        expr: up{job="observability"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Observability endpoint is down"
+          description: "The observability target is down for more than 1 minute."

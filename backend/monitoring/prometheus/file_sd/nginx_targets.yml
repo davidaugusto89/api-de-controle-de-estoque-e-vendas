@@ -1,0 +1,4 @@
+- targets:
+  - 'nginx:80'
+  labels:
+    job: observability
