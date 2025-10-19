@@ -22,7 +22,7 @@ class SaleRepository
     /**
      * Injeta um resolver opcional para Sale::query() (facilita testes).
      *
-     * @param callable():mixed|null $resolver
+     * @param  callable():mixed|null  $resolver
      */
     public function setQueryResolver(?callable $resolver): void
     {
@@ -85,9 +85,9 @@ class SaleRepository
 
         $sale = $qb->create([
             'total_amount' => $data['total_amount'],
-            'total_cost'   => $data['total_cost'],
+            'total_cost' => $data['total_cost'],
             'total_profit' => $data['total_profit'],
-            'status'       => $data['status'],
+            'status' => $data['status'],
         ]);
 
         return $sale;

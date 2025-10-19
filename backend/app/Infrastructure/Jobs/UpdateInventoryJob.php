@@ -50,6 +50,8 @@ final class UpdateInventoryJob implements ShouldQueue
     /**
      * Executa a atualização de estoque com transação e lock por produto.
      *
+     *
+     *
      * @throws Throwable
      */
     public function handle(
@@ -61,14 +63,14 @@ final class UpdateInventoryJob implements ShouldQueue
         MetricsCollector|LoggerInterface|null $metricsOrLogger = null,
         ?LoggerInterface $logger = null
     ): void {
-        // Backwards compatible: callers previously passed the Logger as the 6th
-        // argument. Accept either a MetricsCollector or a LoggerInterface here and
-        // normalize both variables.
+        // Compatibilidade retroativa: chamadores anteriormente passavam o Logger
+        // como 6º argumento. Aceitamos tanto MetricsCollector quanto
+        // LoggerInterface aqui e normalizamos as variáveis.
 
-        // Normalize logger: if metricsOrLogger is a Logger, treat it as the logger.
+        // Normaliza logger: se metricsOrLogger for um Logger, trate-o como logger.
         if ($metricsOrLogger instanceof LoggerInterface) {
             $logger = $metricsOrLogger;
-            // don't force-resolve MetricsCollector in unit tests without a cache binding
+            // não forçar a resolução de MetricsCollector em testes unitários sem um binding de cache
             $metrics = $this->resolveMetricsSafely();
         } else {
             // metricsOrLogger is either MetricsCollector or null
@@ -77,7 +79,7 @@ final class UpdateInventoryJob implements ShouldQueue
 
         $logger ??= new NullLogger;
 
-        // metrics might be null in unit tests; guard calls
+        // metrics pode ser nulo em testes unitários; proteger as chamadas
         $metrics?->increment('inventory.job.start');
 
         $processed = [];
@@ -85,7 +87,7 @@ final class UpdateInventoryJob implements ShouldQueue
         $tx->run(function () use ($locks, $inventoryRepo, &$processed, $logger, $metrics): void {
             foreach ($this->items as $it) {
                 $productId = (int) $it['product_id'];
-                $quantity  = (int) $it['quantity'];
+                $quantity = (int) $it['quantity'];
 
                 $logger->info('Processing inventory item', ['sale_id' => $this->saleId, 'product_id' => $productId, 'quantity' => $quantity]);
 
@@ -125,7 +127,7 @@ final class UpdateInventoryJob implements ShouldQueue
 
         $logger->info('Inventory update completed from sale', [
             'sale_id' => $this->saleId,
-            'items'   => array_map(
+            'items' => array_map(
                 static fn (array $i): array => [
                     'p' => (int) $i['product_id'],
                     'q' => (int) $i['quantity'],
@@ -137,14 +139,18 @@ final class UpdateInventoryJob implements ShouldQueue
 
     /**
      * Callback após esgotar tentativas.
+     *
+     *
+     *
+     * @throws Throwable
      */
     public function failed(Throwable $e, ?LoggerInterface $logger = null): void
     {
         $logger ??= new NullLogger;
 
         $meta = [
-            'sale_id'   => $this->saleId,
-            'error'     => $e->getMessage(),
+            'sale_id' => $this->saleId,
+            'error' => $e->getMessage(),
             'exception' => get_class($e),
         ];
 

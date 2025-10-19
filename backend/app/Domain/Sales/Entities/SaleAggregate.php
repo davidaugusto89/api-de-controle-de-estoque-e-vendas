@@ -14,14 +14,19 @@ final class SaleAggregate
 
     /**
      * Adiciona um item ao agregado.
+     *
+     * @param  int  $productId  ID do produto.
+     * @param  int  $qty  Quantidade vendida.
+     * @param  float  $price  Preço unitário de venda.
+     * @param  float  $cost  Custo unitário do produto.
      */
     public function addItem(int $productId, int $qty, float $price, float $cost): void
     {
         $this->items[] = [
             'product_id' => $productId,
-            'quantity'   => $qty,
+            'quantity' => $qty,
             'unit_price' => $price,
-            'unit_cost'  => $cost,
+            'unit_cost' => $cost,
         ];
     }
 
@@ -60,7 +65,12 @@ final class SaleAggregate
     /**
      * Retorna todos os itens do agregado.
      *
-     * @return array<int, array{product_id:int, quantity:int, unit_price:float, unit_cost:float}>
+     * @return array<int, array{
+     *  product_id:int,
+     *  quantity:int,
+     *  unit_price:float,
+     *  unit_cost:float
+     * }>
      */
     public function items(): array
     {

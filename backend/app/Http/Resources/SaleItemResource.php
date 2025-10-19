@@ -7,7 +7,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Serializa um item de venda para respostas da API.
+ * Resource para serialização consistente de itens de venda.
  *
  * Campos retornados:
  * - product_id: int
@@ -29,14 +29,14 @@ final class SaleItemResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'product_id'  => (int) $this->resource['product_id'],
-            'sku'         => (string) $this->resource['sku'],
-            'name'        => (string) $this->resource['name'],
-            'quantity'    => (int) $this->resource['quantity'],
-            'unit_price'  => (float) $this->resource['unit_price'],
-            'unit_cost'   => (float) $this->resource['unit_cost'],
-            'line_total'  => (float) $this->resource['unit_price']                                          * (int) $this->resource['quantity'],
-            'line_cost'   => (float) $this->resource['unit_cost']                                           * (int) $this->resource['quantity'],
+            'product_id' => (int) $this->resource['product_id'],
+            'sku' => (string) $this->resource['sku'],
+            'name' => (string) $this->resource['name'],
+            'quantity' => (int) $this->resource['quantity'],
+            'unit_price' => (float) $this->resource['unit_price'],
+            'unit_cost' => (float) $this->resource['unit_cost'],
+            'line_total' => (float) $this->resource['unit_price'] * (int) $this->resource['quantity'],
+            'line_cost' => (float) $this->resource['unit_cost'] * (int) $this->resource['quantity'],
             'line_profit' => ((float) $this->resource['unit_price'] - (float) $this->resource['unit_cost']) * (int) $this->resource['quantity'],
         ];
     }

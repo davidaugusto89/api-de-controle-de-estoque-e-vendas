@@ -8,21 +8,18 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
+/**
+ * Middleware para requisições Inertia.js.
+ */
 class HandleInertiaRequests extends Middleware
 {
-    /**
-     * The root template that's loaded on the first page visit.
-     *
-     * @see https://inertiajs.com/server-side-setup#root-template
-     *
-     * @var string
-     */
     protected $rootView = 'app';
 
     /**
-     * Determines the current asset version.
+     * Determina a versão atual dos assets.
      *
-     * @see https://inertiajs.com/asset-versioning
+     * @param  Request  $request  Requisição HTTP atual
+     * @return string|null Versão dos assets ou null
      */
     public function version(Request $request): ?string
     {
@@ -30,11 +27,10 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Define the props that are shared by default.
+     * Compartilha dados padrão com todas as respostas Inertia.
      *
-     * @see https://inertiajs.com/shared-data
-     *
-     * @return array<string, mixed>
+     * @param  Request  $request  Requisição HTTP atual
+     * @return array Dados compartilhados
      */
     public function share(Request $request): array
     {
@@ -42,9 +38,9 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
-            'name'  => config('app.name'),
+            'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
-            'auth'  => [
+            'auth' => [
                 'user' => $request->user(),
             ],
         ];

@@ -24,7 +24,7 @@ final class GenerateSalesReport
     /**
      * Injeta um resolver opcional para o SalesReportQuery (facilita testes).
      *
-     * @param callable():mixed|null $resolver
+     * @param  callable():mixed|null  $resolver
      */
     public function setQueryResolver(?callable $resolver): void
     {
@@ -35,7 +35,7 @@ final class GenerateSalesReport
     private $cacheResolver;
 
     /**
-     * @param (callable():mixed)|null $cacheResolver Resolver opcional para Cache::tags(...) (facilita testes)
+     * @param  (callable():mixed)|null  $cacheResolver  Resolver opcional para Cache::tags(...) (facilita testes)
      */
     public function setCacheResolver(?callable $cacheResolver): void
     {
@@ -67,25 +67,25 @@ final class GenerateSalesReport
         $now = CarbonImmutable::now();
 
         $fromInput = Arr::get($params, 'from', Arr::get($params, 'start_date'));
-        $toInput   = Arr::get($params, 'to', Arr::get($params, 'end_date'));
+        $toInput = Arr::get($params, 'to', Arr::get($params, 'end_date'));
 
         $from = $this->parseDate($fromInput) ?? $now->subDays(30)->startOfDay();
-        $to   = $this->parseDate($toInput)   ?? $now->endOfDay();
+        $to = $this->parseDate($toInput) ?? $now->endOfDay();
 
         if ($from->gt($to)) {
             [$from, $to] = [$to, $from];
         }
 
         $periodStart = $from->startOfDay();
-        $periodEnd   = $to->endOfDay();
+        $periodEnd = $to->endOfDay();
 
         $sku = trim((string) Arr::get($params, 'product_sku', '')) ?: null;
         $top = max(1, min(1000, (int) (Arr::get($params, 'top', 10))));
         $ttl = max(0, (int) (Arr::get($params, 'cache_ttl', 300)));
 
         $allowedOrder = ['amount', 'quantity', 'profit', 'date', 'sku'];
-        $orderParam   = Arr::get($params, 'order_by');
-        $orderBy      = in_array($orderParam, $allowedOrder, true) ? $orderParam : 'amount';
+        $orderParam = Arr::get($params, 'order_by');
+        $orderBy = in_array($orderParam, $allowedOrder, true) ? $orderParam : 'amount';
 
         $cacheKey = sprintf(
             'sales_report:%s:%s:%s:%d:%s',
@@ -104,8 +104,8 @@ final class GenerateSalesReport
             function () use ($periodStart, $periodEnd, $sku, $top, $orderBy): array {
                 $query = $this->queryResolver ? ($this->queryResolver)() : $this->query;
 
-                $totals      = $query->totals($periodStart, $periodEnd, $sku);
-                $byDay       = $query->byDay($periodStart, $periodEnd, $sku)->all();
+                $totals = $query->totals($periodStart, $periodEnd, $sku);
+                $byDay = $query->byDay($periodStart, $periodEnd, $sku)->all();
                 $topProducts = $query
                     ->topProducts($periodStart, $periodEnd, $top, $orderBy, $sku)
                     ->all();
@@ -113,10 +113,10 @@ final class GenerateSalesReport
                 return [
                     'period' => [
                         'from' => $periodStart->toDateString(),
-                        'to'   => $periodEnd->toDateString(),
+                        'to' => $periodEnd->toDateString(),
                     ],
-                    'totals'       => $totals,
-                    'series'       => $byDay,
+                    'totals' => $totals,
+                    'series' => $byDay,
                     'top_products' => $topProducts,
                 ];
             }
@@ -125,6 +125,8 @@ final class GenerateSalesReport
 
     /**
      * Converte string ISO em CarbonImmutable, retornando null se inválida.
+     *
+     * @param  string|null  $value  Data ISO
      */
     private function parseDate(?string $value): ?CarbonImmutable
     {

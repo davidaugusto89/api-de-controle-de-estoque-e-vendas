@@ -19,6 +19,9 @@ class InventoryRepository
 {
     /**
      * Recupera registro de inventário pelo id do produto.
+     *
+     * @param  int  $productId  ID do produto
+     * @return Inventory|null Retorna o inventário ou null se não encontrado.
      */
     public function findByProductId(int $productId): ?Inventory
     {
@@ -30,6 +33,11 @@ class InventoryRepository
 
     /**
      * Insere ou atualiza o inventário de um produto e atualiza version/last_updated.
+     *
+     * @param  int  $productId  ID do produto
+     * @param  int  $quantity  Quantidade a definir
+     * @param  Carbon|null  $lastUpdated  Data de atualização (padrão: agora)
+     * @return Inventory Retorna o inventário atualizado
      */
     public function upsertByProductId(int $productId, int $quantity, ?Carbon $lastUpdated = null): Inventory
     {
@@ -40,7 +48,7 @@ class InventoryRepository
         if (! $inv) {
             $inv = new Inventory([
                 'product_id' => $productId,
-                'quantity'   => $quantity,
+                'quantity' => $quantity,
             ]);
             $inv->version = 0;
         } else {
@@ -48,7 +56,7 @@ class InventoryRepository
         }
 
         $inv->last_updated = $lastUpdated;
-        $inv->version      = (int) $inv->version + 1;
+        $inv->version = (int) $inv->version + 1;
         $inv->save();
 
         return $inv;
@@ -57,6 +65,10 @@ class InventoryRepository
     /**
      * Decrementa atomica mente a quantidade se houver estoque suficiente.
      * Retorna true quando a atualização afetou uma linha.
+     *
+     * @param  int  $productId  ID do produto
+     * @param  int  $quantity  Quantidade a decrementar
+     * @return bool Retorna true se o decremento foi aplicado com sucesso.
      */
     public function decrementIfEnough(int $productId, int $quantity): bool
     {
@@ -80,6 +92,9 @@ class InventoryRepository
     /**
      * Decrementa a quantidade ou lança DomainException se não for possível.
      * Método utilitário para tornar o uso no job mais explícito e legível.
+     *
+     * @param  int  $productId  ID do produto
+     * @param  int  $quantity  Quantidade a decrementar
      *
      * @throws \DomainException
      */

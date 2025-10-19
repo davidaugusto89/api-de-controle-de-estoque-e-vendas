@@ -37,7 +37,7 @@ final class SaleFinalizedTest extends TestCase
          * Então: propriedades readonly são populadas corretamente
          */
         $saleId = 123;
-        $items  = [
+        $items = [
             ['product_id' => 1, 'quantity' => 2],
             ['product_id' => 2, 'quantity' => 5],
         ];

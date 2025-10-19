@@ -15,6 +15,12 @@ final class SaleValidator
      * Verifica se os itens da venda são válidos.
      *
      * @param  iterable<array|object>  $items
+     *                                         {
+     *                                         - product_id:int,
+     *                                         - quantity:int,
+     *                                         - unit_price:float,
+     *                                         - unit_cost:float
+     *                                         }
      *
      * @throws InvalidArgumentException
      */
@@ -26,9 +32,9 @@ final class SaleValidator
             $count++;
 
             $productId = is_array($it) ? (int) ($it['product_id'] ?? 0) : (int) ($it->product_id ?? 0);
-            $qty       = is_array($it) ? (int) ($it['quantity'] ?? 0) : (int) ($it->quantity ?? 0);
-            $price     = is_array($it) ? (float) ($it['unit_price'] ?? 0) : (float) ($it->unit_price ?? 0);
-            $cost      = is_array($it) ? (float) ($it['unit_cost'] ?? 0) : (float) ($it->unit_cost ?? 0);
+            $qty = is_array($it) ? (int) ($it['quantity'] ?? 0) : (int) ($it->quantity ?? 0);
+            $price = is_array($it) ? (float) ($it['unit_price'] ?? 0) : (float) ($it->unit_price ?? 0);
+            $cost = is_array($it) ? (float) ($it['unit_cost'] ?? 0) : (float) ($it->unit_cost ?? 0);
 
             if ($productId <= 0) {
                 throw new InvalidArgumentException('Item inválido: product_id ausente/ inválido.');

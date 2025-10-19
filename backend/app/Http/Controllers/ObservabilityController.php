@@ -7,19 +7,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+/**
+ * Controlador para endpoints de observabilidade.
+ */
 final class ObservabilityController
 {
     /**
-     * Exposes basic counters stored under cache keys `metrics:*` in a simple
-     * Prometheus text format. This is intentionally minimal — for production
-     * integrate a proper metrics exporter.
+     * Exibe métricas no formato Prometheus.
+     *
+     * @param  Request  $request  Requisição HTTP atual
+     * @return Response Resposta HTTP com métricas no formato Prometheus
      */
     public function metrics(Request $request): Response
     {
         $cache = app()->make('cache.store');
 
-        // Collect all known metric keys from config — keep a whitelist to avoid
-        // scanning the whole cache store.
+        // Lista branca (whitelist) de chaves de métricas
         $keys = config('observability.metrics_whitelist', [
             'inventory.job.start',
             'inventory.job.completed',
@@ -35,8 +38,7 @@ final class ObservabilityController
 
         foreach ($keys as $k) {
             $v = (int) $cache->get('metrics:'.$k, 0);
-            // Prometheus metric name: replace dots with underscores
-            $name    = 'app_'.str_replace('.', '_', $k);
+            $name = 'app_'.str_replace('.', '_', $k);
             $lines[] = "# TYPE {$name} counter";
             $lines[] = "{$name} {$v}";
         }

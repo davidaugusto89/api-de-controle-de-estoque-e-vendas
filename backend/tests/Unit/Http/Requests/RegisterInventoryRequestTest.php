@@ -32,7 +32,7 @@ final class RegisterInventoryRequestTest extends TestCase
          * Quando: rules() é consultado
          * Então: contém chaves product_id, quantity e unit_cost
          */
-        $req   = new RegisterInventoryRequest;
+        $req = new RegisterInventoryRequest;
         $rules = $req->rules();
 
         $this->assertArrayHasKey('product_id', $rules);
@@ -48,7 +48,7 @@ final class RegisterInventoryRequestTest extends TestCase
          * Quando: messages() é consultado
          * Então: contém mensagens customizadas para product_id e quantity/unit_cost
          */
-        $req      = new RegisterInventoryRequest;
+        $req = new RegisterInventoryRequest;
         $messages = $req->messages();
 
         $this->assertArrayHasKey('product_id.required', $messages);

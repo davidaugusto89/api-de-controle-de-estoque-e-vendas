@@ -80,13 +80,13 @@ final class CreateSaleTest extends TestCase
             ->andReturn($productQuery);
 
         // Mock do Sale - sobrecarrega instância criada por `new Sale`
-        $saleId   = $expectedSaleId;
+        $saleId = $expectedSaleId;
         $saleMock = Mockery::mock('overload:App\\Models\\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnTrue();
         $saleMock->shouldReceive('getAttribute')->with('id')->andReturn($saleId);
 
         // Mock do SaleItem::query()->insert($rows)
-        $saleItemQuery     = Mockery::mock();
+        $saleItemQuery = Mockery::mock();
         $insertExpectation = $saleItemQuery->shouldReceive('insert')->once()->withArgs(function (array $rows) use ($expectedInsertedCount, $saleId, $expectedTotalAmount, $expectedTotalCost): bool {
             // Checa contagem de linhas e sale_id e tipos numéricos
             if (count($rows) !== $expectedInsertedCount) {
@@ -109,15 +109,15 @@ final class CreateSaleTest extends TestCase
 
             // Validação adicional simples: soma dos unit_price * qty aproxima total_amount
             $sumAmount = 0.0;
-            $sumCost   = 0.0;
+            $sumCost = 0.0;
             foreach ($rows as $r) {
                 $sumAmount += $r['unit_price'] * $r['quantity'];
-                $sumCost   += $r['unit_cost']  * $r['quantity'];
+                $sumCost += $r['unit_cost'] * $r['quantity'];
             }
 
             // Permitir pequena diferença numérica
             return abs($sumAmount - $expectedTotalAmount) < 0.0001
-                && abs($sumCost - $expectedTotalCost)     < 0.0001;
+                && abs($sumCost - $expectedTotalCost) < 0.0001;
         })->andReturnTrue();
 
         Mockery::mock('alias:App\\Models\\SaleItem')
@@ -207,7 +207,7 @@ final class CreateSaleTest extends TestCase
             ->shouldReceive('query')
             ->andReturn($productQuery);
 
-        $saleId   = 4242;
+        $saleId = 4242;
         $saleMock = Mockery::mock('overload:App\\Models\\Sale');
         $saleMock->shouldReceive('save')->once()->andReturnTrue();
         $saleMock->shouldReceive('getAttribute')->with('id')->andReturn($saleId);

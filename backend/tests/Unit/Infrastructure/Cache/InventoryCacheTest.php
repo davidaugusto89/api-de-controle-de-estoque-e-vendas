@@ -26,7 +26,7 @@ final class InventoryCacheTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->cacheMock      = Mockery::mock(CacheRepository::class);
+        $this->cacheMock = Mockery::mock(CacheRepository::class);
         $this->inventoryCache = new InventoryCache($this->cacheMock);
     }
 
@@ -44,9 +44,9 @@ final class InventoryCacheTest extends TestCase
          * Então: retorna dados do cache (cache hit)
          */
         // Arrange
-        $search     = 'produto';
-        $perPage    = 10;
-        $page       = 1;
+        $search = 'produto';
+        $perPage = 10;
+        $page = 1;
         $cachedData = [['item1'], ['meta'], ['totals']];
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
@@ -71,11 +71,11 @@ final class InventoryCacheTest extends TestCase
          * Então: executor do resolver é chamado e resultado retornado
          */
         // Arrange
-        $search       = null;
-        $perPage      = 5;
-        $page         = 2;
+        $search = null;
+        $perPage = 5;
+        $page = 2;
         $resolverData = [['item2'], ['meta2'], ['totals2']];
-        $resolver     = fn () => $resolverData;
+        $resolver = fn () => $resolverData;
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
             ->andReturn(1);
@@ -101,7 +101,7 @@ final class InventoryCacheTest extends TestCase
          * Então: retorna dados do cache
          */
         // Arrange
-        $search     = 'busca';
+        $search = 'busca';
         $cachedData = [['item3'], ['totals3']];
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
@@ -126,9 +126,9 @@ final class InventoryCacheTest extends TestCase
          * Então: resolver é executado e retorno é retornado
          */
         // Arrange
-        $search       = '';
+        $search = '';
         $resolverData = [['item4'], ['totals4']];
-        $resolver     = fn () => $resolverData;
+        $resolver = fn () => $resolverData;
         $this->cacheMock->shouldReceive('get')
             ->with('inventory:list_version', 1)
             ->andReturn(1);
@@ -154,7 +154,7 @@ final class InventoryCacheTest extends TestCase
          * Então: retorna dados do cache
          */
         // Arrange
-        $productId  = 123;
+        $productId = 123;
         $cachedData = ['product' => 'data'];
         $this->cacheMock->shouldReceive('remember')
             ->once()
@@ -176,9 +176,9 @@ final class InventoryCacheTest extends TestCase
          * Então: resolver é executado e resultado retornado
          */
         // Arrange
-        $productId    = 456;
+        $productId = 456;
         $resolverData = ['product' => 'new data'];
-        $resolver     = fn () => $resolverData;
+        $resolver = fn () => $resolverData;
         $this->cacheMock->shouldReceive('remember')
             ->once()
             ->andReturnUsing(function ($key, $ttl, $callback) {

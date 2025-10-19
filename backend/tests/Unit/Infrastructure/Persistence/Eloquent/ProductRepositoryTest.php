@@ -25,9 +25,9 @@ final class ProductRepositoryTest extends TestCase
          */
         $repo = new ProductRepository;
 
-        $qb           = Mockery::mock();
-        $product      = new \App\Models\Product;
-        $product->id  = 1;
+        $qb = Mockery::mock();
+        $product = new \App\Models\Product;
+        $product->id = 1;
         $product->sku = 'SKU-1';
 
         $qb->shouldReceive('where')->with('sku', 'SKU-1')->once()->andReturnSelf();
@@ -50,9 +50,9 @@ final class ProductRepositoryTest extends TestCase
          */
         $repo = new ProductRepository;
 
-        $qb           = Mockery::mock();
-        $product      = new \App\Models\Product;
-        $product->id  = 2;
+        $qb = Mockery::mock();
+        $product = new \App\Models\Product;
+        $product->id = 2;
         $product->sku = 'SKU-2';
 
         $qb->shouldReceive('find')->with(2)->once()->andReturn($product);

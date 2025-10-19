@@ -203,7 +203,7 @@ final class InventoryQueryTest extends TestCase
             }
         };
 
-        // fake DB facade by setting resolver on the InventoryQuery's baseQuery path
+        // fake da facade DB configurando um resolver no caminho baseQuery do InventoryQuery
         $q = new InventoryQuery;
         $q->setDbResolver(fn () => $db);
 

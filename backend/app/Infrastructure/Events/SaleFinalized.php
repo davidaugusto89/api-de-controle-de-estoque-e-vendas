@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Events;
 
+/**
+ * Evento disparado quando uma venda é finalizada.
+ */
 final class SaleFinalized
 {
     /**

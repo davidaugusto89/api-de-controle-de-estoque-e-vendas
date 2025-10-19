@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @runTestsInSeparateProcesses
+ *
  * @preserveGlobalState disabled
  */
 final class InventoryTest extends TestCase
@@ -51,7 +52,7 @@ final class InventoryTest extends TestCase
         // Avoid calling the relation method because instantiating the relation
         // will touch Eloquent/DB container bindings (no container in plain PHPUnit
         // TestCase). Instead, assert the declared return type is BelongsTo.
-        $ref    = new \ReflectionMethod(Inventory::class, 'product');
+        $ref = new \ReflectionMethod(Inventory::class, 'product');
         $return = $ref->getReturnType();
 
         $this->assertNotNull($return, 'product() should declare a return type');
@@ -113,7 +114,7 @@ final class InventoryTest extends TestCase
         // link the external called array by reference
         $fakeBuilder->calledRef = &$called;
 
-        $m   = new Inventory;
+        $m = new Inventory;
         $res = $m->scopeActive($fakeBuilder);
 
         $this->assertSame('RESULT', $res);

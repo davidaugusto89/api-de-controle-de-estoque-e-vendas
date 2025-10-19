@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Provedor de serviço para configuração de rate limiting da API.
+ */
 final class ApiRateLimiterServiceProvider extends ServiceProvider
 {
     public function boot(): void
@@ -79,7 +82,7 @@ final class ApiRateLimiterServiceProvider extends ServiceProvider
         return function () {
             return response()->json([
                 'error' => [
-                    'code'    => 'TooManyRequests',
+                    'code' => 'TooManyRequests',
                     'message' => 'Muitas requisições. Tente novamente em instantes.',
                 ],
             ], Response::HTTP_TOO_MANY_REQUESTS);

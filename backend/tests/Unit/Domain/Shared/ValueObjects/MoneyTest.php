@@ -48,13 +48,13 @@ final class MoneyTest extends TestCase
     public static function providerForNormalization(): array
     {
         return [
-            'integer'               => [100, 100.0, '100.00'],
-            'float'                 => [100.5, 100.5, '100.50'],
-            'numeric-string-dot'    => ['1234.56', 1234.56, '1234.56'],
-            'numeric-string-comma'  => ['1234,56', 1234.56, '1234.56'],
+            'integer' => [100, 100.0, '100.00'],
+            'float' => [100.5, 100.5, '100.50'],
+            'numeric-string-dot' => ['1234.56', 1234.56, '1234.56'],
+            'numeric-string-comma' => ['1234,56', 1234.56, '1234.56'],
             'negative-string-comma' => ['-1234,56', -1234.56, '-1234.56'],
-            'zero-string'           => ['0', 0.0, '0.00'],
-            'invalid-string'        => ['not-a-number', 0.0, '0.00'],
+            'zero-string' => ['0', 0.0, '0.00'],
+            'invalid-string' => ['not-a-number', 0.0, '0.00'],
         ];
     }
 
@@ -75,9 +75,9 @@ final class MoneyTest extends TestCase
     public static function providerForFormatting(): array
     {
         return [
-            'round-down'         => [1.234, '1.23'],
-            'round-up'           => [1.235, '1.24'],
-            'one-decimal'        => [1.2, '1.20'],
+            'round-down' => [1.234, '1.23'],
+            'round-up' => [1.235, '1.24'],
+            'one-decimal' => [1.2, '1.20'],
             'exact-two-decimals' => [2.50, '2.50'],
         ];
     }
@@ -93,7 +93,7 @@ final class MoneyTest extends TestCase
         $a = new Money(100.00);
         $b = new Money('40,55');
 
-        $sum  = $a->add($b);
+        $sum = $a->add($b);
         $diff = $a->sub($b);
 
         $this->assertSame(140.55, $sum->asFloat(), 'add() deve retornar a soma correta.');
@@ -109,7 +109,7 @@ final class MoneyTest extends TestCase
     public function test_sub_pode_produzir_valores_negativos_e_string_reflete_sinal(): void
     {
         $small = new Money(10);
-        $big   = new Money(20);
+        $big = new Money(20);
 
         $result = $small->sub($big);
 
@@ -125,9 +125,9 @@ final class MoneyTest extends TestCase
          * Quando: instanciados como Money
          * Então: normalizam para 0.0 e string '0.00'
          */
-        $fromEmpty      = new Money('');
+        $fromEmpty = new Money('');
         $fromWhitespace = new Money('   ');
-        $fromZeroInt    = new Money(0);
+        $fromZeroInt = new Money(0);
 
         $this->assertSame(0.0, $fromEmpty->asFloat());
         $this->assertSame('0.00', (string) $fromEmpty);

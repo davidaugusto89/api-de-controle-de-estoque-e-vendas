@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Provedor de serviços da aplicação.
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -25,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(InventoryCache::class);
         $this->app->singleton(MetricsCollector::class, function ($app) {
             /** @var CacheRepository $cache */
-            $cache  = $app->make(CacheRepository::class);
+            $cache = $app->make(CacheRepository::class);
             $logger = $app->has(LoggerInterface::class) ? $app->make(LoggerInterface::class) : null;
 
             return new MetricsCollector($cache, $logger);

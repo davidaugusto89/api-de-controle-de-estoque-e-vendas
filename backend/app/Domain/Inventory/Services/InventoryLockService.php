@@ -24,9 +24,9 @@ class InventoryLockService
     public function lock(int $productId, Closure $callback, int $ttlSeconds = 10, int $waitSeconds = 5): mixed
     {
         if ($this->lock === null) {
-            // In test environments or when RedisLock is intentionally not provided
-            // run the callback directly instead of throwing. This keeps behavior
-            // equivalent (no lock) while allowing jobs/tests to proceed.
+            // Em ambientes de teste ou quando o RedisLock não é fornecido intencionalmente,
+            // execute o callback diretamente em vez de lançar. Isso mantém o comportamento
+            // equivalente (sem lock) e permite que jobs/testes prossigam.
             return $callback();
         }
 
@@ -75,6 +75,12 @@ class InventoryLockService
         return $runner($keys, $callback);
     }
 
+    /**
+     * Gera a chave de lock para um produto.
+     *
+     * @param  int  $productId  - ID do produto
+     * @return string Chave de lock
+     */
     private function keyForProduct(int $productId): string
     {
         return "lock:inventory:product:{$productId}";

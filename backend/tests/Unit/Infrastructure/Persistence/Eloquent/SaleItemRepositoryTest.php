@@ -21,13 +21,13 @@ final class SaleItemRepositoryTest extends TestCase
          * Quando: create é chamado no repositório
          * Então: retorna instância de SaleItem esperada
          */
-        $expected             = new SaleItem;
-        $expected->id         = 123;
-        $expected->sale_id    = 10;
+        $expected = new SaleItem;
+        $expected->id = 123;
+        $expected->sale_id = 10;
         $expected->product_id = 5;
-        $expected->quantity   = 2;
+        $expected->quantity = 2;
         $expected->unit_price = 9.99;
-        $expected->unit_cost  = 4.5;
+        $expected->unit_cost = 4.5;
 
         $qb = new class($expected)
         {
@@ -48,11 +48,11 @@ final class SaleItemRepositoryTest extends TestCase
         $repo->setQueryResolver(fn () => $qb);
 
         $item = $repo->create([
-            'sale_id'    => 10,
+            'sale_id' => 10,
             'product_id' => 5,
-            'quantity'   => 2,
+            'quantity' => 2,
             'unit_price' => 9.99,
-            'unit_cost'  => 4.5,
+            'unit_cost' => 4.5,
         ]);
 
         $this->assertSame($expected, $item);
@@ -67,7 +67,7 @@ final class SaleItemRepositoryTest extends TestCase
          * Quando: findById é chamado
          * Então: retorna o SaleItem ou null
          */
-        $expected     = new SaleItem;
+        $expected = new SaleItem;
         $expected->id = 7;
 
         $qb = new class($expected)
@@ -101,7 +101,7 @@ final class SaleItemRepositoryTest extends TestCase
          * Quando: findBySaleId é chamado
          * Então: retorna Collection com os itens
          */
-        $item     = new SaleItem;
+        $item = new SaleItem;
         $item->id = 1;
 
         $collection = new Collection([$item]);
@@ -183,10 +183,10 @@ final class SaleItemRepositoryTest extends TestCase
          * Quando: delete é chamado no repositório
          * Então: chama delete e retorna true quando presente
          */
-        $model     = new SaleItem;
+        $model = new SaleItem;
         $model->id = 9;
 
-        $called  = false;
+        $called = false;
         $deleter = new class($model, $called)
         {
             private $model;
@@ -195,7 +195,7 @@ final class SaleItemRepositoryTest extends TestCase
 
             public function __construct($model, &$called)
             {
-                $this->model  = $model;
+                $this->model = $model;
                 $this->called = &$called;
             }
 
@@ -224,8 +224,8 @@ final class SaleItemRepositoryTest extends TestCase
             public function __construct($deleter, $model, &$called)
             {
                 $this->deleter = $deleter;
-                $this->model   = $model;
-                $this->called  = &$called;
+                $this->model = $model;
+                $this->called = &$called;
             }
 
             public function find($id)
@@ -278,7 +278,7 @@ final class SaleItemRepositoryTest extends TestCase
          * Quando: findBySales é chamado
          * Então: retorna Collection com os itens encontrados
          */
-        $item     = new SaleItem;
+        $item = new SaleItem;
         $item->id = 2;
 
         $collection = new Collection([$item]);

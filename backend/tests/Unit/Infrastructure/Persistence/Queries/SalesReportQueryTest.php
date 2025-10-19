@@ -22,7 +22,7 @@ final class SalesReportQueryTest extends TestCase
          * Então: retorna zeros para totais
          */
         $from = CarbonImmutable::parse('2025-01-01');
-        $to   = CarbonImmutable::parse('2025-01-31');
+        $to = CarbonImmutable::parse('2025-01-31');
 
         $fake = new class
         {
@@ -65,7 +65,7 @@ final class SalesReportQueryTest extends TestCase
          * Então: retorna Collection de dias com totals
          */
         $from = CarbonImmutable::parse('2025-10-01');
-        $to   = CarbonImmutable::parse('2025-10-03');
+        $to = CarbonImmutable::parse('2025-10-03');
 
         $row = (object) ['date' => '2025-10-01', 'total_amount' => '100.00', 'total_profit' => '40.00', 'orders' => 2];
 

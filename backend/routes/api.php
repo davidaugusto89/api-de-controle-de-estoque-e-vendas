@@ -20,8 +20,8 @@ Route::middleware([
      */
     Route::get('/up', function () {
         return response()->json([
-            'status'    => 'ok',
-            'message'   => 'API operacional 🚀',
+            'status' => 'ok',
+            'message' => 'API operacional 🚀',
             'timestamp' => now()->toISOString(),
         ]);
     })->name('health.up');

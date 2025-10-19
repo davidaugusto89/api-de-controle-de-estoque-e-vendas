@@ -58,10 +58,10 @@ final class IdempotentRetryJobTest extends TestCase
             }
         };
 
-        $tx             = $this->app->make(\App\Support\Database\Transactions::class);
-        $locks          = $this->app->make(\App\Domain\Inventory\Services\InventoryLockService::class);
-        $policy         = $this->app->make(\App\Domain\Inventory\Services\StockPolicy::class);
-        $cacheStore     = $this->app->make('cache.store');
+        $tx = $this->app->make(\App\Support\Database\Transactions::class);
+        $locks = $this->app->make(\App\Domain\Inventory\Services\InventoryLockService::class);
+        $policy = $this->app->make(\App\Domain\Inventory\Services\StockPolicy::class);
+        $cacheStore = $this->app->make('cache.store');
         $inventoryCache = new InventoryCache($cacheStore);
         // Reset metrics
         foreach (['inventory.job.start', 'inventory.job.completed', 'inventory.item.decrement', 'inventory.item.failure', 'inventory.cache.invalidated'] as $m) {
@@ -74,7 +74,7 @@ final class IdempotentRetryJobTest extends TestCase
         $job = new UpdateInventoryJob($saleId, $items);
         $job->handle($tx, $locks, $policy, $decorator, $inventoryCache, new NullLogger);
 
-        // After failed job, metrics should reflect a start and an item failure
+        // Após job com falha, as métricas devem refletir um início e uma falha de item
         $this->assertSame(1, (int) $cacheStore->get('metrics:inventory.job.start', 0));
         $this->assertSame(1, (int) $cacheStore->get('metrics:inventory.item.failure', 0));
 
@@ -88,7 +88,7 @@ final class IdempotentRetryJobTest extends TestCase
         // Act 2: executar job com repositório real -> deve processar com sucesso
         $job->handle($tx, $locks, $policy, $invRepo, $inventoryCache, new NullLogger);
 
-        // After successful retry, verify metrics were incremented accordingly
+        // Após retry bem-sucedido, verificar que as métricas foram incrementadas conforme esperado
         $this->assertSame(2, (int) $cacheStore->get('metrics:inventory.job.start', 0));
         $this->assertSame(1, (int) $cacheStore->get('metrics:inventory.job.completed', 0));
         $this->assertSame(2, (int) $cacheStore->get('metrics:inventory.item.decrement', 0));

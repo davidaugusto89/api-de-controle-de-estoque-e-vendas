@@ -24,10 +24,14 @@ final class ApiExceptionFormatter
 {
     /**
      * Constrói uma resposta JSON padronizada a partir de uma exceção.
+     *
+     * @param  Throwable  $e  Exceção capturada
+     * @param  Request  $request  Requisição HTTP atual
+     * @return JsonResponse Resposta JSON formatada
      */
     public static function from(Throwable $e, Request $request): JsonResponse
     {
-        $debug     = (bool) config('app.debug', false);
+        $debug = (bool) config('app.debug', false);
         $requestId = self::requestId($request);
 
         // 422 Validation
@@ -84,8 +88,8 @@ final class ApiExceptionFormatter
 
         // 405 Method Not Allowed — normaliza header Allow
         if ($e instanceof MethodNotAllowedHttpException) {
-            $headers   = $e->getHeaders();
-            $allow     = $headers['Allow'] ?? null;
+            $headers = $e->getHeaders();
+            $allow = $headers['Allow'] ?? null;
             $allowList = is_array($allow) ? $allow : (is_string($allow) ? [$allow] : []);
 
             return self::json(
@@ -134,7 +138,7 @@ final class ApiExceptionFormatter
             );
         }
 
-        // 500 Fallback
+        // 500 Fallback (padrão)
         return self::json(
             status: 500,
             code: 'InternalServerError',
@@ -162,7 +166,7 @@ final class ApiExceptionFormatter
     ): JsonResponse {
         $payload = [
             'error' => [
-                'code'    => $code,
+                'code' => $code,
                 'message' => $message,
             ],
             'meta' => [
@@ -194,6 +198,8 @@ final class ApiExceptionFormatter
 
     /**
      * Obtém o identificador da requisição a partir do header ou gera um novo.
+     *
+     * @param  Request  $request  Requisição HTTP atual
      */
     private static function requestId(Request $request): string
     {
@@ -203,15 +209,16 @@ final class ApiExceptionFormatter
     /**
      * Constrói o bloco de informações de debug com metadados mínimos.
      *
+     * @param  Throwable  $e  Exceção capturada
      * @return array{exception:string,file:string,line:int,trace:list<string>}
      */
     private static function debugPayload(Throwable $e): array
     {
         return [
             'exception' => get_class($e),
-            'file'      => $e->getFile(),
-            'line'      => $e->getLine(),
-            'trace'     => collect(explode("\n", $e->getTraceAsString()))->take(20)->all(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => collect(explode("\n", $e->getTraceAsString()))->take(20)->all(),
         ];
     }
 }

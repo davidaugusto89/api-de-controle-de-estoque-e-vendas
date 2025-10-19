@@ -11,6 +11,9 @@ use Illuminate\Contracts\Cache\Factory as CacheFactory;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Provedor de serviços para repositórios e cache de inventário.
+ */
 class RepositoryServiceProvider extends ServiceProvider
 {
     /**
@@ -42,8 +45,5 @@ class RepositoryServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        //
-    }
+    public function boot(): void {}
 }

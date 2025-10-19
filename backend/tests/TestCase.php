@@ -19,8 +19,8 @@ abstract class TestCase extends BaseTestCase
     {
         $app = require __DIR__.'/../bootstrap/app.php';
 
-        // Bootstrap the kernel so that providers, routes and configuration
-        // are carregados como em um ambiente normal.
+        // Inicializa o kernel para que providers, rotas e configuração
+        // sejam carregados como em um ambiente normal.
         $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
         return $app;

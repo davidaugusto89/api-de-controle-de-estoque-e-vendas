@@ -168,7 +168,7 @@ final class RedisLockTest extends TestCase
             return 'first';
         }, 0, 100);
 
-        // Act - second run (should be allowed since first released)
+        // Act - segunda execução (deve ser permitida já que a primeira foi liberada)
         $second = $redisLock->run('key-reuse', 10, function () {
             return 'second';
         }, 0, 100);

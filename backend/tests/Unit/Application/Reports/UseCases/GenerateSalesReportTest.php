@@ -31,8 +31,8 @@ final class GenerateSalesReportTest extends TestCase
         $query = Mockery::mock($realQuery)->makePartial();
 
         $periodTotals = ['amount' => 100.0, 'quantity' => 5, 'profit' => 50.0];
-        $byDay        = [['date' => '2025-01-01', 'amount' => 50.0], ['date' => '2025-01-02', 'amount' => 50.0]];
-        $topProducts  = [['sku' => 'SKU-1', 'amount' => 60.0], ['sku' => 'SKU-2', 'amount' => 40.0]];
+        $byDay = [['date' => '2025-01-01', 'amount' => 50.0], ['date' => '2025-01-02', 'amount' => 50.0]];
+        $topProducts = [['sku' => 'SKU-1', 'amount' => 60.0], ['sku' => 'SKU-2', 'amount' => 40.0]];
 
         $query->shouldReceive('totals')->once()->andReturn($periodTotals);
         $query->shouldReceive('byDay')->once()->andReturn(new Collection($byDay));
@@ -69,9 +69,9 @@ final class GenerateSalesReportTest extends TestCase
         $query = Mockery::mock($realQuery2)->makePartial();
 
         $cached = [
-            'period'       => ['from' => '2025-01-01', 'to' => '2025-01-02'],
-            'totals'       => ['amount' => 1.0],
-            'series'       => [],
+            'period' => ['from' => '2025-01-01', 'to' => '2025-01-02'],
+            'totals' => ['amount' => 1.0],
+            'series' => [],
             'top_products' => [],
         ];
 

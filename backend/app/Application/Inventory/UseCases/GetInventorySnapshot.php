@@ -35,7 +35,7 @@ final class GetInventorySnapshot
         });
 
         return [
-            'items'  => $items,
+            'items' => $items,
             'totals' => $totals,
         ];
     }

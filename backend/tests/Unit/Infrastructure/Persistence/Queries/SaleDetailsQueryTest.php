@@ -50,13 +50,13 @@ final class SaleDetailsQueryTest extends TestCase
          * Então: retorna array com sale e lista de items
          */
         $sale = (object) [
-            'id'           => 1,
-            'status'       => 'finalized',
+            'id' => 1,
+            'status' => 'finalized',
             'total_amount' => '200',
-            'total_cost'   => '120',
+            'total_cost' => '120',
             'total_profit' => '80',
-            'created_at'   => '2025-10-19 00:00:00',
-            'updated_at'   => '2025-10-19 00:00:00',
+            'created_at' => '2025-10-19 00:00:00',
+            'updated_at' => '2025-10-19 00:00:00',
         ];
 
         $item = (object) ['product_id' => 5, 'sku' => 'X', 'name' => 'Prod X', 'quantity' => 2, 'unit_price' => 50, 'unit_cost' => 30];

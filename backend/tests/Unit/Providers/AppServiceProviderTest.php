@@ -18,13 +18,13 @@ final class AppServiceProviderTest extends TestCase
          * Quando: resolvemos InventoryQuery e InventoryCache duas vezes
          * Então: são singletons (mesma instância)
          */
-        $firstQuery  = $this->app->make(InventoryQuery::class);
+        $firstQuery = $this->app->make(InventoryQuery::class);
         $secondQuery = $this->app->make(InventoryQuery::class);
 
         $this->assertInstanceOf(InventoryQuery::class, $firstQuery);
         $this->assertSame($firstQuery, $secondQuery, 'InventoryQuery should be registered as a singleton');
 
-        $firstCache  = $this->app->make(InventoryCache::class);
+        $firstCache = $this->app->make(InventoryCache::class);
         $secondCache = $this->app->make(InventoryCache::class);
 
         $this->assertInstanceOf(InventoryCache::class, $firstCache);

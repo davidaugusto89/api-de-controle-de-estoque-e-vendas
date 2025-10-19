@@ -15,6 +15,10 @@ class ForceJsonResponse
 {
     /**
      * Garante que toda resposta HTTP seja JSON.
+     *
+     * @param  Request  $request  Requisição HTTP atual
+     * @param  Closure  $next  Próxima função da cadeia
+     * @return Response Resposta HTTP em formato JSON
      */
     public function handle(Request $request, Closure $next): Response
     {

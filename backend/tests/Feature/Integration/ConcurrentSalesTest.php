@@ -46,11 +46,11 @@ final class ConcurrentSalesTest extends TestCase
         $this->assertIsInt($saleId2);
 
         // Preparar dependências
-        $tx             = $this->app->make(\App\Support\Database\Transactions::class);
-        $locks          = $this->app->make(\App\Domain\Inventory\Services\InventoryLockService::class);
-        $policy         = $this->app->make(\App\Domain\Inventory\Services\StockPolicy::class);
-        $inventoryRepo  = $this->app->make(InventoryRepository::class);
-        $cache          = $this->app->make('cache.store');
+        $tx = $this->app->make(\App\Support\Database\Transactions::class);
+        $locks = $this->app->make(\App\Domain\Inventory\Services\InventoryLockService::class);
+        $policy = $this->app->make(\App\Domain\Inventory\Services\StockPolicy::class);
+        $inventoryRepo = $this->app->make(InventoryRepository::class);
+        $cache = $this->app->make('cache.store');
         $inventoryCache = new InventoryCache($cache);
         // Reset metrics
         foreach (['inventory.job.start', 'inventory.job.completed', 'inventory.item.decrement', 'inventory.item.failure', 'inventory.cache.invalidated'] as $m) {

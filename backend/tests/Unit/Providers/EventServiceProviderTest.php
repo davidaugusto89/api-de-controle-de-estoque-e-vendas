@@ -36,7 +36,7 @@ final class EventServiceProviderTest extends TestCase
     private function getProtectedProperty(object $obj, string $prop)
     {
         $ref = new \ReflectionObject($obj);
-        $p   = $ref->getProperty($prop);
+        $p = $ref->getProperty($prop);
         $p->setAccessible(true);
 
         return $p->getValue($obj);

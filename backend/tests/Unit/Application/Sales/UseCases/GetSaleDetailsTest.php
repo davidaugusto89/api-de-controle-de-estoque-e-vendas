@@ -42,18 +42,18 @@ final class GetSaleDetailsTest extends TestCase
     public static function provider_success_and_variants(): array
     {
         $base = [
-            'id'           => 123,
+            'id' => 123,
             'total_amount' => 100.5,
-            'total_cost'   => 70.25,
+            'total_cost' => 70.25,
             'total_profit' => 30.25,
-            'status'       => 'completed',
-            'created_at'   => '2025-10-18T12:00:00.000000Z',
-            'items'        => [
+            'status' => 'completed',
+            'created_at' => '2025-10-18T12:00:00.000000Z',
+            'items' => [
                 [
                     'product_id' => 1,
-                    'quantity'   => 2,
+                    'quantity' => 2,
                     'unit_price' => 25.25,
-                    'unit_cost'  => 17.5,
+                    'unit_cost' => 17.5,
                 ],
             ],
         ];
@@ -62,9 +62,9 @@ final class GetSaleDetailsTest extends TestCase
         $case1 = [$base];
 
         // caso: sem items
-        $noItems          = $base;
+        $noItems = $base;
         $noItems['items'] = [];
-        $case2            = [$noItems];
+        $case2 = [$noItems];
 
         return [
             'com_items' => $case1,
@@ -100,13 +100,13 @@ final class GetSaleDetailsTest extends TestCase
             public function __construct() {}
         };
 
-        $sale->id           = $repoReturn['id'];
+        $sale->id = $repoReturn['id'];
         $sale->total_amount = $repoReturn['total_amount'];
-        $sale->total_cost   = $repoReturn['total_cost'];
+        $sale->total_cost = $repoReturn['total_cost'];
         $sale->total_profit = $repoReturn['total_profit'];
-        $sale->status       = $repoReturn['status'];
-        $sale->created_at   = Carbon::parse($repoReturn['created_at']);
-        $sale->items        = collect(array_map(fn ($i) => (object) $i, $repoReturn['items']));
+        $sale->status = $repoReturn['status'];
+        $sale->created_at = Carbon::parse($repoReturn['created_at']);
+        $sale->items = collect(array_map(fn ($i) => (object) $i, $repoReturn['items']));
 
         $this->salesRepo
             ->expects($this->once())

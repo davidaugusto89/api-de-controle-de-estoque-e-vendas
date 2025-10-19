@@ -24,7 +24,7 @@ final class SaleRepositoryTest extends TestCase
         if (class_exists('\Mockery')) {
             \Mockery::close();
         }
-        $sale     = new Sale;
+        $sale = new Sale;
         $sale->id = 11;
 
         $qb = new class($sale)
@@ -61,7 +61,7 @@ final class SaleRepositoryTest extends TestCase
         if (class_exists('\Mockery')) {
             \Mockery::close();
         }
-        $sale     = new Sale;
+        $sale = new Sale;
         $sale->id = 12;
 
         $with = new class($sale)
@@ -113,7 +113,7 @@ final class SaleRepositoryTest extends TestCase
         if (class_exists('\Mockery')) {
             \Mockery::close();
         }
-        $sale     = new Sale;
+        $sale = new Sale;
         $sale->id = 20;
 
         $qb = new class($sale)
@@ -136,9 +136,9 @@ final class SaleRepositoryTest extends TestCase
 
         $res = $repo->create([
             'total_amount' => 100.0,
-            'total_cost'   => 60.0,
+            'total_cost' => 60.0,
             'total_profit' => 40.0,
-            'status'       => 'finalized',
+            'status' => 'finalized',
         ]);
 
         $this->assertSame($sale, $res);
@@ -233,7 +233,7 @@ final class SaleRepositoryTest extends TestCase
         if (class_exists('\Mockery')) {
             \Mockery::close();
         }
-        $s     = new Sale;
+        $s = new Sale;
         $s->id = 44;
 
         $collection = new Collection([$s]);

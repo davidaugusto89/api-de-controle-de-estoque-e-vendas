@@ -111,7 +111,7 @@ final class UpdateInventoryJobTest extends TestCase
 
         // inventoryRepo->decrementIfEnough deve ser chamado com os pares corretos em ordem
         $callIndex = 0;
-        $expected  = [
+        $expected = [
             [7, 3],
             [8, 1],
         ];
@@ -127,7 +127,7 @@ final class UpdateInventoryJobTest extends TestCase
                 return true;
             });
 
-        // Expect underlying cache operations: forget for each product item and an increment for list version
+        // Espera operações subjacentes de cache: forget para cada item de produto e um increment para a versão da lista
         $cacheStore->expects($this->exactly(2))
             ->method('forget')
             ->with($this->isType('string'));

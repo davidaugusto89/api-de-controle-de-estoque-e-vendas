@@ -111,7 +111,7 @@ final class InventoryItemTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Quantidade atual não pode ser negativa.');
 
-        // Ao construir, o ajuste inicial chama StockPolicy::adjust -> normalize
+        // Ao construir, o ajuste inicial chama StockPolicy::adjust -> normalize (normalização aplicável)
         new InventoryItem(productId: 5, quantity: -1);
     }
 
@@ -125,7 +125,7 @@ final class InventoryItemTest extends TestCase
          */
         // Definimos maxPerProduct baixo para forçar a exceção no incremento
         $policy = new StockPolicy(5);
-        $item   = new InventoryItem(productId: 6, quantity: 5, policy: $policy);
+        $item = new InventoryItem(productId: 6, quantity: 5, policy: $policy);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Quantidade máxima por produto excedida.');

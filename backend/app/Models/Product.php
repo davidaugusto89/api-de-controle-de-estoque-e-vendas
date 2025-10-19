@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * Representa um produto vendável no sistema.
+ * Representa um produto no sistema.
  *
  * Propriedades gerenciadas pelo Eloquent e disponíveis no modelo.
  * A propriedade `profit` é um accessor que expõe o lucro unitário (sale_price - cost_price).

@@ -8,6 +8,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Query para consultar o inventário.
+ */
 final class InventoryQuery
 {
     /** @var (callable():mixed)|null */
@@ -16,7 +19,7 @@ final class InventoryQuery
     /**
      * Injeta um resolver opcional para DB::table(...) (facilita testes).
      *
-     * @param callable():mixed|null $resolver
+     * @param  callable():mixed|null  $resolver
      */
     public function setDbResolver(?callable $resolver): void
     {
@@ -106,8 +109,8 @@ final class InventoryQuery
         $totalSale = (float) ($totals->total_sale ?? 0);
 
         return [
-            'total_cost'       => $totalCost,
-            'total_sale'       => $totalSale,
+            'total_cost' => $totalCost,
+            'total_sale' => $totalSale,
             'projected_profit' => $totalSale - $totalCost,
         ];
     }

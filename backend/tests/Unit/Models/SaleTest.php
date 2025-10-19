@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @runTestsInSeparateProcesses
+ *
  * @preserveGlobalState disabled
  */
 final class SaleTest extends TestCase
@@ -55,7 +56,7 @@ final class SaleTest extends TestCase
             \Mockery::close();
         }
 
-        $ref    = new \ReflectionMethod(Sale::class, 'items');
+        $ref = new \ReflectionMethod(Sale::class, 'items');
         $return = $ref->getReturnType();
 
         $this->assertNotNull($return);
@@ -114,14 +115,14 @@ final class SaleTest extends TestCase
         $s = new Sale;
 
         $from = CarbonImmutable::parse('2025-01-01');
-        $to   = CarbonImmutable::parse('2025-01-03');
+        $to = CarbonImmutable::parse('2025-01-03');
 
         $res1 = $s->scopeBetweenDates($fakeBuilder, $from, $to);
         $this->assertSame('RESULT', $res1);
         $this->assertCount(1, $called);
 
         // clear and test betweenDays
-        $called                 = [];
+        $called = [];
         $fakeBuilder->calledRef = &$called;
 
         $res2 = $s->scopeBetweenDays($fakeBuilder, $from, $to);

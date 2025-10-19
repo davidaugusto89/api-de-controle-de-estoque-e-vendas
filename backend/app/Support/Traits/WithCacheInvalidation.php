@@ -6,6 +6,9 @@ namespace App\Support\Traits;
 
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Trait para invalidação de cache em repositórios.
+ */
 trait WithCacheInvalidation
 {
     /**

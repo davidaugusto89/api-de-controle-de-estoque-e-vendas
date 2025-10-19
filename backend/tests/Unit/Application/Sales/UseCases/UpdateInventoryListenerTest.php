@@ -49,12 +49,12 @@ final class UpdateInventoryListenerTest extends TestCase
         Queue::fake();
 
         $saleId = 123;
-        $items  = [
+        $items = [
             ['product_id' => 1, 'quantity' => 2],
             ['product_id' => 2, 'quantity' => 1],
         ];
 
-        $event    = new SaleFinalized($saleId, $items);
+        $event = new SaleFinalized($saleId, $items);
         $listener = new UpdateInventoryListener;
 
         // Act
@@ -67,7 +67,7 @@ final class UpdateInventoryListenerTest extends TestCase
             static function ($job) use ($saleId, $items): bool {
                 return isset($job->saleId, $job->items)
                     && $job->saleId === $saleId
-                    && $job->items  === $items;
+                    && $job->items === $items;
             }
         );
     }
@@ -78,7 +78,7 @@ final class UpdateInventoryListenerTest extends TestCase
     {
         // Arrange: não fakeamos a fila aqui porque queremos mockar o método estático
         $saleId = 999;
-        $items  = [
+        $items = [
             ['product_id' => 42, 'quantity' => 3],
         ];
 
@@ -91,8 +91,8 @@ final class UpdateInventoryListenerTest extends TestCase
             ->with($saleId, $items)
             ->andThrow($exception);
 
-        // Swap the underlying logger used by the Log facade with a Mockery mock
-        // so we can assert the error call even when running in a separate process.
+        // Substitui o logger subjacente usado pela facade Log por um mock do Mockery
+        // para que possamos afirmar a chamada de erro mesmo quando executando em processo separado.
         $loggerMock = Mockery::mock(\Psr\Log\LoggerInterface::class);
         $loggerMock->shouldReceive('info')->andReturnNull();
         $loggerMock->shouldReceive('error')
@@ -101,7 +101,7 @@ final class UpdateInventoryListenerTest extends TestCase
                 return $message === 'Falha no UpdateInventoryListener'
                     && isset($context['sale_id'], $context['items'], $context['error'])
                     && $context['sale_id'] === $saleId
-                    && $context['items']   === $items
+                    && $context['items'] === $items
                     && str_contains((string) $context['error'], $exception->getMessage());
             });
 

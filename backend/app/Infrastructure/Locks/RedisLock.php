@@ -10,6 +10,9 @@ use Illuminate\Contracts\Cache\Lock as CacheLockContract;
 use Illuminate\Contracts\Cache\LockProvider;
 use RuntimeException;
 
+/**
+ * Classe para gerenciar locks distribuídos usando Redis.
+ */
 final class RedisLock
 {
     public function __construct(

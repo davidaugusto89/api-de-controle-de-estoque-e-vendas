@@ -15,11 +15,15 @@ interface CacheInterface
      * @param  string  $key  Chave de cache
      * @param  int  $ttl  Tempo de vida em segundos
      * @param  callable  $callback  Função a ser executada se o cache não existir
+     * @return mixed Valor em cache ou resultado do callback
      */
     public function remember(string $key, int $ttl, callable $callback): mixed;
 
     /**
      * Remove uma chave do cache.
+     *
+     * @param  string  $key  Chave de cache
+     * @return bool True se a chave foi removida, false caso contrário.
      */
     public function forget(string $key): bool;
 }

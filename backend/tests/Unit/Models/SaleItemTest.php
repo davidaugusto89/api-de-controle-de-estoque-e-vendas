@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @runTestsInSeparateProcesses
+ *
  * @preserveGlobalState disabled
  */
 final class SaleItemTest extends TestCase
@@ -57,7 +58,7 @@ final class SaleItemTest extends TestCase
             \Mockery::close();
         }
 
-        $ref1   = new \ReflectionMethod(SaleItem::class, 'sale');
+        $ref1 = new \ReflectionMethod(SaleItem::class, 'sale');
         $return = $ref1->getReturnType();
 
         $this->assertNotNull($return);
@@ -101,7 +102,7 @@ final class SaleItemTest extends TestCase
 
         $it = new SaleItem;
 
-        $it->quantity   = 3;
+        $it->quantity = 3;
         $it->unit_price = 12.5;
 
         $this->assertSame(37.5, $it->total);

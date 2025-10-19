@@ -6,6 +6,9 @@ namespace App\Support\Helpers;
 
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Helper para respostas JSON padronizadas.
+ */
 final class JsonResponseHelper
 {
     /**
@@ -15,8 +18,8 @@ final class JsonResponseHelper
     {
         return response()->json([
             'status' => 'success',
-            'meta'   => $meta,
-            'data'   => $data,
+            'meta' => $meta,
+            'data' => $data,
         ], $status);
     }
 
@@ -27,8 +30,8 @@ final class JsonResponseHelper
     {
         return response()->json([
             'status' => 'error',
-            'error'  => [
-                'code'    => $code,
+            'error' => [
+                'code' => $code,
                 'message' => $message,
                 'details' => $details,
             ],

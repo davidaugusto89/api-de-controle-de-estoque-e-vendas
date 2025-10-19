@@ -43,11 +43,11 @@ final class SaleValidatorTest extends TestCase
 
     public static function providerValidItems(): array
     {
-        $objItem             = new \stdClass;
+        $objItem = new \stdClass;
         $objItem->product_id = 1;
-        $objItem->quantity   = 2;
+        $objItem->quantity = 2;
         $objItem->unit_price = 10.5;
-        $objItem->unit_cost  = 5.0;
+        $objItem->unit_cost = 5.0;
 
         return [
             'itens em array' => [[
@@ -85,10 +85,10 @@ final class SaleValidatorTest extends TestCase
 
     public static function providerInvalidProductId(): array
     {
-        $objMissing             = new \stdClass;
-        $objMissing->quantity   = 1;
+        $objMissing = new \stdClass;
+        $objMissing->quantity = 1;
         $objMissing->unit_price = 1.0;
-        $objMissing->unit_cost  = 0.5;
+        $objMissing->unit_cost = 0.5;
 
         return [
             'array sem product_id' => [[
@@ -124,7 +124,7 @@ final class SaleValidatorTest extends TestCase
     public static function providerInvalidQuantity(): array
     {
         return [
-            'quantidade zero'     => [['product_id' => 5, 'quantity' => 0, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
+            'quantidade zero' => [['product_id' => 5, 'quantity' => 0, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
             'quantidade negativa' => [['product_id' => 5, 'quantity' => -3, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
         ];
     }

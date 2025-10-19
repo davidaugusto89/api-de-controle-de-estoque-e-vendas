@@ -15,9 +15,9 @@ class SaleItemFactory extends Factory
     {
         // Quantidade pequena e preços com 2 casas.
         return [
-            'quantity'   => $this->faker->numberBetween(1, 5),
+            'quantity' => $this->faker->numberBetween(1, 5),
             'unit_price' => $this->formatMoney($this->faker->randomFloat(2, 5, 50)),
-            'unit_cost'  => $this->formatMoney($this->faker->randomFloat(2, 2, 40)),
+            'unit_cost' => $this->formatMoney($this->faker->randomFloat(2, 2, 40)),
         ];
     }
 

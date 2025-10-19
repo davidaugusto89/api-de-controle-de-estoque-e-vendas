@@ -52,8 +52,8 @@ final class InventoryRepositoryTest extends TestCase
          * Então: atualiza quantity e incrementa version
          */
         $productId = 21;
-        $quantity  = 5;
-        $now       = Carbon::now();
+        $quantity = 5;
+        $now = Carbon::now();
 
         // Caso: existe -> atualiza quantity e incrementa version
         // Criamos um mock do model Inventory para evitar operações de DB ao chamar save().
@@ -65,8 +65,8 @@ final class InventoryRepositoryTest extends TestCase
 
         // Define propriedades que o repositório manipulará
         $existing->product_id = $productId;
-        $existing->quantity   = 2;
-        $existing->version    = 7;
+        $existing->quantity = 2;
+        $existing->version = 7;
 
         $existing->expects($this->once())
             ->method('save')
@@ -96,7 +96,7 @@ final class InventoryRepositoryTest extends TestCase
          * Então: método retorna true
          */
         $productId = 31;
-        $quantity  = 4;
+        $quantity = 4;
 
         // Contudo, criar mocks dinâmicos para o facade DB é complexo. Em vez disso,
         // usamos o facade DB::shouldReceive quando possível. Como este TestCase usa

@@ -42,8 +42,8 @@ final class RegisterStockEntryTest extends TestCase
          * Observações:
          *  - Teste 100% unitário, usa mocks para Transactions, locks e policy.
          */
-        $tx     = Mockery::mock(Transactions::class);
-        $lock   = Mockery::mock(InventoryLockService::class);
+        $tx = Mockery::mock(Transactions::class);
+        $lock = Mockery::mock(InventoryLockService::class);
         $policy = Mockery::mock(StockPolicy::class);
 
         $sut = new RegisterStockEntry($tx, $lock, $policy);
@@ -111,8 +111,8 @@ final class RegisterStockEntryTest extends TestCase
             }
         };
 
-        $product->id   = $productId;
-        $product->sku  = "SKU-{$productId}";
+        $product->id = $productId;
+        $product->sku = "SKU-{$productId}";
         $product->name = "Produto {$productId}";
 
         $productQuery = Mockery::mock();

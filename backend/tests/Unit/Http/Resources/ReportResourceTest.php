@@ -23,11 +23,11 @@ final class ReportResourceTest extends TestCase
         $payload = [
             'period' => ['from' => '2025-01-01', 'to' => '2025-01-31'],
             'totals' => [
-                'total_sales'  => 2,
+                'total_sales' => 2,
                 'total_amount' => 100.0,
-                'total_cost'   => 60.0,
+                'total_cost' => 60.0,
                 'total_profit' => 40.0,
-                'avg_ticket'   => 50.0,
+                'avg_ticket' => 50.0,
             ],
             'series' => [
                 ['date' => '2025-01-01', 'total_amount' => 50.0, 'total_profit' => 20.0, 'orders' => 1],

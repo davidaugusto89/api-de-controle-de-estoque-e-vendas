@@ -37,8 +37,8 @@ class Inventory extends Model
     ];
 
     protected $casts = [
-        'quantity'     => 'integer',
-        'version'      => 'integer',
+        'quantity' => 'integer',
+        'version' => 'integer',
         'last_updated' => 'datetime',
     ];
 

@@ -7,6 +7,9 @@ namespace App\Support\Traits;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Trait para otimizações de query leves e seguras.
+ */
 trait WithQueryOptimization
 {
     /**
@@ -15,8 +18,6 @@ trait WithQueryOptimization
      */
     protected function readOnlyConnection(): void
     {
-        // Se você tiver réplicas, poderia forçar "read" aqui.
-        // DB::connection('read'); // exemplo
     }
 
     /**

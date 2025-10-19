@@ -10,8 +10,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-// Small local interfaces used only for mocking in unit tests.
-// This avoids using MockBuilder::addMethods() which is deprecated in newer PHPUnit versions.
+// Pequenas interfaces locais usadas apenas para mocking em testes unitários.
+// Isso evita usar MockBuilder::addMethods() que é deprecado em versões mais novas do PHPUnit.
 interface SaleRepositoryInterface
 {
     /**
@@ -120,12 +120,12 @@ final class FinalizeSaleUseCaseTest extends TestCase
             ->with($this->callback(function ($sale) use ($saleId, $items) {
                 // Verifica forma mínima do objeto/array enviado ao repositório
                 if (is_array($sale)) {
-                    return ($sale['id'] ?? null)    === $saleId
+                    return ($sale['id'] ?? null) === $saleId
                         && ($sale['items'] ?? null) === $items;
                 }
 
                 if (is_object($sale)) {
-                    return ($sale->id ?? null)    === $saleId
+                    return ($sale->id ?? null) === $saleId
                         && ($sale->items ?? null) === $items;
                 }
 

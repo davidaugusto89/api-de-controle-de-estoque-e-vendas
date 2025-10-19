@@ -30,8 +30,8 @@ final class RegisterStockEntry
     private $inventoryQueryResolver;
 
     /**
-     * @param callable():mixed|null $productQueryResolver  Resolver opcional para Product::query() (facilita testes)
-     * @param callable():mixed|null $inventoryQueryResolver Resolver opcional para Inventory::query() (facilita testes)
+     * @param  callable():mixed|null  $productQueryResolver  Resolver opcional para Product::query() (facilita testes)
+     * @param  callable():mixed|null  $inventoryQueryResolver  Resolver opcional para Inventory::query() (facilita testes)
      */
     public function __construct(
         Transactions $tx,
@@ -40,16 +40,19 @@ final class RegisterStockEntry
         ?callable $productQueryResolver = null,
         ?callable $inventoryQueryResolver = null,
     ) {
-        $this->tx                     = $tx;
-        $this->lockService            = $lockService;
-        $this->stockPolicy            = $stockPolicy;
-        $this->productQueryResolver   = $productQueryResolver;
+        $this->tx = $tx;
+        $this->lockService = $lockService;
+        $this->stockPolicy = $stockPolicy;
+        $this->productQueryResolver = $productQueryResolver;
         $this->inventoryQueryResolver = $inventoryQueryResolver;
     }
 
     /**
      * Registra uma entrada de estoque para um produto, aplicando custo médio móvel.
      *
+     * @param  int  $productId  ID do produto.
+     * @param  int  $quantity  Quantidade a adicionar (deve ser positiva).
+     * @param  float|null  $unitCost  Custo unitário (deve ser positivo).
      * @return array{
      *   product_id:int,
      *   sku:string,
@@ -77,32 +80,32 @@ final class RegisterStockEntry
             return $this->lockService->lock($productId, function () use ($productId, $quantity, $unitCost): array {
                 /** @var Product $product */
                 $productQuery = $this->productQueryResolver ? ($this->productQueryResolver)() : Product::query();
-                $product      = $productQuery->lockForUpdate()->findOrFail($productId);
+                $product = $productQuery->lockForUpdate()->findOrFail($productId);
 
                 /** @var Inventory|null $inv */
                 $invQuery = $this->inventoryQueryResolver ? ($this->inventoryQueryResolver)() : Inventory::query();
-                $inv      = $invQuery
+                $inv = $invQuery
                     ->where('product_id', $product->id)
                     ->lockForUpdate()
                     ->first();
 
                 if (! $inv) {
-                    $inv             = new Inventory;
+                    $inv = new Inventory;
                     $inv->product_id = $product->id;
-                    $inv->quantity   = 0;
+                    $inv->quantity = 0;
                 }
 
-                $newQty            = $this->stockPolicy->increase((int) $inv->quantity, $quantity);
-                $inv->quantity     = $newQty;
+                $newQty = $this->stockPolicy->increase((int) $inv->quantity, $quantity);
+                $inv->quantity = $newQty;
                 $inv->last_updated = Carbon::now();
                 $inv->save();
 
                 if ($unitCost !== null) {
                     $currentQty = (int) $newQty;
-                    $prevQty    = max(0, $currentQty - $quantity);
-                    $prevCost   = (float) $product->cost_price;
+                    $prevQty = max(0, $currentQty - $quantity);
+                    $prevCost = (float) $product->cost_price;
 
-                    $den     = $prevQty + $quantity;
+                    $den = $prevQty + $quantity;
                     $newCost = $den > 0
                         ? (($prevQty * $prevCost) + ($quantity * (float) $unitCost)) / $den
                         : (float) $unitCost;
@@ -112,13 +115,13 @@ final class RegisterStockEntry
                 }
 
                 return [
-                    'product_id'       => $product->id,
-                    'sku'              => $product->sku,
-                    'name'             => $product->name,
-                    'quantity'         => (int) $inv->quantity,
-                    'cost_price'       => (float) $product->cost_price,
-                    'sale_price'       => (float) $product->sale_price,
-                    'last_updated'     => $inv->last_updated?->toISOString(),
+                    'product_id' => $product->id,
+                    'sku' => $product->sku,
+                    'name' => $product->name,
+                    'quantity' => (int) $inv->quantity,
+                    'cost_price' => (float) $product->cost_price,
+                    'sale_price' => (float) $product->sale_price,
+                    'last_updated' => $inv->last_updated?->toISOString(),
                     'stock_cost_value' => (int) $inv->quantity * (float) $product->cost_price,
                     'stock_sale_value' => (int) $inv->quantity * (float) $product->sale_price,
                     'projected_profit' => ((int) $inv->quantity * (float) $product->sale_price)

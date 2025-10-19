@@ -35,8 +35,7 @@ final class RegisterInventoryRequest extends FormRequest
     {
         return [
             'product_id' => ['required', 'integer', 'exists:products,id'],
-            'quantity'   => ['required', 'integer', 'min:1'],
-            // o teste pede custo na entrada — usamos para custo médio móvel
+            'quantity' => ['required', 'integer', 'min:1'],
             'unit_cost' => ['nullable', 'numeric', 'min:0'],
         ];
     }
@@ -50,10 +49,10 @@ final class RegisterInventoryRequest extends FormRequest
     {
         return [
             'product_id.required' => 'Informe o produto.',
-            'product_id.exists'   => 'Produto não encontrado.',
-            'quantity.required'   => 'Informe a quantidade.',
-            'quantity.min'        => 'Quantidade deve ser pelo menos 1.',
-            'unit_cost.min'       => 'O custo unitário não pode ser negativo.',
+            'product_id.exists' => 'Produto não encontrado.',
+            'quantity.required' => 'Informe a quantidade.',
+            'quantity.min' => 'Quantidade deve ser pelo menos 1.',
+            'unit_cost.min' => 'O custo unitário não pode ser negativo.',
         ];
     }
 }

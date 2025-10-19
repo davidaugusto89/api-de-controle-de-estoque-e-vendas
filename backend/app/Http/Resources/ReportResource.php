@@ -27,9 +27,9 @@ final class ReportResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'period'       => $this->resource['period'],
-            'totals'       => $this->resource['totals'],
-            'series'       => $this->resource['series'],
+            'period' => $this->resource['period'],
+            'totals' => $this->resource['totals'],
+            'series' => $this->resource['series'],
             'top_products' => $this->resource['top_products'],
         ];
     }

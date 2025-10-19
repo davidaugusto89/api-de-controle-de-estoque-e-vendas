@@ -59,7 +59,7 @@ final class InventoryLockServiceTest extends TestCase
 
             public function block(int $waitSeconds, int $sleepMs): bool
             {
-                $this->captured['wait']  = $waitSeconds;
+                $this->captured['wait'] = $waitSeconds;
                 $this->captured['sleep'] = $sleepMs;
 
                 return true;
@@ -79,7 +79,7 @@ final class InventoryLockServiceTest extends TestCase
 
             public function __construct($lock, array &$captured)
             {
-                $this->lock     = $lock;
+                $this->lock = $lock;
                 $this->captured = &$captured;
             }
 
@@ -222,7 +222,7 @@ final class InventoryLockServiceTest extends TestCase
         $cache->method('store')->willReturn($fakeStore);
 
         $redis = new RedisLock($cache);
-        $sut   = new InventoryLockService($redis);
+        $sut = new InventoryLockService($redis);
 
         // Act: passar ids não ordenados e com duplicatas
         $result = $sut->lockMany([3, 1, 2, 2], fn () => 'done');
@@ -290,7 +290,7 @@ final class InventoryLockServiceTest extends TestCase
         $cache->method('store')->willReturn($fakeStore);
 
         $redis = new RedisLock($cache);
-        $sut   = new InventoryLockService($redis);
+        $sut = new InventoryLockService($redis);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('falha ao adquirir 2');
@@ -321,7 +321,7 @@ final class InventoryLockServiceTest extends TestCase
 
             public function block(int $waitSeconds, int $sleepMs): bool
             {
-                $this->captured['wait']  = $waitSeconds;
+                $this->captured['wait'] = $waitSeconds;
                 $this->captured['sleep'] = $sleepMs;
 
                 return true;
@@ -341,7 +341,7 @@ final class InventoryLockServiceTest extends TestCase
 
             public function __construct($lock, array &$captured)
             {
-                $this->lock     = $lock;
+                $this->lock = $lock;
                 $this->captured = &$captured;
             }
 
@@ -358,7 +358,7 @@ final class InventoryLockServiceTest extends TestCase
         $cache->method('store')->willReturn($fakeStore);
 
         $redis = new RedisLock($cache);
-        $sut   = new InventoryLockService($redis);
+        $sut = new InventoryLockService($redis);
 
         // Act
         $sut->lock(9, fn () => 'x', 20, 30);

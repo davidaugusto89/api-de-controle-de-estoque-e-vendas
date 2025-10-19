@@ -27,8 +27,6 @@ final class CreateSale
      *
      * @param  array<int, array{product_id:int, quantity:int, unit_price?:float|null}>  $items
      * @return int ID da venda criada
-     *
-     * @throws \Throwable
      */
     public function execute(array $items): int
     {
@@ -38,47 +36,47 @@ final class CreateSale
             ->keyBy('id');
 
         return $this->tx->run(function () use ($items, $productMap): int {
-            // 1) cria a venda só para obter o ID (mock espera apenas 1 save)
+            // 1) cria a venda só para obter o ID
             $sale = new Sale;
-            // usar string do enum para não depender de constante do Model (Mockery overload-safe)
-            $sale->status       = SaleStatus::QUEUED->value;
+            // usar string do enum para não depender de constante do Model
+            $sale->status = SaleStatus::QUEUED->value;
             $sale->total_amount = 0.0;
-            $sale->total_cost   = 0.0;
+            $sale->total_cost = 0.0;
             $sale->total_profit = 0.0;
             $sale->save(); // única chamada a save()
 
-            // Obtemos o id do modelo de forma defensiva (mock/overload podem expor de formas diferentes)
+            // Obtemos o id do modelo de forma defensiva
             $saleId = $sale->getAttribute('id') ?? ($sale->id ?? null);
 
-            // 2) monta os itens e acumula totais em memória (não precisamos persistir de novo para os testes)
+            // 2) monta os itens e acumula totais em memória
             $rows = [];
             foreach ($items as $it) {
                 $p = $productMap[$it['product_id']] ?? null;
 
-                $quantity  = (int) ($it['quantity'] ?? 0);
+                $quantity = (int) ($it['quantity'] ?? 0);
                 $unitPrice = array_key_exists('unit_price', $it) && $it['unit_price'] !== null
                     ? (float) $it['unit_price']
                     : (float) ($p?->sale_price ?? 0.0);
                 $unitCost = (float) ($p?->cost_price ?? 0.0);
 
-                // Produto ausente → normaliza para zero (exigido pelos testes)
+                // Produto ausente → normaliza para zero
                 if ($p === null) {
                     $unitPrice = 0.0;
-                    $unitCost  = 0.0;
+                    $unitCost = 0.0;
                 }
 
                 $rows[] = [
-                    'sale_id'    => $saleId,
+                    'sale_id' => $saleId,
                     'product_id' => (int) $it['product_id'],
-                    'quantity'   => $quantity,
+                    'quantity' => $quantity,
                     'unit_price' => $unitPrice,
-                    'unit_cost'  => $unitCost,
+                    'unit_cost' => $unitCost,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
 
                 $sale->total_amount += $quantity * $unitPrice;
-                $sale->total_cost   += $quantity * $unitCost;
+                $sale->total_cost += $quantity * $unitCost;
             }
 
             $sale->total_profit = $sale->total_amount - $sale->total_cost;

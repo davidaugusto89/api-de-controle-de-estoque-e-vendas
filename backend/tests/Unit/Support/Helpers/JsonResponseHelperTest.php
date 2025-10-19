@@ -20,7 +20,7 @@ final class JsonResponseHelperTest extends TestCase
          * Então: retorna JsonResponse com estrutura esperada (status, data, meta)
          */
         $data = ['id' => 1, 'name' => 'Produto'];
-        $res  = JsonResponseHelper::ok($data, 201, ['page' => 1]);
+        $res = JsonResponseHelper::ok($data, 201, ['page' => 1]);
 
         $this->assertInstanceOf(JsonResponse::class, $res);
         $this->assertSame(201, $res->getStatusCode());

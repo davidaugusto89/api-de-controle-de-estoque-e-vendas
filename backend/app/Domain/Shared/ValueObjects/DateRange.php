@@ -12,6 +12,12 @@ use InvalidArgumentException;
  */
 final class DateRange
 {
+    /**
+     * @param  CarbonImmutable  $from  Data inicial
+     * @param  CarbonImmutable  $to  Data final
+     *
+     * @throws InvalidArgumentException Se from for maior que to
+     */
     public function __construct(
         public readonly CarbonImmutable $from,
         public readonly CarbonImmutable $to
@@ -23,6 +29,10 @@ final class DateRange
 
     /**
      * Cria um intervalo normalizado para o dia completo.
+     *
+     * @param  CarbonImmutable  $from  Data inicial
+     * @param  CarbonImmutable  $to  Data final
+     * @return self Novo DateRange com from no início do dia e to no final do dia
      */
     public static function of(CarbonImmutable $from, CarbonImmutable $to): self
     {

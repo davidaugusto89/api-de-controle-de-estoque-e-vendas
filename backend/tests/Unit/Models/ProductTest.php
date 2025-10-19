@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @runTestsInSeparateProcesses
+ *
  * @preserveGlobalState disabled
  */
 final class ProductTest extends TestCase
@@ -54,7 +55,7 @@ final class ProductTest extends TestCase
         if (class_exists('Mockery')) {
             \Mockery::close();
         }
-        $p             = new Product;
+        $p = new Product;
         $p->sale_price = 25.5;
         $p->cost_price = 10.25;
 
@@ -72,7 +73,7 @@ final class ProductTest extends TestCase
         if (class_exists('Mockery')) {
             \Mockery::close();
         }
-        $ref    = new \ReflectionMethod(Product::class, 'inventory');
+        $ref = new \ReflectionMethod(Product::class, 'inventory');
         $return = $ref->getReturnType();
 
         $this->assertNotNull($return);
@@ -113,7 +114,7 @@ final class ProductTest extends TestCase
         if (class_exists('Mockery')) {
             \Mockery::close();
         }
-        $ref    = new \ReflectionMethod(Product::class, 'saleItems');
+        $ref = new \ReflectionMethod(Product::class, 'saleItems');
         $return = $ref->getReturnType();
 
         $this->assertNotNull($return);
@@ -168,7 +169,7 @@ final class ProductTest extends TestCase
         };
         $fakeBuilder->calledRef = &$called;
 
-        $p   = new Product;
+        $p = new Product;
         $res = $p->scopeSku($fakeBuilder, 'ABC123');
 
         $this->assertSame('RESULT', $res);

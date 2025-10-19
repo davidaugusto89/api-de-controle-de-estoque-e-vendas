@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Query para relatórios de vendas.
+ */
 final class SalesReportQuery
 {
     /** @var (callable():mixed)|null */
@@ -22,16 +25,31 @@ final class SalesReportQuery
     /** @var (callable():mixed)|null */
     private $productQueryResolver;
 
+    /**
+     * Define um resolver para consultas de vendas (facilita testes).
+     *
+     * @param  callable():mixed|null  $resolver
+     */
     public function setSaleQueryResolver(?callable $resolver): void
     {
         $this->saleQueryResolver = $resolver;
     }
 
+    /**
+     * Injeta um resolver opcional para DB::table(...) (facilita testes).
+     *
+     * @param  callable():mixed|null  $resolver
+     */
     public function setDbResolver(?callable $resolver): void
     {
         $this->dbResolver = $resolver;
     }
 
+    /**
+     * Define um resolver para consultas de produtos (facilita testes).
+     *
+     * @param  callable():mixed|null  $resolver
+     */
     public function setProductQueryResolver(?callable $resolver): void
     {
         $this->productQueryResolver = $resolver;
@@ -55,7 +73,7 @@ final class SalesReportQuery
     ): array {
         // Normalizamos início/fim e usamos a coluna indexada "sale_date"
         $from = $from->startOfDay();
-        $to   = $to->endOfDay();
+        $to = $to->endOfDay();
 
         $base = ($this->saleQueryResolver ? ($this->saleQueryResolver)() : Sale::query())
             ->betweenDays($from, $to) // usa sale_date (DATE) -> índice
@@ -77,9 +95,9 @@ final class SalesReportQuery
             ->selectRaw('COALESCE(SUM(total_profit),0) as total_profit')
             ->first();
 
-        $totalSales  = (int) ($row?->total_sales ?? 0);
+        $totalSales = (int) ($row?->total_sales ?? 0);
         $totalAmount = (string) ($row?->total_amount ?? '0.00');
-        $totalCost   = (string) ($row?->total_cost ?? '0.00');
+        $totalCost = (string) ($row?->total_cost ?? '0.00');
         $totalProfit = (string) ($row?->total_profit ?? '0.00');
 
         $avgTicket = $totalSales > 0
@@ -87,11 +105,11 @@ final class SalesReportQuery
             : '0.00';
 
         return [
-            'total_sales'  => $totalSales,
+            'total_sales' => $totalSales,
             'total_amount' => $totalAmount,
-            'total_cost'   => $totalCost,
+            'total_cost' => $totalCost,
             'total_profit' => $totalProfit,
-            'avg_ticket'   => $avgTicket,
+            'avg_ticket' => $avgTicket,
         ];
     }
 
@@ -106,7 +124,7 @@ final class SalesReportQuery
         ?string $productSku = null
     ): Collection {
         $from = $from->startOfDay();
-        $to   = $to->endOfDay();
+        $to = $to->endOfDay();
 
         $base = ($this->saleQueryResolver ? ($this->saleQueryResolver)() : Sale::query())
             ->betweenDays($from, $to) // filtro por sale_date (indexado)
@@ -130,10 +148,10 @@ final class SalesReportQuery
             ->orderBy('sales.sale_date', 'asc')
             ->get()
             ->map(static fn ($r) => [
-                'date'         => (string) $r->date,
+                'date' => (string) $r->date,
                 'total_amount' => (string) $r->total_amount,
                 'total_profit' => (string) $r->total_profit,
-                'orders'       => (int) $r->orders,
+                'orders' => (int) $r->orders,
             ]);
     }
 
@@ -150,11 +168,11 @@ final class SalesReportQuery
         string $orderBy = 'amount',
         ?string $productSku = null
     ): Collection {
-        $limit   = max(1, min(1000, $limit));
+        $limit = max(1, min(1000, $limit));
         $orderBy = $orderBy === 'quantity' ? 'quantity' : 'amount';
 
         $from = $from->startOfDay();
-        $to   = $to->endOfDay();
+        $to = $to->endOfDay();
 
         // Agregação uma vez só (filtra por período na coluna indexada sale_date)
         $agg = ($this->dbResolver ? ($this->dbResolver)() : DB::table('sale_items as si'))
@@ -184,11 +202,11 @@ final class SalesReportQuery
             ->get()
             ->map(static fn ($p) => [
                 'product_id' => (int) $p->id,
-                'sku'        => $p->sku ?: null,
-                'name'       => $p->name ?: null,
-                'quantity'   => (int) $p->quantity,
-                'amount'     => (string) $p->amount,
-                'profit'     => (string) $p->profit,
+                'sku' => $p->sku ?: null,
+                'name' => $p->name ?: null,
+                'quantity' => (int) $p->quantity,
+                'amount' => (string) $p->amount,
+                'profit' => (string) $p->profit,
             ]);
     }
 }

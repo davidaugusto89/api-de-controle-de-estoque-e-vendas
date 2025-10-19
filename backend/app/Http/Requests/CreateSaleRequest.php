@@ -23,7 +23,7 @@ final class CreateSaleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // ajuste se houver auth
+        return true;
     }
 
     /**
@@ -34,10 +34,9 @@ final class CreateSaleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'items'              => ['required', 'array', 'min:1'],
+            'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
-            'items.*.quantity'   => ['required', 'integer', 'min:1'],
-            // preço unitário de venda pode vir do produto; aceitar override opcional
+            'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['nullable', 'numeric', 'min:0'],
         ];
     }

@@ -34,9 +34,9 @@ final class SaleFlowIntegrationTest extends TestCase
         $invRepo->upsertByProductId((int) $product->id, $initialQty);
 
         // Captura a versão atual do cache das listas
-        $cache          = $this->app->make('cache.store');
+        $cache = $this->app->make('cache.store');
         $inventoryCache = new InventoryCache($cache);
-        $beforeVersion  = (int) $cache->get('inventory:list_version', 1);
+        $beforeVersion = (int) $cache->get('inventory:list_version', 1);
         // Reset metric counters to avoid test cross-contamination
         foreach (['inventory.job.start', 'inventory.job.completed', 'inventory.item.decrement', 'inventory.item.failure', 'inventory.cache.invalidated'] as $m) {
             $cache->put('metrics:'.$m, 0);
@@ -47,7 +47,7 @@ final class SaleFlowIntegrationTest extends TestCase
             'items' => [
                 [
                     'product_id' => $product->id,
-                    'quantity'   => 3,
+                    'quantity' => 3,
                     'unit_price' => $product->sale_price,
                 ],
             ],
@@ -63,22 +63,22 @@ final class SaleFlowIntegrationTest extends TestCase
         $this->assertIsInt($saleId, 'sale_id should be present in response');
 
         // Recupera os items da venda a partir do DB
-        $sale  = Sale::findOrFail($saleId);
+        $sale = Sale::findOrFail($saleId);
         $items = $sale->items->map(function ($it) {
             return [
                 'product_id' => (int) $it->product_id,
-                'quantity'   => (int) $it->quantity,
+                'quantity' => (int) $it->quantity,
                 'unit_price' => (float) $it->unit_price,
-                'unit_cost'  => (float) $it->unit_cost,
+                'unit_cost' => (float) $it->unit_cost,
             ];
         })->toArray();
 
         // Execução do job manualmente (sincronamente) com dependências reais
         $job = new UpdateInventoryJob($saleId, $items);
 
-        $tx            = $this->app->make(Transactions::class);
-        $locks         = $this->app->make(InventoryLockService::class);
-        $policy        = $this->app->make(StockPolicy::class);
+        $tx = $this->app->make(Transactions::class);
+        $locks = $this->app->make(InventoryLockService::class);
+        $policy = $this->app->make(StockPolicy::class);
         $inventoryRepo = $this->app->make(InventoryRepository::class);
 
         $job->handle($tx, $locks, $policy, $inventoryRepo, $inventoryCache, new NullLogger);

@@ -5,12 +5,28 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
-use Database\Factories\SaleFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Representa uma venda realizada no sistema.
+ *
+ * A tabela `sales` armazena informações agregadas sobre cada venda,
+ * incluindo valores totais e status. A relação `items` aponta para
+ * os itens individuais vendidos nesta venda.
+ *
+ * @property int $id
+ * @property float $total_amount
+ * @property float $total_cost
+ * @property float $total_profit
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $sale_date
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SaleItem> $items
+ */
 class Sale extends Model
 {
     use HasFactory;
@@ -36,42 +52,56 @@ class Sale extends Model
 
     protected $casts = [
         'total_amount' => 'decimal:2',
-        'total_cost'   => 'decimal:2',
+        'total_cost' => 'decimal:2',
         'total_profit' => 'decimal:2',
-        'created_at'   => 'datetime',
-        'updated_at'   => 'datetime',
-        'sale_date'    => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'sale_date' => 'date',
     ];
 
-    protected static function newFactory(): SaleFactory
-    {
-        return SaleFactory::new();
-    }
-
-    /** @return HasMany<\App\Models\SaleItem> */
+    /**
+     * Relação 1:N com os itens/linhas desta venda.
+     *
+     * @return HasMany<\App\Models\SaleItem, self>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(SaleItem::class);
     }
 
-    /** Filtro por intervalo *temporal* (timestamp) em created_at */
+    /**
+     * Filtro por intervalo *calendário* (date) na coluna indexada created_at
+     *
+     * @param [type] $query
+     * @return void
+     */
     public function scopeBetweenDates($query, CarbonImmutable $from, CarbonImmutable $to)
     {
         return $query->whereBetween('created_at', [$from->startOfDay(), $to->endOfDay()]);
     }
 
-    /** Filtro por intervalo *calendário* (date) na coluna indexada sale_date */
+    /**
+     * Filtro por intervalo *data* (date) na coluna indexada sale_date
+     *
+     * @param [type] $query
+     * @return void
+     */
     public function scopeBetweenDays($query, CarbonImmutable $from, CarbonImmutable $to)
     {
         return $query->whereBetween('sale_date', [$from->toDateString(), $to->toDateString()]);
     }
 
+    /**
+     * Verifica se a venda está completa.
+     */
     public function isCompleted(): bool
     {
         return $this->status === self::STATUS_COMPLETED;
     }
 
-    // Accessors abaixo são opcionais, pois os casts já cuidam. Mantidos por compat.
+    /**
+     * Atributo acessor para total_amount garantindo float.
+     */
     protected function totalAmount(): Attribute
     {
         return Attribute::make(
@@ -79,6 +109,9 @@ class Sale extends Model
         );
     }
 
+    /**
+     * Atributo acessor para total_cost garantindo float.
+     */
     protected function totalCost(): Attribute
     {
         return Attribute::make(
@@ -86,6 +119,9 @@ class Sale extends Model
         );
     }
 
+    /**
+     * Atributo acessor para total_profit garantindo float.
+     */
     protected function totalProfit(): Attribute
     {
         return Attribute::make(

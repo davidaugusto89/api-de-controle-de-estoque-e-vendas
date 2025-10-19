@@ -19,10 +19,13 @@ final class MetricsCollector
 
     public function __construct(CacheRepository $cache, ?LoggerInterface $logger = null)
     {
-        $this->cache  = $cache;
+        $this->cache = $cache;
         $this->logger = $logger ?? new \Psr\Log\NullLogger;
     }
 
+    /**
+     * Incrementa um contador.
+     */
     public function increment(string $key, int $by = 1): void
     {
         try {
@@ -37,6 +40,9 @@ final class MetricsCollector
         }
     }
 
+    /**
+     * Define um valor de gauge.
+     */
     public function gauge(string $key, int|float $value): void
     {
         try {
@@ -46,6 +52,9 @@ final class MetricsCollector
         }
     }
 
+    /**
+     * Recupera um valor de gauge.
+     */
     public function get(string $key): int|float|null
     {
         return $this->cache->get("metrics:{$key}");

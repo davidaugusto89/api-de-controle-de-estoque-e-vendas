@@ -21,7 +21,7 @@ final class SaleItemRepository
     /**
      * Injeta um resolver opcional para SaleItem::query() (facilita testes).
      *
-     * @param callable():mixed|null $resolver
+     * @param  callable():mixed|null  $resolver
      */
     public function setQueryResolver(?callable $resolver): void
     {
@@ -45,11 +45,11 @@ final class SaleItemRepository
         $qb = $this->queryResolver ? ($this->queryResolver)() : SaleItem::query();
 
         $item = $qb->create([
-            'sale_id'    => $data['sale_id'],
+            'sale_id' => $data['sale_id'],
             'product_id' => $data['product_id'],
-            'quantity'   => $data['quantity'],
+            'quantity' => $data['quantity'],
             'unit_price' => $data['unit_price'],
-            'unit_cost'  => $data['unit_cost'],
+            'unit_cost' => $data['unit_cost'],
         ]);
 
         return $item;
@@ -57,6 +57,8 @@ final class SaleItemRepository
 
     /**
      * Busca um item específico de venda.
+     *
+     * @param  int  $id  ID do item de venda.
      */
     public function findById(int $id): ?SaleItem
     {
@@ -68,6 +70,7 @@ final class SaleItemRepository
     /**
      * Retorna todos os itens de uma venda específica.
      *
+     * @param  int  $saleId  ID da venda
      * @return Collection<int, SaleItem>
      */
     public function findBySaleId(int $saleId): Collection
@@ -80,6 +83,7 @@ final class SaleItemRepository
     /**
      * Atualiza um item de venda existente.
      *
+     * @param  int  $id  ID do item de venda.
      * @param  array<string, mixed>  $data
      */
     public function update(int $id, array $data): bool
@@ -91,6 +95,8 @@ final class SaleItemRepository
 
     /**
      * Exclui um item de venda.
+     *
+     * @param  int  $id  ID do item de venda.
      */
     public function delete(int $id): ?bool
     {
@@ -102,7 +108,7 @@ final class SaleItemRepository
     /**
      * Retorna todos os itens de um conjunto de vendas.
      *
-     * @param  array<int>  $saleIds
+     * @param  array<int>  $saleIds  IDs das vendas
      * @return Collection<int, SaleItem>
      */
     public function findBySales(array $saleIds): Collection

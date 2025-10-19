@@ -51,11 +51,11 @@ final class FinalizeSaleTest extends TestCase
         });
 
         $validator = new SaleValidator;
-        $margin    = new MarginCalculator;
+        $margin = new MarginCalculator;
 
         // Mock do Sale::query()->lockForUpdate()->findOrFail($saleId)
-        $saleModel         = Mockery::mock();
-        $saleModel->id     = 1;
+        $saleModel = Mockery::mock();
+        $saleModel->id = 1;
         $saleModel->status = SaleStatus::COMPLETED->value;
 
         $saleQuery = Mockery::mock();
@@ -85,11 +85,11 @@ final class FinalizeSaleTest extends TestCase
 
         // Usa instância real do validador (classe final) e provoca exceção via dados inválidos
         $validator = new SaleValidator;
-        $margin    = new MarginCalculator;
+        $margin = new MarginCalculator;
 
         // Sale exists and not completed
-        $saleModel         = Mockery::mock();
-        $saleModel->id     = 2;
+        $saleModel = Mockery::mock();
+        $saleModel->id = 2;
         $saleModel->status = SaleStatus::PROCESSING->value;
 
         $saleQuery = Mockery::mock();
@@ -101,7 +101,7 @@ final class FinalizeSaleTest extends TestCase
             ->andReturn($saleQuery);
 
         // SaleItem::query()->where(...)->get() retorna collection com item inválido (product_id 0)
-        $item          = (object) ['unit_price' => 5.0, 'unit_cost' => 3.0, 'quantity' => 1, 'product_id' => 0];
+        $item = (object) ['unit_price' => 5.0, 'unit_cost' => 3.0, 'quantity' => 1, 'product_id' => 0];
         $saleItemQuery = Mockery::mock();
         $saleItemQuery->shouldReceive('where')->andReturnSelf();
         $saleItemQuery->shouldReceive('get')->andReturn(collect([$item]));
@@ -130,8 +130,8 @@ final class FinalizeSaleTest extends TestCase
         $margin = new MarginCalculator;
 
         // Sale model to be returned by findOrFail
-        $saleModel         = Mockery::mock();
-        $saleModel->id     = 3;
+        $saleModel = Mockery::mock();
+        $saleModel->id = 3;
         $saleModel->status = SaleStatus::PROCESSING->value;
         $saleModel->shouldReceive('save')->once()->andReturnTrue();
 
@@ -165,7 +165,7 @@ final class FinalizeSaleTest extends TestCase
         Event::assertDispatched(SaleFinalized::class, function ($evt) {
             return $evt->saleId === 3
                 && is_array($evt->items)
-                && count($evt->items)           === 2
+                && count($evt->items) === 2
                 && $evt->items[0]['product_id'] === 10;
         });
     }

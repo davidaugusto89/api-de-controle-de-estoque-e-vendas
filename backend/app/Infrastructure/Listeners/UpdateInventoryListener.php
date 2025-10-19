@@ -10,6 +10,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Listener que reage ao evento de venda finalizada para atualizar o estoque.
+ */
 final class UpdateInventoryListener implements ShouldQueue
 {
     use InteractsWithQueue;
@@ -20,16 +23,19 @@ final class UpdateInventoryListener implements ShouldQueue
     /** Fila preferida deste listener */
     public string $queue = 'inventory';
 
+    /**
+     * Manipula o evento disparado quando uma venda é finalizada.
+     */
     public function handle(SaleFinalized $event): void
     {
         try {
             // Log antes do dispatch para ter contexto no worker
             Log::info('Dispatching UpdateInventoryJob from listener', ['sale_id' => $event->saleId, 'items_count' => count($event->items)]);
 
-            // If the queue connection is sync (tests), dispatch synchronously in
-            // the current process so that test container bindings (mocks) are
-            // visible to the job handler. Otherwise dispatch to the queue as
-            // before.
+            // Se a conexão da fila for 'sync' (testes), despacha sincronicamente
+            // no processo atual para que os bindings do container de teste
+            // (mocks) sejam visíveis ao handler do job. Caso contrário, despachar
+            // para a fila como antes.
             $default = config('queue.default');
             if ($default === 'sync') {
                 $job = new \App\Infrastructure\Jobs\UpdateInventoryJob($event->saleId, $event->items);
@@ -43,8 +49,8 @@ final class UpdateInventoryListener implements ShouldQueue
             // Log útil para diagnosticar rapidamente
             Log::error('Falha no UpdateInventoryListener', [
                 'sale_id' => $event->saleId,
-                'items'   => $event->items,
-                'error'   => $e->getMessage(),
+                'items' => $event->items,
+                'error' => $e->getMessage(),
             ]);
 
             // Repassa a exceção para o worker marcar como failed (e aparecer no Horizon/queue:failed)

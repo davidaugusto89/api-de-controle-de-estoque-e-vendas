@@ -24,7 +24,7 @@ final class RepositoryServiceProviderTest extends TestCase
          */
         $app = new Container;
 
-        // Fake cache factory and repository with minimal methods used by provider
+        // Fábrica de cache fake e repositório com os métodos mínimos usados pelo provider
         $factory = new class
         {
             public function store($name = null)
@@ -70,11 +70,11 @@ final class RepositoryServiceProviderTest extends TestCase
 
         $provider->register();
 
-        // ProductRepository and InventoryRepository should be bound (resolvable)
+        // ProductRepository e InventoryRepository devem estar vinculados (resolvíveis)
         $this->assertTrue($app->bound(ProductRepository::class));
         $this->assertTrue($app->bound(InventoryRepository::class));
 
-        // InventoryCache singleton should be resolvable and instance of InventoryCache
+        // InventoryCache singleton deve ser resolvível e instância de InventoryCache
         $instance = $app->make(InventoryCache::class);
         $this->assertInstanceOf(InventoryCache::class, $instance);
     }

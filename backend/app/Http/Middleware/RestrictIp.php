@@ -8,14 +8,23 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Middleware para restringir acesso por IP.
+ */
 final class RestrictIp
 {
+    /**
+     * Restringe acesso com base em uma lista de IPs permitidos.
+     *
+     * @param  Request  $request  Requisição HTTP atual
+     * @param  Closure  $next  Próxima função da cadeia
+     * @return Response Resposta HTTP
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $allowed = config('observability.allowed_ips', []);
 
         if (empty($allowed)) {
-            // No restriction configured — allow by default (safe for dev).
             return $next($request);
         }
 

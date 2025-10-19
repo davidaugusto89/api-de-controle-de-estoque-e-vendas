@@ -25,15 +25,20 @@ final class ReportController extends Controller
 
     /**
      * Endpoint GET /api/reports/sales
-     * Parâmetros de query obrigatórios: start_date (YYYY-MM-DD), end_date (YYYY-MM-DD), product_sku (opcional)
-     * Extras opcionais: top (int), order_by (string), cache_ttl (int segundos)
+     * Parâmetros de query obrigatórios:
+     *  - start_date (YYYY-MM-DD),
+     *  - end_date (YYYY-MM-DD), product_sku (opcional)
+     * Extras opcionais:
+     *  - top (int),
+     *  - order_by (string),
+     *  - cache_ttl (int segundos)
      */
     public function sales(Request $request): JsonResponse
     {
         $validated = $request->validate([
             // requisitos do teste
-            'start_date'  => ['required', 'date_format:Y-m-d'],
-            'end_date'    => ['required', 'date_format:Y-m-d', 'after_or_equal:start_date'],
+            'start_date' => ['required', 'date_format:Y-m-d'],
+            'end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:start_date'],
             'product_sku' => ['nullable', 'string', 'max:100'],
 
             // opcionais seus
@@ -44,17 +49,16 @@ final class ReportController extends Controller
 
         // mapeamento para o caso de uso (aceitando também aliases antigos para compatibilidade, se quiser)
         $payload = [
-            'start_date'  => $validated['start_date'],
-            'end_date'    => $validated['end_date'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
             'product_sku' => $validated['product_sku'] ?? null,
-            'top'         => $validated['top']         ?? (int) $request->query('top', 100),
-            'order_by'    => $validated['order_by']    ?? 'date',
-            'cache_ttl'   => $validated['cache_ttl']   ?? 300,
+            'top' => $validated['top'] ?? (int) $request->query('top', 100),
+            'order_by' => $validated['order_by'] ?? 'date',
+            'cache_ttl' => $validated['cache_ttl'] ?? 300,
         ];
 
         $data = $this->report->handle($payload);
 
-        // sempre JSON (API-only), 200 OK
         return response()->json((new ReportResource($data))->resolve(), 200);
     }
 }
