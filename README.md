@@ -417,5 +417,4 @@ No último relatório de cobertura gerado (veja `coverage/`), a cobertura total 
 ## 👨‍💻 Autor
 
 **David Augusto**
-Desenvolvedor Backend | Laravel & PHP
 
