@@ -37,9 +37,9 @@ O sistema simula o módulo de controle de estoque e vendas de um ERP, oferecendo
 
 ## 🧩 Arquitetura e Tecnologias
 
-- **Framework:** Laravel 10+
-- **Linguagem:** PHP 8.1+
-- **Banco de Dados:** MySQL / PostgreSQL / SQLite
+- **Framework:** Laravel 12
+- **Linguagem:** PHP 8.4
+- **Banco de Dados:** MySQL 8.4
 - **Filas e Cache:** Redis
 - **Testes:** PHPUnit
 - **Scheduler:** Cron Jobs via Laravel Scheduler
