@@ -8,10 +8,12 @@ use Closure;
 
 final class InventoryCache
 {
-    private const TTL_SECONDS = 60;
-
     private const NS = 'inventory';
 
+    /**
+     * Key used to store the list version. Kept explicit for backwards compatibility
+     * with tests and other code that may reference the exact key name.
+     */
     private const VERSION_KEY = 'inventory:list_version';
 
     /**
@@ -32,6 +34,8 @@ final class InventoryCache
         Closure $resolver
     ): array {
         [$qNorm, $ver] = [$this->normalize($search), $this->listVersion()];
+
+        // (no-op)
 
         $key = $this->key("list:paged:v{$ver}:".md5(json_encode([
             'q' => $qNorm, 'pp' => $perPage, 'p' => $page,
@@ -115,22 +119,37 @@ final class InventoryCache
 
     private function bumpListVersion(): void
     {
-        // usando increment para evitar colisões entre processos — tolerate stores que não implementam increment
-        try {
-            if (method_exists($this->cache, 'increment')) {
-                $this->cache->increment(self::VERSION_KEY);
-            } else {
-                // fallback: ler versão atual e setar v+1 para preservar monotonicidade
-                $current = (int) ($this->cache->get(self::VERSION_KEY) ?? 1);
-                $this->cache->put(self::VERSION_KEY, $current + 1, self::TTL_SECONDS);
-            }
-        } catch (\Throwable) {
+        // Prefer atomic increment when available. Keep operations flat and
+        // avoid nested try/catch blocks.
+        // Detect real increment method (method_exists) instead of is_callable to
+        // avoid treating Mockery mocks (which implement __call) as increment-capable
+        // when they don't explicitly implement the method.
+        if (method_exists($this->cache, 'increment')) {
             try {
-                $current = (int) ($this->cache->get(self::VERSION_KEY) ?? 1);
-                $this->cache->put(self::VERSION_KEY, $current + 1, self::TTL_SECONDS);
+                $this->cache->increment(self::VERSION_KEY);
+                // Try to read back the version; if it yields a value we assume
+                // increment worked and we can stop.
+                try {
+                    $val = $this->cache->get(self::VERSION_KEY, 0);
+                    if ($val !== null) {
+                        return;
+                    }
+                } catch (\Throwable) {
+                    // if get fails, continue to fallback
+                }
             } catch (\Throwable) {
-                // silencioso
+                // ignore and fall back
             }
+            // If increment didn't produce a readable value, continue to fallback
+        }
+
+        // Fallback: read current version and write v+1
+        try {
+            $current = $this->cache->get(self::VERSION_KEY);
+            $current = (int) ($current ?? 1);
+            $this->cache->put(self::VERSION_KEY, $current + 1, $this->versionTtlSeconds());
+        } catch (\Throwable) {
+            // silent by design
         }
     }
 
@@ -139,27 +158,70 @@ final class InventoryCache
      */
     private function remember(string $key, Closure $resolver): mixed
     {
-        // Store pode não suportar locks (ex.: file). Fallback para remember simples.
-        if (method_exists($this->cache, 'lock')) {
-            try {
-                $lock = $this->cache->lock($key.':lock', 5);
+        $ttl = $this->ttlSeconds();
 
-                return $this->cache->remember($key, self::TTL_SECONDS, function () use ($resolver, $lock) {
-                    try {
-                        return $resolver();
-                    } finally {
-                        optional($lock)->release();
-                    }
-                });
+        // If store provides remember(), use it and fallback to resolver on error
+        if (is_callable([$this->cache, 'remember'])) {
+            try {
+                return $this->cache->remember($key, $ttl, $resolver);
             } catch (\Throwable) {
-                // fallback silencioso
+                return $resolver();
             }
         }
 
+        // Emulate remember: try get, run resolver, then put. All steps are
+        // independent and failures are non-fatal.
         try {
-            return $this->cache->remember($key, self::TTL_SECONDS, $resolver);
+            $existing = $this->cache->get($key);
+            if ($existing !== null) {
+                return $existing;
+            }
         } catch (\Throwable) {
-            return $resolver();
+            // ignore
         }
+
+        $value = $resolver();
+
+        try {
+            $this->cache->put($key, $value, $ttl);
+        } catch (\Throwable) {
+            // ignore
+        }
+
+        return $value;
+    }
+
+    /**
+     * Item TTL (seconds) — configurable via `config/inventory.php`.
+     */
+    private function ttlSeconds(): int
+    {
+        try {
+            if (function_exists('config')) {
+                return (int) config('inventory.cache.item_ttl', 60);
+            }
+        } catch (\Throwable) {
+            // fall through to default
+        }
+
+        return 60;
+    }
+
+    /**
+     * Version key TTL (seconds) used only by fallback path when store doesn't
+     * implement atomic increment + put. Should be large (e.g. 24h) so versions
+     * persist in fallback stores.
+     */
+    private function versionTtlSeconds(): int
+    {
+        try {
+            if (function_exists('config')) {
+                return (int) config('inventory.cache.version_ttl', 60);
+            }
+        } catch (\Throwable) {
+            // fall through to default
+        }
+
+        return 60;
     }
 }

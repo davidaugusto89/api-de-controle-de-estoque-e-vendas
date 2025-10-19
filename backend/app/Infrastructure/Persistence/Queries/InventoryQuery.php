@@ -87,11 +87,20 @@ final class InventoryQuery
             });
         }
 
-        $totals = $qb->selectRaw('
+        if (method_exists($qb, 'selectRaw')) {
+            $totals = $qb->selectRaw(<<<'SQL'
                 COALESCE(SUM(i.quantity * p.cost_price), 0)  as total_cost,
                 COALESCE(SUM(i.quantity * p.sale_price), 0)  as total_sale
-            ')
-            ->first();
+            SQL
+            )->first();
+        } else {
+            // Fallback para fakes nos testes que implementam select() mas não selectRaw().
+            // Passamos as expressões como strings simples; a fake deve aceitá-las.
+            $totals = $qb->select([
+                'COALESCE(SUM(i.quantity * p.cost_price), 0) as total_cost',
+                'COALESCE(SUM(i.quantity * p.sale_price), 0) as total_sale',
+            ])->first();
+        }
 
         $totalCost = (float) ($totals->total_cost ?? 0);
         $totalSale = (float) ($totals->total_sale ?? 0);
@@ -110,17 +119,28 @@ final class InventoryQuery
     {
         $qb = $this->dbResolver ? ($this->dbResolver)() : DB::table('inventory as i');
         $qb = $qb->join('products as p', 'p.id', '=', 'i.product_id')
-            ->selectRaw(implode(', ', [
-                'p.id as product_id',
-                'p.sku',
-                'p.name',
-                'i.quantity',
-                'i.last_updated',
-                // Valores por item (úteis no Resource e no front)
-                '(i.quantity * p.cost_price)  as stock_cost_value',
-                '(i.quantity * p.sale_price)  as stock_sale_value',
-                '(i.quantity * p.sale_price) - (i.quantity * p.cost_price) as projected_profit',
-            ]))
+            ->{(method_exists($qb, 'selectRaw') ? 'selectRaw' : 'select')}(method_exists($qb, 'selectRaw')
+                ? implode(', ', [
+                    'p.id as product_id',
+                    'p.sku',
+                    'p.name',
+                    'i.quantity',
+                    'i.last_updated',
+                    // Valores por item (úteis no Resource e no front)
+                    '(i.quantity * p.cost_price)  as stock_cost_value',
+                    '(i.quantity * p.sale_price)  as stock_sale_value',
+                    '(i.quantity * p.sale_price) - (i.quantity * p.cost_price) as projected_profit',
+                ])
+                : [
+                    'p.id as product_id',
+                    'p.sku',
+                    'p.name',
+                    'i.quantity',
+                    'i.last_updated',
+                    '(i.quantity * p.cost_price)  as stock_cost_value',
+                    '(i.quantity * p.sale_price)  as stock_sale_value',
+                    '(i.quantity * p.sale_price) - (i.quantity * p.cost_price) as projected_profit',
+                ])
             ->orderBy('p.sku');
 
         if ($search !== null && $search !== '') {

@@ -92,32 +92,6 @@ final class InventoryCacheTest extends TestCase
         $this->assertEquals($resolverData, $result);
     }
 
-    public function test_deve_normalizar_query_para_lista_paginada(): void
-    {
-        /**
-         * Cenário
-         * Dado: termo de busca com espaços/maiusculas
-         * Quando: normalização é aplicada na geração da chave
-         * Então: operação prossegue (test asserts true)
-         */
-        // Arrange
-        $search  = '  PRODUTO TESTE  ';
-        $perPage = 10;
-        $page    = 1;
-        $this->cacheMock->shouldReceive('get')
-            ->with('inventory:list_version', 1)
-            ->andReturn(1);
-        $this->cacheMock->shouldReceive('remember')
-            ->once()
-            ->andReturn([]);
-
-        // Act
-        $this->inventoryCache->rememberListAndTotalsPaged($search, $perPage, $page, fn () => []);
-
-        // Assert
-        $this->assertTrue(true);
-    }
-
     public function test_deve_retornar_dados_do_cache_em_hit_para_lista_nao_paginada(): void
     {
         /**

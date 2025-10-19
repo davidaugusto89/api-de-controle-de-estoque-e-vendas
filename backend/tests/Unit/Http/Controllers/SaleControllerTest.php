@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
-use App\Application\Sales\UseCases\CreateSale;
-use App\Http\Controllers\SaleController;
 use App\Infrastructure\Persistence\Queries\SaleDetailsQuery;
-use Illuminate\Http\Request;
 use Tests\TestCase;
 
 /**
@@ -46,12 +43,12 @@ final class SaleControllerTest extends TestCase
             }
         };
 
-    $saleQuery = new SaleDetailsQuery();
-    $saleQuery->setDbResolver(fn () => $inv);
+        $saleQuery = new SaleDetailsQuery;
+        $saleQuery->setDbResolver(fn () => $inv);
 
-    $this->instance(SaleDetailsQuery::class, $saleQuery);
+        $this->instance(SaleDetailsQuery::class, $saleQuery);
 
-    $response = $this->getJson('/api/v1/sales/9999');
+        $response = $this->getJson('/api/v1/sales/9999');
 
         $this->assertEquals(404, $response->getStatusCode());
         $payload = json_decode($response->getContent(), true);

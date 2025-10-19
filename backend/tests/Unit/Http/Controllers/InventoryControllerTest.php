@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
-use App\Http\Controllers\InventoryController;
 use App\Infrastructure\Cache\InventoryCache;
 use App\Infrastructure\Persistence\Queries\InventoryQuery;
-use Illuminate\Http\Request;
 use Tests\TestCase;
 
 /**
@@ -43,6 +41,7 @@ final class InventoryControllerTest extends TestCase
         $inv = new class($get, $row)
         {
             private $get;
+
             private $row;
 
             public function __construct($get, $row)
@@ -102,7 +101,7 @@ final class InventoryControllerTest extends TestCase
             }
         };
 
-        $query = new InventoryQuery();
+        $query = new InventoryQuery;
         $query->setDbResolver(fn () => $inv);
 
         $totals = ['total_cost' => 100.0, 'total_sale' => 150.0, 'projected_profit' => 50.0];
@@ -120,13 +119,9 @@ final class InventoryControllerTest extends TestCase
                 return $d;
             }
 
-            public function put($k, $v, $t)
-            {
-            }
+            public function put($k, $v, $t) {}
 
-            public function forget($k)
-            {
-            }
+            public function forget($k) {}
         };
 
         $cache = new InventoryCache($fakeCache);
@@ -188,7 +183,7 @@ final class InventoryControllerTest extends TestCase
             }
         };
 
-        $query2 = new InventoryQuery();
+        $query2 = new InventoryQuery;
         $query2->setDbResolver(fn () => $inv2);
 
         $fakeCache2 = new class

@@ -7,6 +7,7 @@ namespace App\Infrastructure\Jobs;
 use App\Domain\Inventory\Services\InventoryLockService;
 use App\Domain\Inventory\Services\StockPolicy;
 use App\Infrastructure\Cache\InventoryCache;
+use App\Infrastructure\Metrics\MetricsCollector;
 use App\Infrastructure\Persistence\Eloquent\InventoryRepository;
 use App\Support\Database\Transactions;
 use Illuminate\Bus\Queueable;
@@ -57,30 +58,56 @@ final class UpdateInventoryJob implements ShouldQueue
         StockPolicy $policy,
         InventoryRepository $inventoryRepo,
         InventoryCache $cache,
+        MetricsCollector|LoggerInterface|null $metricsOrLogger = null,
         ?LoggerInterface $logger = null
     ): void {
+        // Backwards compatible: callers previously passed the Logger as the 6th
+        // argument. Accept either a MetricsCollector or a LoggerInterface here and
+        // normalize both variables.
+
+        // Normalize logger: if metricsOrLogger is a Logger, treat it as the logger.
+        if ($metricsOrLogger instanceof LoggerInterface) {
+            $logger = $metricsOrLogger;
+            // don't force-resolve MetricsCollector in unit tests without a cache binding
+            $metrics = $this->resolveMetricsSafely();
+        } else {
+            // metricsOrLogger is either MetricsCollector or null
+            $metrics = $metricsOrLogger ?? $this->resolveMetricsSafely();
+        }
+
         $logger ??= new NullLogger;
+
+        // metrics might be null in unit tests; guard calls
+        $metrics?->increment('inventory.job.start');
 
         $processed = [];
 
-        $tx->run(function () use ($locks, $inventoryRepo, &$processed, $logger): void {
+        $tx->run(function () use ($locks, $inventoryRepo, &$processed, $logger, $metrics): void {
             foreach ($this->items as $it) {
                 $productId = (int) $it['product_id'];
                 $quantity  = (int) $it['quantity'];
 
                 $logger->info('Processing inventory item', ['sale_id' => $this->saleId, 'product_id' => $productId, 'quantity' => $quantity]);
 
-                $locks->lock(
-                    $productId,
-                    function () use ($inventoryRepo, $productId, $quantity, $logger): void {
-                        // Decremento atômico no DB encapsulado no repositório
-                        $inventoryRepo->decrementOrFail($productId, $quantity);
+                try {
+                    $locks->lock(
+                        $productId,
+                        function () use ($inventoryRepo, $productId, $quantity, $logger): void {
+                            // Decremento atômico no DB encapsulado no repositório
+                            $inventoryRepo->decrementOrFail($productId, $quantity);
 
-                        $logger->info('Decrement applied', ['product_id' => $productId, 'quantity' => $quantity]);
-                    },
-                    10,
-                    5
-                );
+                            $logger->info('Decrement applied', ['product_id' => $productId, 'quantity' => $quantity]);
+                        },
+                        10,
+                        5
+                    );
+
+                    $metrics?->increment('inventory.item.decrement');
+                } catch (\Throwable $e) {
+                    $metrics?->increment('inventory.item.failure');
+                    $logger->warning('Failed to process inventory item', ['product_id' => $productId, 'error' => $e->getMessage()]);
+                    throw $e;
+                }
 
                 $processed[] = $productId;
             }
@@ -91,7 +118,10 @@ final class UpdateInventoryJob implements ShouldQueue
             $cache->invalidateByProducts(array_values(array_unique($processed)));
 
             $logger->info('Cache invalidated for products', ['products' => array_values(array_unique($processed))]);
+            $metrics?->increment('inventory.cache.invalidated');
         }
+
+        $metrics?->increment('inventory.job.completed');
 
         $logger->info('Inventory update completed from sale', [
             'sale_id' => $this->saleId,
@@ -119,10 +149,40 @@ final class UpdateInventoryJob implements ShouldQueue
         ];
 
         // Tratamento específico para exceção de estoque insuficiente
+        $metrics = $this->resolveMetricsSafely();
+
         if ($e instanceof \App\Domain\Inventory\Exceptions\InventoryInsufficientException) {
             $logger->warning('UpdateInventoryJob failed due to insufficient inventory', $meta);
+            try {
+                $metrics?->increment('inventory.job.failed');
+            } catch (\Throwable) {
+                // silencioso
+            }
         } else {
             $logger->error('UpdateInventoryJob failed', $meta);
+            try {
+                $metrics?->increment('inventory.job.failed');
+            } catch (\Throwable) {
+                // silencioso
+            }
+        }
+    }
+
+    /**
+     * Tenta resolver MetricsCollector apenas quando o container forneceu um
+     * CacheRepository (evita BindingResolutionException em testes unitários).
+     */
+    private function resolveMetricsSafely(): ?MetricsCollector
+    {
+        try {
+            // Se o container não tem um CacheRepository, não tentamos resolver
+            if (! app()->bound(\Illuminate\Contracts\Cache\Repository::class)) {
+                return null;
+            }
+
+            return app()->make(MetricsCollector::class);
+        } catch (\Throwable) {
+            return null;
         }
     }
 }

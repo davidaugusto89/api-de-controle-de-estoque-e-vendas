@@ -80,4 +80,11 @@ Route::middleware([
         Log::error('Simulação de erro interno para teste de API Exception Formatter.');
         throw new \RuntimeException('Erro interno simulado.');
     })->name('debug.error');
+
+    // Observability endpoints (metrics)
+    Route::prefix('observability')->group(function () {
+        Route::get('/metrics', [\App\Http\Controllers\ObservabilityController::class, 'metrics'])
+            ->name('observability.metrics')
+            ->middleware(['throttle:observability', 'restrict.ip']);
+    });
 });
