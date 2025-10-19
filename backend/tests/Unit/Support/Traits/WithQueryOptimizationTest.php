@@ -13,6 +13,12 @@ final class WithQueryOptimizationTest extends TestCase
 {
     public function test_maybe_with_aplica_relacoes_quando_nao_vazio(): void
     {
+        /**
+         * Cenário
+         * Dado: lista de relações não vazia
+         * Quando: maybeWith é chamado
+         * Então: delega with ao builder
+         */
         $qb = \Mockery::mock(Builder::class);
         $qb->shouldReceive('with')->with(['rel1', 'rel2'])->once()->andReturnSelf();
 
@@ -32,6 +38,12 @@ final class WithQueryOptimizationTest extends TestCase
 
     public function test_maybe_with_retorna_qb_quando_vazio(): void
     {
+        /**
+         * Cenário
+         * Dado: lista de relações vazia
+         * Quando: maybeWith é chamado
+         * Então: retorna o builder sem chamar with
+         */
         $qb = \Mockery::mock(Builder::class);
         $qb->shouldReceive('with')->never();
 
@@ -51,6 +63,12 @@ final class WithQueryOptimizationTest extends TestCase
 
     public function test_without_model_events_executa_callback_e_retorna_valor(): void
     {
+        /**
+         * Cenário
+         * Dado: callback passado para withoutModelEvents
+         * Quando: callWithoutModelEvents é invocado
+         * Então: callback é executado e valor retornado
+         */
         $obj = new class
         {
             use WithQueryOptimization;
@@ -62,7 +80,7 @@ final class WithQueryOptimizationTest extends TestCase
         };
 
         $called = false;
-        $ret = $obj->callWithoutModelEvents(function () use (&$called) {
+        $ret    = $obj->callWithoutModelEvents(function () use (&$called) {
             $called = true;
 
             return 123;

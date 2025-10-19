@@ -30,6 +30,12 @@ final class RedisLockTest extends TestCase
 {
     public function test_deve_adquirir_e_liberar_lock(): void
     {
+        /**
+         * Cenário
+         * Dado: FakeStore e FakeClock simulando store/locks
+         * Quando: run é invocado com uma chave e callback
+         * Então: callback é executado e lock é liberado ao final
+         */
         // Arrange
         $clock = new FakeClock(1_600_000_000);
         $store = new FakeStore($clock);
@@ -55,6 +61,12 @@ final class RedisLockTest extends TestCase
 
     public function test_nao_deve_permitir_lock_duplicado(): void
     {
+        /**
+         * Cenário
+         * Dado: chave já adquirida no store
+         * Quando: tentar run com mesma chave
+         * Então: RuntimeException informando falha ao obter lock é lançada
+         */
         // Arrange
         $clock = new FakeClock(1_600_000_000);
         $store = new FakeStore($clock);
@@ -79,6 +91,12 @@ final class RedisLockTest extends TestCase
 
     public function test_deve_expirar_automaticamente(): void
     {
+        /**
+         * Cenário
+         * Dado: lock pré-adquirido com TTL curto
+         * Quando: run espera até a expiração simulada
+         * Então: nova aquisição pós-expiração é permitida
+         */
         // Arrange
         $clock = new FakeClock(1_600_000_000);
         $store = new FakeStore($clock);
@@ -102,6 +120,12 @@ final class RedisLockTest extends TestCase
 
     public function test_deve_liberar_idempotente(): void
     {
+        /**
+         * Cenário
+         * Dado: lock adquirido diretamente pelo store
+         * Quando: release é chamado múltiplas vezes
+         * Então: release é idempotente e não lança exceção
+         */
         // Arrange
         $clock = new FakeClock(1_600_000_000);
         $store = new FakeStore($clock);
@@ -125,6 +149,12 @@ final class RedisLockTest extends TestCase
 
     public function test_reutilizacao_da_chave_apos_liberacao(): void
     {
+        /**
+         * Cenário
+         * Dado: chave usada em duas execuções consecutivas
+         * Quando: run é chamado duas vezes
+         * Então: ambas execuções funcionam e não há locks remanescentes
+         */
         // Arrange
         $clock = new FakeClock(1_600_000_000);
         $store = new FakeStore($clock);
@@ -151,6 +181,12 @@ final class RedisLockTest extends TestCase
 
     public function test_callback_lanca_excecao_e_libera_lock(): void
     {
+        /**
+         * Cenário
+         * Dado: callback que lança exceção
+         * Quando: run é executado
+         * Então: exceção é propagada e lock é liberado no finally
+         */
         // Arrange
         $clock = new FakeClock(1_600_000_000);
         $store = new FakeStore($clock);

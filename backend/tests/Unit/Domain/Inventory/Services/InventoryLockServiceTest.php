@@ -38,6 +38,12 @@ final class InventoryLockServiceTest extends TestCase
 {
     public function test_deve_adquirir_lock_com_sucesso(): void
     {
+        /**
+         * Cenário
+         * Dado: implementação RedisLock com store fake que fornece lock fake
+         * Quando: InventoryLockService::lock(id, callback, ttl, wait) é chamado
+         * Então: callback é executado e os parâmetros key/ttl/wait são encaminhados corretamente
+         */
         // Arrange: construímos um RedisLock real com um CacheFactory falso que
         // retorna um store/lock fake para capturar key/ttl/wait e executar o callback.
         $captured = [];
@@ -53,7 +59,7 @@ final class InventoryLockServiceTest extends TestCase
 
             public function block(int $waitSeconds, int $sleepMs): bool
             {
-                $this->captured['wait'] = $waitSeconds;
+                $this->captured['wait']  = $waitSeconds;
                 $this->captured['sleep'] = $sleepMs;
 
                 return true;
@@ -73,7 +79,7 @@ final class InventoryLockServiceTest extends TestCase
 
             public function __construct($lock, array &$captured)
             {
-                $this->lock = $lock;
+                $this->lock     = $lock;
                 $this->captured = &$captured;
             }
 
@@ -107,6 +113,12 @@ final class InventoryLockServiceTest extends TestCase
 
     public function test_nao_deve_adquirir_lock_ja_ocupado(): void
     {
+        /**
+         * Cenário
+         * Dado: lock ocupado (block retorna false)
+         * Quando: InventoryLockService::lock for chamado
+         * Então: RuntimeException informando impossibilidade de obter lock é lançada
+         */
         // Arrange: simular falha de aquisição (block retorna false) -> exceção do RedisLock
         $fakeLock = new class
         {
@@ -153,6 +165,12 @@ final class InventoryLockServiceTest extends TestCase
 
     public function test_lock_many_deve_aquirir_multiplos_locks_em_ordem_deterministica(): void
     {
+        /**
+         * Cenário
+         * Dado: vários ids com duplicatas e em ordem aleatória
+         * Quando: lockMany(ids, callback) é invocado
+         * Então: locks são adquiridos em ordem determinística (ordenados e deduplicados)
+         */
         // Arrange: captura das chaves na ordem de execução
         $seen = [];
 
@@ -204,7 +222,7 @@ final class InventoryLockServiceTest extends TestCase
         $cache->method('store')->willReturn($fakeStore);
 
         $redis = new RedisLock($cache);
-        $sut = new InventoryLockService($redis);
+        $sut   = new InventoryLockService($redis);
 
         // Act: passar ids não ordenados e com duplicatas
         $result = $sut->lockMany([3, 1, 2, 2], fn () => 'done');
@@ -218,6 +236,12 @@ final class InventoryLockServiceTest extends TestCase
 
     public function test_lock_many_propagates_exception_when_one_lock_fails(): void
     {
+        /**
+         * Cenário
+         * Dado: uma das aquisições de lock falha (lançando RuntimeException)
+         * Quando: lockMany é chamado
+         * Então: exceção é propagada e o erro não é silenciado
+         */
         // Arrange
         // Arrange: fakeStore/lock que lança exceção quando a chave corresponde a product:2
         $fakeLock1 = new class
@@ -266,7 +290,7 @@ final class InventoryLockServiceTest extends TestCase
         $cache->method('store')->willReturn($fakeStore);
 
         $redis = new RedisLock($cache);
-        $sut = new InventoryLockService($redis);
+        $sut   = new InventoryLockService($redis);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('falha ao adquirir 2');
@@ -277,6 +301,12 @@ final class InventoryLockServiceTest extends TestCase
 
     public function test_lock_encaminha_ttl_e_wait_personalizados(): void
     {
+        /**
+         * Cenário
+         * Dado: parâmetros ttl e wait personalizados
+         * Quando: lock(id, callback, ttl, wait) é invocado
+         * Então: valores ttl e wait são encaminhados para o lock subjacente
+         */
         // Arrange
         $captured = [];
 
@@ -291,7 +321,7 @@ final class InventoryLockServiceTest extends TestCase
 
             public function block(int $waitSeconds, int $sleepMs): bool
             {
-                $this->captured['wait'] = $waitSeconds;
+                $this->captured['wait']  = $waitSeconds;
                 $this->captured['sleep'] = $sleepMs;
 
                 return true;
@@ -311,7 +341,7 @@ final class InventoryLockServiceTest extends TestCase
 
             public function __construct($lock, array &$captured)
             {
-                $this->lock = $lock;
+                $this->lock     = $lock;
                 $this->captured = &$captured;
             }
 
@@ -328,7 +358,7 @@ final class InventoryLockServiceTest extends TestCase
         $cache->method('store')->willReturn($fakeStore);
 
         $redis = new RedisLock($cache);
-        $sut = new InventoryLockService($redis);
+        $sut   = new InventoryLockService($redis);
 
         // Act
         $sut->lock(9, fn () => 'x', 20, 30);

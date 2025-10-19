@@ -27,7 +27,12 @@ final class CleanupOldInventoryTest extends TestCase
      */
     public function test_retorna_zeros_quando_nao_ha_alteracoes(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: o use case `CleanupOldInventory` que remove orfãos e stale, podendo normalizar
+         * Quando: `handle(true)` é executado sem registros afetados
+         * Então: retorna zeros para removed_orphans, removed_stale e normalized; invalida cache
+         */
         // Quando não há órfãos, nem stale, nem negativos
         DB::shouldReceive('transaction')->once()->andReturnUsing(function ($cb) {
             return $cb();
@@ -56,7 +61,12 @@ final class CleanupOldInventoryTest extends TestCase
 
     public function test_remove_orfaos_e_stale_e_normaliza(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: registros orfãos e stale existem
+         * Quando: `handle(true)` é executado
+         * Então: retorna counts conforme deletes/updates simulados e invalida cache
+         */
         // Forçar execução da transação
         DB::shouldReceive('transaction')->once()->andReturnUsing(function ($cb) {
             return $cb();
@@ -85,7 +95,12 @@ final class CleanupOldInventoryTest extends TestCase
 
     public function test_nao_normalizar_quando_flag_false(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: `normalize` falso
+         * Quando: `handle(false)` é executado
+         * Então: nenhum update de normalização deve ocorrer; removed_orphans e removed_stale retornam conforme deletes
+         */
         DB::shouldReceive('transaction')->once()->andReturnUsing(function ($cb) {
             return $cb();
         });

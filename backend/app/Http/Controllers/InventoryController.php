@@ -30,9 +30,9 @@ final class InventoryController extends Controller
      */
     public function index(Request $request, InventoryQuery $query, InventoryCache $cache): JsonResponse
     {
-        $search = Str::limit(trim((string) $request->query('q', '')), 100, '');
+        $search  = Str::limit(trim((string) $request->query('q', '')), 100, '');
         $perPage = (int) max(0, $request->integer('per_page', 15));
-        $page = (int) max(1, $request->integer('page', 1));
+        $page    = (int) max(1, $request->integer('page', 1));
 
         // Cap para listas não paginadas
         $MAX_UNPAGED = 5000;
@@ -42,7 +42,7 @@ final class InventoryController extends Controller
             [$items, $totals] = $cache->rememberListAndTotalsUnpaged(
                 $search,
                 function () use ($query, $search, $MAX_UNPAGED) {
-                    $items = $query->list($search, $MAX_UNPAGED); // limite aplicado no SQL
+                    $items  = $query->list($search, $MAX_UNPAGED); // limite aplicado no SQL
                     $totals = $query->totals($search);              // { total_cost, total_sale, projected_profit }
 
                     return [$items, $totals];
@@ -55,8 +55,8 @@ final class InventoryController extends Controller
                 'data' => $data,
                 'meta' => [
                     'pagination' => null,
-                    'query' => ['q' => $search, 'per_page' => $perPage, 'page' => $page],
-                    'totals' => $totals,
+                    'query'      => ['q' => $search, 'per_page' => $perPage, 'page' => $page],
+                    'totals'     => $totals,
                 ],
             ])->withHeaders([
                 'Cache-Control' => 'public, max-age=30',
@@ -77,9 +77,9 @@ final class InventoryController extends Controller
                     $paginator->items(),
                     [
                         'current_page' => $paginator->currentPage(),
-                        'per_page' => $paginator->perPage(),
-                        'total' => $paginator->total(),
-                        'last_page' => $paginator->lastPage(),
+                        'per_page'     => $paginator->perPage(),
+                        'total'        => $paginator->total(),
+                        'last_page'    => $paginator->lastPage(),
                     ],
                     $query->totals($search),
                 ];
@@ -92,8 +92,8 @@ final class InventoryController extends Controller
             'data' => $data,
             'meta' => [
                 'pagination' => $pageMeta,
-                'query' => ['q' => $search, 'per_page' => $perPage, 'page' => $page],
-                'totals' => $totals,
+                'query'      => ['q' => $search, 'per_page' => $perPage, 'page' => $page],
+                'totals'     => $totals,
             ],
         ])->withHeaders([
             'Cache-Control' => 'public, max-age=30',
@@ -110,7 +110,7 @@ final class InventoryController extends Controller
         if ($row === null) {
             return response()->json([
                 'error' => [
-                    'code' => 'InventoryNotFound',
+                    'code'    => 'InventoryNotFound',
                     'message' => 'Inventário não encontrado para o produto informado.',
                 ],
             ], 404);
@@ -147,17 +147,17 @@ final class InventoryController extends Controller
 
             return response()->json([
                 'message' => 'Entrada de estoque registrada com sucesso.',
-                'data' => (new InventoryResource($payload))->resolve(),
+                'data'    => (new InventoryResource($payload))->resolve(),
             ], 201);
         } catch (\Throwable $e) {
             Log::error('Erro ao registrar entrada de estoque', [
                 'product_id' => $validated['product_id'] ?? null,
-                'error' => $e->getMessage(),
+                'error'      => $e->getMessage(),
             ]);
 
             return response()->json([
                 'error' => [
-                    'code' => 'StockEntryError',
+                    'code'    => 'StockEntryError',
                     'message' => 'Erro ao registrar a entrada de estoque.',
                 ],
             ], 500);

@@ -79,11 +79,19 @@ final class MarginCalculatorTest extends TestCase
         float $expectedProfit,
         float $expectedMarginPercent
     ): void {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: o serviço de domínio `MarginCalculator` que calcula profit e marginPercent
+         * Quando: `profit(totalAmount, totalCost)` e `marginPercent(totalAmount, totalCost)` são invocados com pares de valores
+         * Então: profit e marginPercent são retornados conforme esperado, arredondados a 2 casas
+         * Regras de Negócio Relevantes:
+         *  - Arredondamento com round(..., 2).
+         *  - Para totalAmount <= 0, marginPercent retorna 0.0.
+         */
         $sut = new MarginCalculator;
 
         // Act
-        $profit = $sut->profit($totalAmount, $totalCost);
+        $profit  = $sut->profit($totalAmount, $totalCost);
         $percent = $sut->marginPercent($totalAmount, $totalCost);
 
         // Assert - profit arredondado a 2 casas conforme implementação
@@ -108,12 +116,17 @@ final class MarginCalculatorTest extends TestCase
      */
     public function test_nao_deve_dividir_por_zero_e_retornar_percentual_zero_quando_totalamount_zero(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: totalAmount == 0
+         * Quando: marginPercent e profit são calculados
+         * Então: marginPercent == 0.0 e profit calculado corretamente (pode ser negativo), com arredondamento
+         */
         $sut = new MarginCalculator;
 
         // Act
         $percentZero = $sut->marginPercent(0.0, 10.0);
-        $profitZero = $sut->profit(0.0, 10.0);
+        $profitZero  = $sut->profit(0.0, 10.0);
 
         // Assert
         $this->assertSame(0.0, $percentZero, 'marginPercent deve retornar 0.0 quando totalAmount == 0.');
@@ -122,12 +135,17 @@ final class MarginCalculatorTest extends TestCase
 
     public function test_nao_deve_dividir_por_zero_e_retornar_percentual_zero_quando_totalamount_negativo(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: totalAmount negativo
+         * Quando: marginPercent e profit são calculados
+         * Então: marginPercent == 0.0 e profit refletindo a diferença, com arredondamento
+         */
         $sut = new MarginCalculator;
 
         // Act
         $percentNegative = $sut->marginPercent(-1.0, 0.0);
-        $profitNegative = $sut->profit(-1.0, 0.0);
+        $profitNegative  = $sut->profit(-1.0, 0.0);
 
         // Assert
         $this->assertSame(0.0, $percentNegative, 'marginPercent deve retornar 0.0 quando totalAmount < 0.');
@@ -139,7 +157,12 @@ final class MarginCalculatorTest extends TestCase
      */
     public function test_arredondamento_do_profit_em_casos_de_limiar(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: valores próximos do limiar de arredondamento
+         * Quando: profit() é chamado com 1.234 e 1.235
+         * Então: comportamento de arredondamento segue round(..., 2)
+         */
         $sut = new MarginCalculator;
 
         // Act & Assert - 1.234 -> 1.23

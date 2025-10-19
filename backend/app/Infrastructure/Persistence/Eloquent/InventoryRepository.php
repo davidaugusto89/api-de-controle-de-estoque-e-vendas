@@ -40,7 +40,7 @@ class InventoryRepository
         if (! $inv) {
             $inv = new Inventory([
                 'product_id' => $productId,
-                'quantity' => $quantity,
+                'quantity'   => $quantity,
             ]);
             $inv->version = 0;
         } else {
@@ -48,7 +48,7 @@ class InventoryRepository
         }
 
         $inv->last_updated = $lastUpdated;
-        $inv->version = (int) $inv->version + 1;
+        $inv->version      = (int) $inv->version + 1;
         $inv->save();
 
         return $inv;

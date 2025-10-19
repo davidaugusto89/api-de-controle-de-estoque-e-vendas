@@ -26,6 +26,12 @@ final class SaleValidatorTest extends TestCase
     public function test_validar_venda_sem_excecao_quando_items_sao_validos(iterable $items): void
     {
         // Arrange
+        /**
+         * Cenário
+         * Dado: payloads válidos de itens de venda
+         * Quando: `validate($items)` é executado
+         * Então: nenhuma exceção é lançada
+         */
         $sut = new SaleValidator;
 
         // Act
@@ -37,11 +43,11 @@ final class SaleValidatorTest extends TestCase
 
     public static function providerValidItems(): array
     {
-        $objItem = new \stdClass;
+        $objItem             = new \stdClass;
         $objItem->product_id = 1;
-        $objItem->quantity = 2;
+        $objItem->quantity   = 2;
         $objItem->unit_price = 10.5;
-        $objItem->unit_cost = 5.0;
+        $objItem->unit_cost  = 5.0;
 
         return [
             'itens em array' => [[
@@ -61,6 +67,12 @@ final class SaleValidatorTest extends TestCase
     public function test_lancar_excecao_quando_product_id_invalido(iterable $items): void
     {
         // Arrange
+        /**
+         * Cenário
+         * Dado: items com product_id ausente ou inválido
+         * Quando: `validate($items)` é executado
+         * Então: InvalidArgumentException com mensagem específica é lançada
+         */
         $sut = new SaleValidator;
 
         // Assert
@@ -73,10 +85,10 @@ final class SaleValidatorTest extends TestCase
 
     public static function providerInvalidProductId(): array
     {
-        $objMissing = new \stdClass;
-        $objMissing->quantity = 1;
+        $objMissing             = new \stdClass;
+        $objMissing->quantity   = 1;
         $objMissing->unit_price = 1.0;
-        $objMissing->unit_cost = 0.5;
+        $objMissing->unit_cost  = 0.5;
 
         return [
             'array sem product_id' => [[
@@ -93,6 +105,12 @@ final class SaleValidatorTest extends TestCase
     public function test_lancar_excecao_quando_quantidade_invalida(array $item): void
     {
         // Arrange
+        /**
+         * Cenário
+         * Dado: item com quantidade inválida (<=0)
+         * Quando: validate é chamado
+         * Então: InvalidArgumentException com mensagem 'Item 1: quantity deve ser > 0.' é lançada
+         */
         $sut = new SaleValidator;
 
         // Assert: SaleValidator usa o índice (1-based) do item, não o product_id
@@ -106,7 +124,7 @@ final class SaleValidatorTest extends TestCase
     public static function providerInvalidQuantity(): array
     {
         return [
-            'quantidade zero' => [['product_id' => 5, 'quantity' => 0, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
+            'quantidade zero'     => [['product_id' => 5, 'quantity' => 0, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
             'quantidade negativa' => [['product_id' => 5, 'quantity' => -3, 'unit_price' => 1.0, 'unit_cost' => 0.5]],
         ];
     }
@@ -115,6 +133,12 @@ final class SaleValidatorTest extends TestCase
     public function test_lancar_excecao_quando_preco_ou_custo_negativo(array $item, string $expectedMessage): void
     {
         // Arrange
+        /**
+         * Cenário
+         * Dado: item com unit_price ou unit_cost negativo
+         * Quando: validate é executado
+         * Então: InvalidArgumentException com mensagem apropriada é lançada
+         */
         $sut = new SaleValidator;
 
         // Assert
@@ -137,6 +161,12 @@ final class SaleValidatorTest extends TestCase
     public function test_lancar_excecao_quando_lista_vazia(): void
     {
         // Arrange
+        /**
+         * Cenário
+         * Dado: lista vazia de items
+         * Quando: validate([]) é chamado
+         * Então: InvalidArgumentException indicando que é necessário ao menos um item
+         */
         $sut = new SaleValidator;
 
         // Assert
@@ -150,6 +180,12 @@ final class SaleValidatorTest extends TestCase
     public function test_nao_validar_estoque_ou_total_quando_servico_eh_dominio_puro(): void
     {
         // Arrange
+        /**
+         * Cenário
+         * Dado: validator de domínio puro
+         * Quando: item com quantidade muito alta é validado
+         * Então: nenhuma exceção relacionada a estoque/total é lançada (não é responsabilidade do validador)
+         */
         $sut = new SaleValidator;
 
         // item com quantidade extremamente alta (simulando > estoque)

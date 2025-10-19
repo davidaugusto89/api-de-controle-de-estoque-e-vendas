@@ -49,12 +49,12 @@ final class UpdateInventoryListenerTest extends TestCase
         Queue::fake();
 
         $saleId = 123;
-        $items = [
+        $items  = [
             ['product_id' => 1, 'quantity' => 2],
             ['product_id' => 2, 'quantity' => 1],
         ];
 
-        $event = new SaleFinalized($saleId, $items);
+        $event    = new SaleFinalized($saleId, $items);
         $listener = new UpdateInventoryListener;
 
         // Act
@@ -67,7 +67,7 @@ final class UpdateInventoryListenerTest extends TestCase
             static function ($job) use ($saleId, $items): bool {
                 return isset($job->saleId, $job->items)
                     && $job->saleId === $saleId
-                    && $job->items === $items;
+                    && $job->items  === $items;
             }
         );
     }
@@ -78,12 +78,11 @@ final class UpdateInventoryListenerTest extends TestCase
     {
         // Arrange: não fakeamos a fila aqui porque queremos mockar o método estático
         $saleId = 999;
-        $items = [
+        $items  = [
             ['product_id' => 42, 'quantity' => 3],
         ];
 
         $event = new SaleFinalized($saleId, $items);
-        $listener = new UpdateInventoryListener;
 
         // Mock do UpdateInventoryJob estático via alias — precisa rodar em processo separado
         $exception = new \RuntimeException('dispatch-failed');
@@ -92,15 +91,23 @@ final class UpdateInventoryListenerTest extends TestCase
             ->with($saleId, $items)
             ->andThrow($exception);
 
-        // Espera um log de erro com os dados úteis
-        Log::shouldReceive('error')
+        // Swap the underlying logger used by the Log facade with a Mockery mock
+        // so we can assert the error call even when running in a separate process.
+        $loggerMock = Mockery::mock(\Psr\Log\LoggerInterface::class);
+        $loggerMock->shouldReceive('info')->andReturnNull();
+        $loggerMock->shouldReceive('error')
             ->once()
-            ->with('Falha no UpdateInventoryListener', Mockery::on(function ($context) use ($saleId, $items, $exception) {
-                return isset($context['sale_id'], $context['items'], $context['error'])
+            ->withArgs(function ($message, $context) use ($saleId, $items, $exception) {
+                return $message === 'Falha no UpdateInventoryListener'
+                    && isset($context['sale_id'], $context['items'], $context['error'])
                     && $context['sale_id'] === $saleId
-                    && $context['items'] === $items
+                    && $context['items']   === $items
                     && str_contains((string) $context['error'], $exception->getMessage());
-            }));
+            });
+
+        Log::swap($loggerMock);
+
+        $listener = new UpdateInventoryListener;
 
         $this->expectException(\RuntimeException::class);
 

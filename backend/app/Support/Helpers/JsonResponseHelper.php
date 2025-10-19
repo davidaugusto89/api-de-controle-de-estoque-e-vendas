@@ -15,8 +15,8 @@ final class JsonResponseHelper
     {
         return response()->json([
             'status' => 'success',
-            'meta' => $meta,
-            'data' => $data,
+            'meta'   => $meta,
+            'data'   => $data,
         ], $status);
     }
 
@@ -27,8 +27,8 @@ final class JsonResponseHelper
     {
         return response()->json([
             'status' => 'error',
-            'error' => [
-                'code' => $code,
+            'error'  => [
+                'code'    => $code,
                 'message' => $message,
                 'details' => $details,
             ],

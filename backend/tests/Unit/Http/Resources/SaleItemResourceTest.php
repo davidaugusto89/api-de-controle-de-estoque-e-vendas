@@ -13,11 +13,11 @@ final class SaleItemResourceTest extends TestCase
     {
         $data = [
             'product_id' => 11,
-            'sku' => 'SKU-11',
-            'name' => 'Produto 11',
-            'quantity' => 3,
+            'sku'        => 'SKU-11',
+            'name'       => 'Produto 11',
+            'quantity'   => 3,
             'unit_price' => 10.00,
-            'unit_cost' => 6.00,
+            'unit_cost'  => 6.00,
         ];
 
         $res = new SaleItemResource($data);
@@ -51,11 +51,11 @@ final class SaleItemResourceTest extends TestCase
     {
         $data = [
             'product_id' => 1,
-            'sku' => 'SKU-0',
-            'name' => 'Produto zero',
-            'quantity' => 0,
+            'sku'        => 'SKU-0',
+            'name'       => 'Produto zero',
+            'quantity'   => 0,
             'unit_price' => 100.00,
-            'unit_cost' => 90.00,
+            'unit_cost'  => 90.00,
         ];
 
         $arr = (new SaleItemResource($data))->toArray(null);
@@ -70,11 +70,11 @@ final class SaleItemResourceTest extends TestCase
     {
         $data = [
             'product_id' => 2,
-            'sku' => 'SKU-NP',
-            'name' => 'Produto NP',
-            'quantity' => 2,
+            'sku'        => 'SKU-NP',
+            'name'       => 'Produto NP',
+            'quantity'   => 2,
             'unit_price' => 5.00,
-            'unit_cost' => 6.00,
+            'unit_cost'  => 6.00,
         ];
 
         $arr = (new SaleItemResource($data))->toArray(null);
@@ -88,9 +88,9 @@ final class SaleItemResourceTest extends TestCase
     {
         $data = [
             'product_id' => '3',
-            'sku' => 'SKU-STR',
-            'name' => 'Produto STR',
-            'quantity' => '1',
+            'sku'        => 'SKU-STR',
+            'name'       => 'Produto STR',
+            'quantity'   => '1',
             'unit_price' => '12.34',
             // note: string with comma will be cast by (float) to 2.0 in PHP
             'unit_cost' => '2,50',
@@ -115,11 +115,11 @@ final class SaleItemResourceTest extends TestCase
     {
         $data = [
             'product_id' => 4,
-            'sku' => 'SKU-NA',
-            'name' => 'Produto NA',
-            'quantity' => '2',
+            'sku'        => 'SKU-NA',
+            'name'       => 'Produto NA',
+            'quantity'   => '2',
             'unit_price' => 'abc',
-            'unit_cost' => 'def',
+            'unit_cost'  => 'def',
         ];
 
         $arr = (new SaleItemResource($data))->toArray(null);

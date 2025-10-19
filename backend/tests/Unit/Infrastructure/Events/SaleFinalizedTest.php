@@ -30,8 +30,14 @@ final class SaleFinalizedTest extends TestCase
 {
     public function test_criar_evento_com_valores_validos_popula_propriedades(): void
     {
+        /**
+         * Cenário
+         * Dado: valores válidos para evento
+         * Quando: instância é criada
+         * Então: propriedades readonly são populadas corretamente
+         */
         $saleId = 123;
-        $items = [
+        $items  = [
             ['product_id' => 1, 'quantity' => 2],
             ['product_id' => 2, 'quantity' => 5],
         ];
@@ -44,6 +50,12 @@ final class SaleFinalizedTest extends TestCase
 
     public function test_lancar_type_error_quando_saleid_nao_inteiro(): void
     {
+        /**
+         * Cenário
+         * Dado: saleId com tipo incorreto
+         * Quando: construtor é invocado
+         * Então: TypeError é lançado
+         */
         $this->expectException(\TypeError::class);
 
         // Esconde o valor do analisador estático para que o TypeError ocorra apenas em runtime
@@ -51,6 +63,7 @@ final class SaleFinalizedTest extends TestCase
             return 'nao-inteiro';
         })();
 
+        /** @var mixed $badSaleId */
         call_user_func(function () use ($badSaleId) {
             new SaleFinalized($badSaleId, []);
         });
@@ -58,6 +71,12 @@ final class SaleFinalizedTest extends TestCase
 
     public function test_lancar_type_error_quando_items_nao_array(): void
     {
+        /**
+         * Cenário
+         * Dado: items com tipo incorreto
+         * Quando: construtor é invocado
+         * Então: TypeError é lançado
+         */
         $this->expectException(\TypeError::class);
 
         // Evita análise estática do literal de tipo incorreto
@@ -65,6 +84,7 @@ final class SaleFinalizedTest extends TestCase
             return 'nao-array';
         })();
 
+        /** @var mixed $badItems */
         call_user_func(function () use ($badItems) {
             new SaleFinalized(1, $badItems);
         });

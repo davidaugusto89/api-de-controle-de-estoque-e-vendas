@@ -4,13 +4,25 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Queries;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class InventoryQuery
 {
+    /** @var (callable():mixed)|null */
+    private $dbResolver;
+
+    /**
+     * Injeta um resolver opcional para DB::table(...) (facilita testes).
+     *
+     * @param callable():mixed|null $resolver
+     */
+    public function setDbResolver(?callable $resolver): void
+    {
+        $this->dbResolver = $resolver;
+    }
+
     /**
      * Lista (não paginada) de itens de estoque.
      *
@@ -64,8 +76,8 @@ final class InventoryQuery
      */
     public function totals(?string $search = null): array
     {
-        $qb = DB::table('inventory as i')
-            ->join('products as p', 'p.id', '=', 'i.product_id');
+        $qb = $this->dbResolver ? ($this->dbResolver)() : DB::table('inventory as i');
+        $qb = $qb->join('products as p', 'p.id', '=', 'i.product_id');
 
         if ($search !== null && $search !== '') {
             $like = '%'.mb_strtolower($search).'%';
@@ -85,8 +97,8 @@ final class InventoryQuery
         $totalSale = (float) ($totals->total_sale ?? 0);
 
         return [
-            'total_cost' => $totalCost,
-            'total_sale' => $totalSale,
+            'total_cost'       => $totalCost,
+            'total_sale'       => $totalSale,
             'projected_profit' => $totalSale - $totalCost,
         ];
     }
@@ -94,10 +106,10 @@ final class InventoryQuery
     /**
      * Query base (JOIN products p, inventory i), com colunas projetadas e filtros.
      */
-    private function baseQuery(?string $search = null): Builder
+    private function baseQuery(?string $search = null): object
     {
-        $qb = DB::table('inventory as i')
-            ->join('products as p', 'p.id', '=', 'i.product_id')
+        $qb = $this->dbResolver ? ($this->dbResolver)() : DB::table('inventory as i');
+        $qb = $qb->join('products as p', 'p.id', '=', 'i.product_id')
             ->select([
                 'p.id as product_id',
                 'p.sku',
@@ -105,9 +117,9 @@ final class InventoryQuery
                 'i.quantity',
                 'i.last_updated',
                 // Valores por item (úteis no Resource e no front)
-                DB::raw('(i.quantity * p.cost_price)  as stock_cost_value'),
-                DB::raw('(i.quantity * p.sale_price)  as stock_sale_value'),
-                DB::raw('(i.quantity * p.sale_price) - (i.quantity * p.cost_price) as projected_profit'),
+                '(i.quantity * p.cost_price)  as stock_cost_value',
+                '(i.quantity * p.sale_price)  as stock_sale_value',
+                '(i.quantity * p.sale_price) - (i.quantity * p.cost_price) as projected_profit',
             ])
             ->orderBy('p.sku');
 

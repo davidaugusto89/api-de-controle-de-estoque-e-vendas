@@ -14,19 +14,25 @@ final class InventoryResourceTest extends TestCase
 {
     public function test_serializacao_do_inventario_retorna_campos_esperados_em_portugues(): void
     {
+        /**
+         * Cenário
+         * Dado: registro bruto de inventário
+         * Quando: InventoryResource é serializado
+         * Então: saída contém campos esperados (em português) e last_updated como ISO string
+         */
         // Arrange: montar um recurso com dados vindos da query
         $raw = [
             'product_id' => 123,
-            'sku' => 'ABC-123',
-            'name' => 'Produto de Teste',
-            'quantity' => 5,
+            'sku'        => 'ABC-123',
+            'name'       => 'Produto de Teste',
+            'quantity'   => 5,
             'cost_price' => 10.5,
             'sale_price' => 15.0,
             // valores calculados podem vir prontos
             'stock_cost_value' => 52.5,
             'stock_sale_value' => 75.0,
             'projected_profit' => 22.5,
-            'last_updated' => Carbon::now()->toIsoString(),
+            'last_updated'     => Carbon::now()->toIsoString(),
         ];
 
         $resource = new InventoryResource($raw);
@@ -51,16 +57,22 @@ final class InventoryResourceTest extends TestCase
 
     public function test_calculos_sao_gerados_quando_campos_nao_vierem_da_query(): void
     {
+        /**
+         * Cenário
+         * Dado: recurso sem valores calculados explicitamente
+         * Quando: InventoryResource serializa
+         * Então: calcula stock_cost_value, stock_sale_value e projected_profit corretamente
+         */
         // Arrange: recurso sem valores calculados explicitamente
         $raw = [
             'product_id' => 5,
-            'product' => [
-                'sku' => 'XYZ-999',
-                'name' => 'Outro Produto',
+            'product'    => [
+                'sku'        => 'XYZ-999',
+                'name'       => 'Outro Produto',
                 'cost_price' => 2.0,
                 'sale_price' => 3.5,
             ],
-            'quantity' => 10,
+            'quantity'     => 10,
             'last_updated' => Carbon::create(2020, 1, 1, 12, 0, 0)->toIsoString(),
         ];
 

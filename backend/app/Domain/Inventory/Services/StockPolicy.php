@@ -17,7 +17,7 @@ class StockPolicy
 
     public function __construct(?int $maxPerProduct = null)
     {
-        $env = getenv('STOCK_MAX_PER_PRODUCT');
+        $env                 = getenv('STOCK_MAX_PER_PRODUCT');
         $this->maxPerProduct = $maxPerProduct
             ?? (is_string($env) && ctype_digit($env) ? (int) $env : 1_000_000);
     }
@@ -32,7 +32,7 @@ class StockPolicy
     public function increase(int $current, int $delta): int
     {
         $current = $this->normalize($current);
-        $delta = $this->normalizeDelta($delta);
+        $delta   = $this->normalizeDelta($delta);
 
         $new = $current + $delta;
         if ($new < 0) {
@@ -55,7 +55,7 @@ class StockPolicy
     public function decrease(int $current, int $delta): int
     {
         $current = $this->normalize($current);
-        $delta = $this->normalizeDelta($delta);
+        $delta   = $this->normalizeDelta($delta);
 
         if ($delta > $current) {
             throw new RuntimeException('Estoque insuficiente para a operação.');

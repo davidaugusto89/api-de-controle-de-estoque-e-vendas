@@ -21,9 +21,9 @@ class InventorySeeder extends Seeder
             Inventory::updateOrCreate(
                 ['product_id' => $product->id],
                 [
-                    'quantity' => fake()->numberBetween(10, 200),
+                    'quantity'     => fake()->numberBetween(10, 200),
                     'last_updated' => now()->subDays(fake()->numberBetween(0, 30)),
-                    'version' => 1,
+                    'version'      => 1,
                 ]
             );
         }

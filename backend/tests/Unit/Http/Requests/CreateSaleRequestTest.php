@@ -13,6 +13,12 @@ final class CreateSaleRequestTest extends TestCase
 {
     public function test_autorizar_por_padrao(): void
     {
+        /**
+         * Cenário
+         * Dado: CreateSaleRequest
+         * Quando: authorize() é chamado
+         * Então: retorna true por padrão
+         */
         // Arrange
         $sut = new CreateSaleRequest;
 
@@ -22,6 +28,12 @@ final class CreateSaleRequestTest extends TestCase
 
     public function test_rules_definem_items_e_campos_do_item(): void
     {
+        /**
+         * Cenário
+         * Dado: CreateSaleRequest
+         * Quando: rules() é consultado
+         * Então: define regras para items e campos do item
+         */
         // Arrange
         $sut = new CreateSaleRequest;
 
@@ -37,6 +49,12 @@ final class CreateSaleRequestTest extends TestCase
 
     public function test_messages_contem_mensagem_customizada_para_items_required(): void
     {
+        /**
+         * Cenário
+         * Dado: CreateSaleRequest
+         * Quando: messages() é consultado
+         * Então: inclui mensagem customizada para items.required
+         */
         // Arrange
         $sut = new CreateSaleRequest;
 

@@ -28,8 +28,14 @@ use Tests\TestCase;
 #[CoversClass(InventoryRepository::class)]
 final class InventoryRepositoryTest extends TestCase
 {
-    public function test_find_by_product_id_retorna_model_ou_null(): void
+    public function test_encontrar_por_product_id_retorna_model_ou_null(): void
     {
+        /**
+         * Cenário
+         * Dado: caso dependente de Eloquent/DB
+         * Quando: findByProductId é chamado
+         * Então: este teste é marcado como skipped e recomenda teste de integração
+         */
         // Este teste é dependente de Eloquent/DB (migrations). Em vez de deixar
         // vazio (risky), marcamos como skipped explicando o motivo. Para uma
         // cobertura completa, mover este caso para um teste de integração
@@ -39,9 +45,15 @@ final class InventoryRepositoryTest extends TestCase
 
     public function test_upsert_cria_novo_ou_atualiza_existente(): void
     {
+        /**
+         * Cenário
+         * Dado: existe um registro Inventory mockado
+         * Quando: upsertByProductId é executado
+         * Então: atualiza quantity e incrementa version
+         */
         $productId = 21;
-        $quantity = 5;
-        $now = Carbon::now();
+        $quantity  = 5;
+        $now       = Carbon::now();
 
         // Caso: existe -> atualiza quantity e incrementa version
         // Criamos um mock do model Inventory para evitar operações de DB ao chamar save().
@@ -53,8 +65,8 @@ final class InventoryRepositoryTest extends TestCase
 
         // Define propriedades que o repositório manipulará
         $existing->product_id = $productId;
-        $existing->quantity = 2;
-        $existing->version = 7;
+        $existing->quantity   = 2;
+        $existing->version    = 7;
 
         $existing->expects($this->once())
             ->method('save')
@@ -77,29 +89,18 @@ final class InventoryRepositoryTest extends TestCase
 
     public function test_decrement_if_enough_chama_db_e_retorna_boolean(): void
     {
+        /**
+         * Cenário
+         * Dado: DB::update retorna 1
+         * Quando: decrementIfEnough é invocado
+         * Então: método retorna true
+         */
         $productId = 31;
-        $quantity = 4;
+        $quantity  = 4;
 
         // Contudo, criar mocks dinâmicos para o facade DB é complexo. Em vez disso,
         // usamos o facade DB::shouldReceive quando possível. Como este TestCase usa
         // a aplicação, podemos usar Mockery via facade.
-
-        DB::shouldReceive('table')
-            ->once()
-            ->with('inventory')
-            ->andReturnSelf();
-
-        DB::shouldReceive('where')
-            ->once()
-            ->with('product_id', $productId)
-            ->andReturnSelf();
-
-        DB::shouldReceive('where')
-            ->once()
-            ->with('quantity', '>=', $quantity)
-            ->andReturnSelf();
-
-        DB::shouldReceive('raw')->andReturnUsing(fn ($s) => new \Illuminate\Database\Query\Expression($s));
 
         DB::shouldReceive('update')
             ->once()

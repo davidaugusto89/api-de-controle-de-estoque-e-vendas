@@ -49,11 +49,11 @@ final class BigSalesSeeder extends Seeder
 
                     $salesRows[] = [
                         'total_amount' => '0.00',
-                        'total_cost' => '0.00',
+                        'total_cost'   => '0.00',
                         'total_profit' => '0.00',
-                        'status' => 'completed',
-                        'created_at' => $created,
-                        'updated_at' => $created,
+                        'status'       => 'completed',
+                        'created_at'   => $created,
+                        'updated_at'   => $created,
                     ];
                 }
 
@@ -61,42 +61,42 @@ final class BigSalesSeeder extends Seeder
                 $saleIds = $this->insertReturningIds('sales', $salesRows, 'id');
 
                 // 3) gera items e totais em memória
-                $items = [];
+                $items  = [];
                 $totals = []; // sale_id => ['total_amount','total_cost','total_profit']
 
                 $prodIdList = array_keys($productMap);
-                $prodCount = count($prodIdList);
+                $prodCount  = count($prodIdList);
 
                 foreach ($saleIds as $saleId) {
                     $nItems = random_int(self::ITEMS_PER_SALE_MIN, self::ITEMS_PER_SALE_MAX);
 
                     $amount = '0.00';
-                    $cost = '0.00';
+                    $cost   = '0.00';
 
                     for ($k = 0; $k < $nItems; $k++) {
                         $pid = $prodIdList[random_int(0, $prodCount - 1)];
                         $qty = random_int(1, 5);
 
-                        $unitCost = $productMap[$pid]['cost'];
+                        $unitCost  = $productMap[$pid]['cost'];
                         $unitPrice = $productMap[$pid]['price'];
 
                         $items[] = [
-                            'sale_id' => $saleId,
+                            'sale_id'    => $saleId,
                             'product_id' => $pid,
-                            'quantity' => $qty,
+                            'quantity'   => $qty,
                             'unit_price' => $unitPrice,
-                            'unit_cost' => $unitCost,
+                            'unit_cost'  => $unitCost,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ];
 
                         $amount = bcadd($amount, bcmul((string) $qty, $unitPrice, 2), 2);
-                        $cost = bcadd($cost, bcmul((string) $qty, $unitCost, 2), 2);
+                        $cost   = bcadd($cost, bcmul((string) $qty, $unitCost, 2), 2);
                     }
 
                     $totals[$saleId] = [
                         'total_amount' => $amount,
-                        'total_cost' => $cost,
+                        'total_cost'   => $cost,
                         'total_profit' => bcsub($amount, $cost, 2),
                     ];
                 }
@@ -110,9 +110,9 @@ final class BigSalesSeeder extends Seeder
                 foreach ($totals as $saleId => $t) {
                     DB::table('sales')->where('id', $saleId)->update([
                         'total_amount' => $t['total_amount'],
-                        'total_cost' => $t['total_cost'],
+                        'total_cost'   => $t['total_cost'],
                         'total_profit' => $t['total_profit'],
-                        'updated_at' => now(),
+                        'updated_at'   => now(),
                     ]);
                 }
             });
@@ -132,21 +132,21 @@ final class BigSalesSeeder extends Seeder
         }
 
         $toCreate = self::PRODUCTS - $current;
-        $rows = [];
-        $now = now();
+        $rows     = [];
+        $now      = now();
 
         for ($i = 1; $i <= $toCreate; $i++) {
-            $cost = random_int(500, 5000) / 100;               // 5.00–50.00
+            $cost  = random_int(500, 5000)         / 100;               // 5.00–50.00
             $price = $cost + random_int(100, 2500) / 100;       // margin positiva
 
             $rows[] = [
-                'sku' => 'SKU-'.Str::padLeft((string) ($current + $i), 6, '0'),
-                'name' => 'Product '.($current + $i),
+                'sku'         => 'SKU-'.Str::padLeft((string) ($current + $i), 6, '0'),
+                'name'        => 'Product '.($current + $i),
                 'description' => null,
-                'cost_price' => number_format($cost, 2, '.', ''),
-                'sale_price' => number_format($price, 2, '.', ''),
-                'created_at' => $now,
-                'updated_at' => $now,
+                'cost_price'  => number_format($cost, 2, '.', ''),
+                'sale_price'  => number_format($price, 2, '.', ''),
+                'created_at'  => $now,
+                'updated_at'  => $now,
             ];
         }
 
@@ -169,9 +169,9 @@ final class BigSalesSeeder extends Seeder
         $ids = [];
         $map = [];
         foreach ($products as $p) {
-            $ids[] = (int) $p->id;
+            $ids[]             = (int) $p->id;
             $map[(int) $p->id] = [
-                'cost' => (string) $p->cost_price,
+                'cost'  => (string) $p->cost_price,
                 'price' => (string) $p->sale_price,
             ];
         }
@@ -190,8 +190,8 @@ final class BigSalesSeeder extends Seeder
     {
         DB::table($table)->insert($rows);
 
-        $lastId = (int) DB::getPdo()->lastInsertId();
-        $count = count($rows);
+        $lastId  = (int) DB::getPdo()->lastInsertId();
+        $count   = count($rows);
         $firstId = $lastId - $count + 1;
 
         // segurança básica: se algo estiver estranho, não assuma faixa

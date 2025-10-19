@@ -11,10 +11,24 @@ use App\Models\Product;
  */
 class ProductRepository
 {
+    /** @var (callable():mixed)|null */
+    private $queryResolver;
+
+    /**
+     * Injeta um resolver opcional para Product::query() (facilita testes).
+     *
+     * @param callable():mixed|null $resolver
+     */
+    public function setQueryResolver(?callable $resolver): void
+    {
+        $this->queryResolver = $resolver;
+    }
+
     public function findBySku(string $sku): ?Product
     {
         /** @var Product|null $product */
-        $product = Product::query()->where('sku', $sku)->first();
+        $qb      = $this->queryResolver ? ($this->queryResolver)() : Product::query();
+        $product = $qb->where('sku', $sku)->first();
 
         return $product;
     }
@@ -22,7 +36,8 @@ class ProductRepository
     public function findById(int $id): ?Product
     {
         /** @var Product|null $product */
-        $product = Product::query()->find($id);
+        $qb      = $this->queryResolver ? ($this->queryResolver)() : Product::query();
+        $product = $qb->find($id);
 
         return $product;
     }

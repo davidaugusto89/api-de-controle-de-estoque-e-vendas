@@ -22,6 +22,12 @@ final class TransactionsTest extends TestCase
 
     public function test_run_executa_callback_e_retorna_valor(): void
     {
+        /**
+         * Cenário
+         * Dado: DatabaseManager mockado que executa transaction via callback
+         * Quando: Transactions->run é invocado
+         * Então: callback é executado e valor de retorno é propagado
+         */
         $expected = 'ok-result';
 
         // Mock do DatabaseManager que o Transactions vai usar
@@ -44,6 +50,12 @@ final class TransactionsTest extends TestCase
 
     public function test_run_propagates_exceptions(): void
     {
+        /**
+         * Cenário
+         * Dado: transaction que executa callback e callback lança exceção
+         * Quando: Transactions->run é invocado
+         * Então: exceção é propagada
+         */
         $manager = Mockery::mock(DatabaseManager::class);
         $manager->shouldReceive('transaction')
             ->once()

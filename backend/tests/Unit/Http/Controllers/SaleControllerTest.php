@@ -21,6 +21,12 @@ final class SaleControllerTest extends TestCase
      */
     public function test_receber_venda_retorna_202_com_sale_id_quando_payload_valido(): void
     {
+        /**
+         * Cenário
+         * Dado: caso de uso CreateSale no container
+         * Quando: rota de store é chamada com payload válido
+         * Então: responde 202 com message, sale_id e status
+         */
         // Arrange
         $fakeItems = [['sku' => 'SKU-1', 'quantity' => 1]];
 
@@ -37,12 +43,12 @@ final class SaleControllerTest extends TestCase
 
         Route::post('/_test/sales', function () use ($fakeItems) {
             $useCase = app(CreateSale::class);
-            $saleId = $useCase->execute($fakeItems);
+            $saleId  = $useCase->execute($fakeItems);
 
             return response()->json([
                 'message' => 'Venda recebida e será processada.',
                 'sale_id' => $saleId,
-                'status' => 'pending',
+                'status'  => 'pending',
             ], 202);
         });
 
@@ -60,6 +66,12 @@ final class SaleControllerTest extends TestCase
 
     public function test_mostrar_retorna_404_quando_nao_encontrado(): void
     {
+        /**
+         * Cenário
+         * Dado: consulta que não encontra venda
+         * Quando: controller show é chamado com id inexistente
+         * Então: retorna 404 com código 'SaleNotFound' no payload de erro
+         */
         // Arrange
         $mockSaleQuery = new class
         {
@@ -84,7 +96,7 @@ final class SaleControllerTest extends TestCase
         });
 
         $realQuery = new SaleDetailsQuery;
-        $sut = new SaleController;
+        $sut       = new SaleController;
 
         // Act
         $res = $sut->show(999, $realQuery);

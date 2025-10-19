@@ -27,7 +27,12 @@ final class StockPolicyTest extends TestCase
     #[DataProvider('providerIncreaseSuccess')]
     public function test_aumentar_retorna_valor_quando_delta_valido(int $current, int $delta, int $expected): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: StockPolicy com limite alto
+         * Quando: increase(current, delta) com delta válido
+         * Então: retorna current + delta
+         */
         $sut = $this->makePolicy(1_000_000);
 
         // Act
@@ -41,14 +46,19 @@ final class StockPolicyTest extends TestCase
     {
         return [
             'incremento simples' => [0, 1, 1],
-            'incremento grande' => [100, 900, 1000],
-            'no limite' => [999_999, 1, 1_000_000],
+            'incremento grande'  => [100, 900, 1000],
+            'no limite'          => [999_999, 1, 1_000_000],
         ];
     }
 
     public function test_nao_deve_permitir_delta_invalido_no_increase(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: delta inválido (0) para increase
+         * Quando: increase é chamado
+         * Então: InvalidArgumentException 'Delta deve ser positivo.' é lançada
+         */
         $sut = $this->makePolicy();
 
         // Assert
@@ -61,7 +71,12 @@ final class StockPolicyTest extends TestCase
 
     public function test_nao_deve_permitir_quantidade_atual_negativa_no_increase(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: current negativo
+         * Quando: increase é chamado
+         * Então: InvalidArgumentException 'Quantidade atual não pode ser negativa.' é lançada
+         */
         $sut = $this->makePolicy();
 
         // Assert
@@ -74,6 +89,12 @@ final class StockPolicyTest extends TestCase
 
     public function test_nao_deve_permitir_exceder_maximo_por_produto(): void
     {
+        /**
+         * Cenário
+         * Dado: limite máximo por produto baixo
+         * Quando: increase excede o limite
+         * Então: RuntimeException 'Quantidade máxima por produto excedida.' é lançada
+         */
         // Arrange: limite baixo para testar overflow de regra
         $sut = $this->makePolicy(5);
 
@@ -88,7 +109,12 @@ final class StockPolicyTest extends TestCase
     #[DataProvider('providerDecreaseSuccess')]
     public function test_diminuir_retorna_valor_quando_delta_valido(int $current, int $delta, int $expected): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: current e delta válidos
+         * Quando: decrease(current, delta) é chamado
+         * Então: retorna o valor esperado (current - delta)
+         */
         $sut = $this->makePolicy();
 
         // Act
@@ -102,13 +128,18 @@ final class StockPolicyTest extends TestCase
     {
         return [
             'diminuição simples' => [5, 1, 4],
-            'zerar estoque' => [3, 3, 0],
+            'zerar estoque'      => [3, 3, 0],
         ];
     }
 
     public function test_nao_deve_permitir_decrease_com_delta_maior_que_current(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: delta maior que current
+         * Quando: decrease é chamado
+         * Então: RuntimeException 'Estoque insuficiente para a operação.' é lançada
+         */
         $sut = $this->makePolicy();
 
         // Assert
@@ -121,7 +152,12 @@ final class StockPolicyTest extends TestCase
 
     public function test_nao_deve_permitir_delta_invalido_no_decrease(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: delta inválido (0) para decrease
+         * Quando: decrease é chamado
+         * Então: InvalidArgumentException 'Delta deve ser positivo.' é lançada
+         */
         $sut = $this->makePolicy();
 
         // Assert
@@ -134,7 +170,12 @@ final class StockPolicyTest extends TestCase
 
     public function test_nao_deve_permitir_current_negativo_no_decrease(): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: current negativo
+         * Quando: decrease é chamado
+         * Então: InvalidArgumentException 'Quantidade atual não pode ser negativa.' é lançada
+         */
         $sut = $this->makePolicy();
 
         // Assert
@@ -148,7 +189,12 @@ final class StockPolicyTest extends TestCase
     #[DataProvider('providerAdjust')]
     public function test_adjust_comportamento(int $current, int $delta, int $expected, ?string $expectedExceptionMessage = null): void
     {
-        // Arrange
+        /**
+         * Cenário
+         * Dado: diferentes pares current/delta
+         * Quando: adjust(current, delta) é executado
+         * Então: retorna valor ajustado ou propaga exceção quando aplicável
+         */
         $sut = $this->makePolicy(1_000_000);
 
         if ($expectedExceptionMessage !== null) {
@@ -168,15 +214,21 @@ final class StockPolicyTest extends TestCase
     public static function providerAdjust(): array
     {
         return [
-            'delta zero' => [10, 0, 10, null],
-            'delta positivo' => [5, 3, 8, null],
-            'delta negativo suficiente' => [5, -3, 2, null],
+            'delta zero'                  => [10, 0, 10, null],
+            'delta positivo'              => [5, 3, 8, null],
+            'delta negativo suficiente'   => [5, -3, 2, null],
             'delta negativo insuficiente' => [2, -3, 0, 'Estoque insuficiente para a operação.'],
         ];
     }
 
     public function test_limite_superior_configurado_via_env(): void
     {
+        /**
+         * Cenário
+         * Dado: variável de ambiente STOCK_MAX_PER_PRODUCT definida
+         * Quando: tentar aumentar além do limite
+         * Então: RuntimeException 'Quantidade máxima por produto excedida.' é lançada
+         */
         // Arrange: simular variável de ambiente (note: getenv é lida no construtor se não passar explicitamente)
         putenv('STOCK_MAX_PER_PRODUCT=42');
 

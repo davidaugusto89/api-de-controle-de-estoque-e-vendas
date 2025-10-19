@@ -16,12 +16,27 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class SaleRepository
 {
+    /** @var (callable():mixed)|null */
+    private $queryResolver;
+
+    /**
+     * Injeta um resolver opcional para Sale::query() (facilita testes).
+     *
+     * @param callable():mixed|null $resolver
+     */
+    public function setQueryResolver(?callable $resolver): void
+    {
+        $this->queryResolver = $resolver;
+    }
+
     /**
      * Recupera uma venda por id.
      */
     public function findById(int $id): ?Sale
     {
-        return Sale::query()->find($id);
+        $qb = $this->queryResolver ? ($this->queryResolver)() : Sale::query();
+
+        return $qb->find($id);
     }
 
     /**
@@ -29,9 +44,9 @@ class SaleRepository
      */
     public function findWithItems(int $id): ?Sale
     {
-        return Sale::query()
-            ->with('items')
-            ->find($id);
+        $qb = $this->queryResolver ? ($this->queryResolver)() : Sale::query();
+
+        return $qb->with('items')->find($id);
     }
 
     /**
@@ -41,7 +56,7 @@ class SaleRepository
      */
     public function paginate(array $filters = []): LengthAwarePaginator
     {
-        $query = Sale::query();
+        $query = $this->queryResolver ? ($this->queryResolver)() : Sale::query();
 
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -66,11 +81,13 @@ class SaleRepository
     public function create(array $data): Sale
     {
         /** @var Sale $sale */
-        $sale = Sale::query()->create([
+        $qb = $this->queryResolver ? ($this->queryResolver)() : Sale::query();
+
+        $sale = $qb->create([
             'total_amount' => $data['total_amount'],
-            'total_cost' => $data['total_cost'],
+            'total_cost'   => $data['total_cost'],
             'total_profit' => $data['total_profit'],
-            'status' => $data['status'],
+            'status'       => $data['status'],
         ]);
 
         return $sale;
@@ -84,9 +101,9 @@ class SaleRepository
      */
     public function update(int $id, array $data): bool
     {
-        return (bool) Sale::query()
-            ->whereKey($id)
-            ->update($data);
+        $qb = $this->queryResolver ? ($this->queryResolver)() : Sale::query();
+
+        return (bool) $qb->whereKey($id)->update($data);
     }
 
     /**
@@ -109,8 +126,8 @@ class SaleRepository
      */
     public function findMany(array $ids): Collection
     {
-        return Sale::query()
-            ->whereIn('id', $ids)
-            ->get();
+        $qb = $this->queryResolver ? ($this->queryResolver)() : Sale::query();
+
+        return $qb->whereIn('id', $ids)->get();
     }
 }

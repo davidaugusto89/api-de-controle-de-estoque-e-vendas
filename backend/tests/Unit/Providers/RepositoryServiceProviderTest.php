@@ -16,6 +16,12 @@ final class RepositoryServiceProviderTest extends TestCase
 {
     public function test_register_vincula_repositorios_e_inventory_cache_singleton(): void
     {
+        /**
+         * Cenário
+         * Dado: container vazio e factory de cache fake
+         * Quando: register do provider é executado
+         * Então: ProductRepository e InventoryRepository são vinculados e InventoryCache é singleton
+         */
         $app = new Container;
 
         // Fake cache factory and repository with minimal methods used by provider

@@ -26,15 +26,25 @@ final class UpdateInventoryListener implements ShouldQueue
             // Log antes do dispatch para ter contexto no worker
             Log::info('Dispatching UpdateInventoryJob from listener', ['sale_id' => $event->saleId, 'items_count' => count($event->items)]);
 
-            // Use o helper/dispatch estático do Job (retorna PendingDispatch → permite onQueue)
-            UpdateInventoryJob::dispatch($event->saleId, $event->items)
-                ->onQueue($this->queue);
+            // If the queue connection is sync (tests), dispatch synchronously in
+            // the current process so that test container bindings (mocks) are
+            // visible to the job handler. Otherwise dispatch to the queue as
+            // before.
+            $default = config('queue.default');
+            if ($default === 'sync') {
+                $job = new \App\Infrastructure\Jobs\UpdateInventoryJob($event->saleId, $event->items);
+                app(\Illuminate\Bus\Dispatcher::class)->dispatchSync($job);
+            } else {
+                // Use o helper/dispatch estático do Job (retorna PendingDispatch → permite onQueue)
+                UpdateInventoryJob::dispatch($event->saleId, $event->items)
+                    ->onQueue($this->queue);
+            }
         } catch (\Throwable $e) {
             // Log útil para diagnosticar rapidamente
             Log::error('Falha no UpdateInventoryListener', [
                 'sale_id' => $event->saleId,
-                'items' => $event->items,
-                'error' => $e->getMessage(),
+                'items'   => $event->items,
+                'error'   => $e->getMessage(),
             ]);
 
             // Repassa a exceção para o worker marcar como failed (e aparecer no Horizon/queue:failed)

@@ -13,6 +13,12 @@ final class EventServiceProviderTest extends TestCase
 {
     public function test_listen_contem_mapeamento_para_sale_finalized(): void
     {
+        /**
+         * Cenário
+         * Dado: instancia do EventServiceProvider
+         * Quando: inspecionamos o array protegido 'listen'
+         * Então: mapeamento para SaleFinalized existe e contém UpdateInventoryListener
+         */
         // Instancia diretamente passando o container para o construtor.
         // Usar $this->app->make() tenta resolver dependências do ServiceProvider
         // via auto-wiring e falha ao resolver o parâmetro `$app`.
@@ -30,7 +36,7 @@ final class EventServiceProviderTest extends TestCase
     private function getProtectedProperty(object $obj, string $prop)
     {
         $ref = new \ReflectionObject($obj);
-        $p = $ref->getProperty($prop);
+        $p   = $ref->getProperty($prop);
         $p->setAccessible(true);
 
         return $p->getValue($obj);

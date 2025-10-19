@@ -12,6 +12,12 @@ final class HandleInertiaRequestsTest extends TestCase
 {
     public function test_version_delega_para_parent_e_retorna_valor(): void
     {
+        /**
+         * Cenário
+         * Dado: middleware HandleInertiaRequests padrão
+         * Quando: chamamos version($request)
+         * Então: delega para parent e retorna null na configuração padrão
+         */
         $request = Request::create('/');
 
         $middleware = new HandleInertiaRequests;
@@ -24,6 +30,12 @@ final class HandleInertiaRequestsTest extends TestCase
 
     public function test_share_inclui_name_quote_e_auth_user_quando_user_presente(): void
     {
+        /**
+         * Cenário
+         * Dado: usuário autenticado resolvido via setUserResolver
+         * Quando: middleware share() é chamado
+         * Então: shared inclui name, quote e auth.user com usuário presente
+         */
         $user = (object) ['id' => 42, 'name' => 'Tester'];
 
         $request = Request::create('/');
@@ -50,6 +62,12 @@ final class HandleInertiaRequestsTest extends TestCase
 
     public function test_share_inclui_auth_user_null_quando_nao_houver_user(): void
     {
+        /**
+         * Cenário
+         * Dado: nenhum usuário autenticado
+         * Quando: share() for chamado
+         * Então: shared.auth.user == null
+         */
         $request = Request::create('/');
         $request->setUserResolver(fn () => null);
 

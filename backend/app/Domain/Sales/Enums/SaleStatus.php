@@ -6,8 +6,8 @@ namespace App\Domain\Sales\Enums;
 
 enum SaleStatus: string
 {
-    case QUEUED = 'queued';
+    case QUEUED     = 'queued';
     case PROCESSING = 'processing';
-    case COMPLETED = 'completed';
-    case CANCELLED = 'cancelled';
+    case COMPLETED  = 'completed';
+    case CANCELLED  = 'cancelled';
 }

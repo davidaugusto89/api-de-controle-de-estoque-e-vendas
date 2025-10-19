@@ -15,10 +15,10 @@ class InventoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => Product::factory(),
-            'quantity' => $this->faker->numberBetween(10, 500),
+            'product_id'   => Product::factory(),
+            'quantity'     => $this->faker->numberBetween(10, 500),
             'last_updated' => now(),
-            'version' => 0,
+            'version'      => 0,
         ];
     }
 

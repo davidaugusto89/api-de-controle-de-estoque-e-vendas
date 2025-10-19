@@ -18,6 +18,12 @@ final class UpdateInventoryJobInsufficientStockTest extends TestCase
 {
     public function test_job_throws_when_inventory_insufficient(): void
     {
+        /**
+         * Cenário
+         * Dado: tentativa de decrementar estoque além do disponível
+         * Quando: UpdateInventoryJob é executado
+         * Então: decrementOrFail lança DomainException e exceção é propagada
+         */
         $items = [['product_id' => 42, 'quantity' => 1000]];
 
         $tx = $this->getMockBuilder(Transactions::class)
@@ -33,7 +39,7 @@ final class UpdateInventoryJobInsufficientStockTest extends TestCase
             ->getMock();
 
         $inventoryRepo = $this->getMockBuilder(InventoryRepository::class)
-            ->onlyMethods(['decrementIfEnough'])
+            ->onlyMethods(['decrementOrFail'])
             ->getMock();
 
         $cacheStore = $this->getMockBuilder(\Illuminate\Contracts\Cache\Repository::class)
@@ -54,8 +60,8 @@ final class UpdateInventoryJobInsufficientStockTest extends TestCase
             });
 
         $inventoryRepo->expects($this->once())
-            ->method('decrementIfEnough')
-            ->willReturn(false);
+            ->method('decrementOrFail')
+            ->will($this->throwException(new \DomainException('insufficient')));
 
         $this->expectException(\DomainException::class);
 

@@ -12,6 +12,12 @@ final class IdempotencyTest extends TestCase
 {
     public function test_chave_da_requisicao_usao_header_quando_presente(): void
     {
+        /**
+         * Cenário
+         * Dado: request com header Idempotency-Key
+         * Quando: keyFromRequest é chamado
+         * Então: retorna chave baseada no header
+         */
         $req = Request::create('/api/v1/sales', 'POST', [], [], [], [
             'HTTP_Idempotency-Key' => 'abc-123',
         ]);
@@ -24,6 +30,12 @@ final class IdempotencyTest extends TestCase
 
     public function test_chave_da_requisicao_sem_header_hash_method_path_query_e_body(): void
     {
+        /**
+         * Cenário
+         * Dado: request sem header de idempotência
+         * Quando: keyFromRequest gera chave baseada em method/path/query/body
+         * Então: chave tem o formato esperado com hash do payload
+         */
         $req = Request::create('/api/v1/products/5?verbose=1', 'PUT', ['name' => 'Product A', 'qty' => 10]);
 
         $key = Idempotency::keyFromRequest($req);

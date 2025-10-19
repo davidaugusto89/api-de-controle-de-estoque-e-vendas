@@ -23,11 +23,11 @@ class SaleFactory extends Factory
 
         return [
             'total_amount' => '0.00',
-            'total_cost' => '0.00',
+            'total_cost'   => '0.00',
             'total_profit' => '0.00',
-            'status' => SaleStatus::QUEUED->value,
-            'created_at' => $created,
-            'updated_at' => $created,
+            'status'       => SaleStatus::QUEUED->value,
+            'created_at'   => $created,
+            'updated_at'   => $created,
         ];
     }
 
@@ -119,7 +119,7 @@ class SaleFactory extends Factory
             // Evita eventos/listeners durante testes/seed
             $sale->updateQuietly([
                 'total_amount' => $totalAmount,
-                'total_cost' => $totalCost,
+                'total_cost'   => $totalCost,
                 'total_profit' => $totalProfit,
             ]);
         });

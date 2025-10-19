@@ -20,24 +20,30 @@ final class SaleResourceTest extends TestCase
      */
     public function test_serializar_venda_retorna_campos_e_items_em_portugues(): void
     {
+        /**
+         * Cenário
+         * Dado: dados brutos de venda com um item
+         * Quando: SaleResource é serializado
+         * Então: retorna campos principais, datas em ISO 8601 e items serializados corretamente
+         */
         // Arrange: montar dados de venda com um item simples
         $raw = [
-            'id' => 77,
-            'status' => 'completed',
+            'id'           => 77,
+            'status'       => 'completed',
             'total_amount' => 100.5,
-            'total_cost' => 60.0,
+            'total_cost'   => 60.0,
             'total_profit' => 40.5,
-            'created_at' => Carbon::create(2021, 5, 4, 10, 30, 0)->toIsoString(),
-            'updated_at' => Carbon::create(2021, 5, 5, 11, 0, 0)->toIsoString(),
-            'items' => [
+            'created_at'   => Carbon::create(2021, 5, 4, 10, 30, 0)->toIsoString(),
+            'updated_at'   => Carbon::create(2021, 5, 5, 11, 0, 0)->toIsoString(),
+            'items'        => [
                 [
-                    'id' => 1,
+                    'id'         => 1,
                     'product_id' => 10,
-                    'sku' => 'SKU-10',
-                    'name' => 'Produto X',
-                    'quantity' => 2,
+                    'sku'        => 'SKU-10',
+                    'name'       => 'Produto X',
+                    'quantity'   => 2,
                     'unit_price' => 50.25,
-                    'unit_cost' => 30.0,
+                    'unit_cost'  => 30.0,
                 ],
             ],
         ];

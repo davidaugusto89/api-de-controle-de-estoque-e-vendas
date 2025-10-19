@@ -59,11 +59,11 @@ final class FinalizeSaleUseCaseTest extends TestCase
         // o uso de MockBuilder::addMethods() (deprecado).
         $this->saleRepository = $this->getMockBuilder(\Tests\Unit\Application\Sales\UseCases\SaleRepositoryInterface::class)
             ->onlyMethods(['save'])
-            ->getMockForAbstractClass();
+            ->getMock();
 
         $this->stockService = $this->getMockBuilder(\Tests\Unit\Application\Sales\UseCases\StockServiceInterface::class)
             ->onlyMethods(['reserve'])
-            ->getMockForAbstractClass();
+            ->getMock();
     }
 
     public static function validSaleProvider(): array
@@ -120,12 +120,12 @@ final class FinalizeSaleUseCaseTest extends TestCase
             ->with($this->callback(function ($sale) use ($saleId, $items) {
                 // Verifica forma mínima do objeto/array enviado ao repositório
                 if (is_array($sale)) {
-                    return ($sale['id'] ?? null) === $saleId
+                    return ($sale['id'] ?? null)    === $saleId
                         && ($sale['items'] ?? null) === $items;
                 }
 
                 if (is_object($sale)) {
-                    return ($sale->id ?? null) === $saleId
+                    return ($sale->id ?? null)    === $saleId
                         && ($sale->items ?? null) === $items;
                 }
 

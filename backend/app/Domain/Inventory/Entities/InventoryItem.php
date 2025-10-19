@@ -19,7 +19,7 @@ final class InventoryItem
         private int $quantity,
         ?StockPolicy $policy = null
     ) {
-        $this->policy = $policy ?? new StockPolicy;
+        $this->policy   = $policy ?? new StockPolicy;
         $this->quantity = $this->policy->adjust($quantity, 0);
     }
 

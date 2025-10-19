@@ -46,8 +46,8 @@ final class DateRangeTest extends TestCase
     public static function validRangesProvider(): array
     {
         return [
-            'from antes de to' => ['2025-10-17 00:00:00', '2025-10-18 00:00:00'],
-            'mesmo instante' => ['2025-10-18 10:00:00', '2025-10-18 10:00:00'], // from == to is permitido
+            'from antes de to'              => ['2025-10-17 00:00:00', '2025-10-18 00:00:00'],
+            'mesmo instante'                => ['2025-10-18 10:00:00', '2025-10-18 10:00:00'], // from == to is permitido
             'diferentes horarios mesmo dia' => ['2025-10-18 01:23:45', '2025-10-18 23:59:59'],
         ];
     }
@@ -60,7 +60,7 @@ final class DateRangeTest extends TestCase
     public static function invalidRangesProvider(): array
     {
         return [
-            'from depois de to um dia' => ['2025-10-19 00:00:00', '2025-10-18 23:59:59'],
+            'from depois de to um dia'    => ['2025-10-19 00:00:00', '2025-10-18 23:59:59'],
             'from depois de to mesmo dia' => ['2025-10-18 12:00:01', '2025-10-18 12:00:00'],
         ];
     }
@@ -68,9 +68,15 @@ final class DateRangeTest extends TestCase
     #[DataProvider('validRangesProvider')]
     public function test_deve_criar_date_range_quando_from_menor_ou_igual_to(string $fromIso, string $toIso): void
     {
+        /**
+         * Cenário
+         * Dado: pares (from <= to)
+         * Quando: instanciamos DateRange(from, to)
+         * Então: instancia é criada e preserva os instantes exatos passados
+         */
         // Arrange
         $from = CarbonImmutable::parse($fromIso);
-        $to = CarbonImmutable::parse($toIso);
+        $to   = CarbonImmutable::parse($toIso);
 
         // Act
         $range = new DateRange($from, $to);
@@ -95,9 +101,15 @@ final class DateRangeTest extends TestCase
     #[DataProvider('validRangesProvider')]
     public function test_deve_normalizar_para_inicio_e_fim_do_dia_quando_usar_of(string $fromIso, string $toIso): void
     {
+        /**
+         * Cenário
+         * Dado: dois instantes (from, to)
+         * Quando: DateRange::of(from, to) é chamado
+         * Então: from normaliza para startOfDay e to para endOfDay
+         */
         // Arrange
         $from = CarbonImmutable::parse($fromIso);
-        $to = CarbonImmutable::parse($toIso);
+        $to   = CarbonImmutable::parse($toIso);
 
         // Act
         $range = DateRange::of($from, $to);
@@ -121,9 +133,15 @@ final class DateRangeTest extends TestCase
     #[DataProvider('invalidRangesProvider')]
     public function test_deve_lancar_invalid_argument_exception_quando_from_maior_que_to(string $fromIso, string $toIso): void
     {
+        /**
+         * Cenário
+         * Dado: from > to
+         * Quando: criamos um DateRange
+         * Então: InvalidArgumentException com mensagem específica é lançada
+         */
         // Arrange
         $from = CarbonImmutable::parse($fromIso);
-        $to = CarbonImmutable::parse($toIso);
+        $to   = CarbonImmutable::parse($toIso);
 
         // Assert - exceção esperada com mensagem específica
         $this->expectException(InvalidArgumentException::class);
@@ -135,16 +153,22 @@ final class DateRangeTest extends TestCase
 
     public function test_date_range_e_objeto_immutavel_em_relacao_as_variaveis_locais(): void
     {
+        /**
+         * Cenário
+         * Dado: DateRange criado a partir de CarbonImmutable
+         * Quando: variáveis locais são modificadas posteriormente
+         * Então: DateRange mantém imutabilidade dos instantes originalmente normalizados
+         */
         // Arrange
         $from = CarbonImmutable::parse('2025-10-18 10:30:00');
-        $to = CarbonImmutable::parse('2025-10-19 11:00:00');
+        $to   = CarbonImmutable::parse('2025-10-19 11:00:00');
 
         // Act
         $range = DateRange::of($from, $to);
 
         // Mutação "simulada" das variáveis locais (CarbonImmutable não altera o instance original; criamos novos instantes)
         $fromModified = $from->addDay(); // novo CarbonImmutable
-        $toModified = $to->subDay();
+        $toModified   = $to->subDay();
 
         // Assert - o DateRange deve continuar referenciando os instantes normalizados a partir dos valores originais,
         // sem ser afetado pelas reatribuições locais/novas instâncias geradas depois da construção.

@@ -66,7 +66,7 @@ final class UpdateInventoryJob implements ShouldQueue
         $tx->run(function () use ($locks, $inventoryRepo, &$processed, $logger): void {
             foreach ($this->items as $it) {
                 $productId = (int) $it['product_id'];
-                $quantity = (int) $it['quantity'];
+                $quantity  = (int) $it['quantity'];
 
                 $logger->info('Processing inventory item', ['sale_id' => $this->saleId, 'product_id' => $productId, 'quantity' => $quantity]);
 
@@ -95,7 +95,7 @@ final class UpdateInventoryJob implements ShouldQueue
 
         $logger->info('Inventory update completed from sale', [
             'sale_id' => $this->saleId,
-            'items' => array_map(
+            'items'   => array_map(
                 static fn (array $i): array => [
                     'p' => (int) $i['product_id'],
                     'q' => (int) $i['quantity'],
@@ -113,8 +113,8 @@ final class UpdateInventoryJob implements ShouldQueue
         $logger ??= new NullLogger;
 
         $meta = [
-            'sale_id' => $this->saleId,
-            'error' => $e->getMessage(),
+            'sale_id'   => $this->saleId,
+            'error'     => $e->getMessage(),
             'exception' => get_class($e),
         ];
 

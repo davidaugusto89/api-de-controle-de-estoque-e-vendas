@@ -13,6 +13,12 @@ final class RegisterInventoryRequestTest extends TestCase
 {
     public function test_autorizar_permite_por_padrao(): void
     {
+        /**
+         * Cenário
+         * Dado: instância de RegisterInventoryRequest
+         * Quando: authorize() é chamado
+         * Então: deve retornar true por padrão
+         */
         $req = new RegisterInventoryRequest;
 
         $this->assertTrue($req->authorize());
@@ -20,7 +26,13 @@ final class RegisterInventoryRequestTest extends TestCase
 
     public function test_regras_definem_produto_quantidade_e_custo_unitario(): void
     {
-        $req = new RegisterInventoryRequest;
+        /**
+         * Cenário
+         * Dado: RegisterInventoryRequest
+         * Quando: rules() é consultado
+         * Então: contém chaves product_id, quantity e unit_cost
+         */
+        $req   = new RegisterInventoryRequest;
         $rules = $req->rules();
 
         $this->assertArrayHasKey('product_id', $rules);
@@ -30,7 +42,13 @@ final class RegisterInventoryRequestTest extends TestCase
 
     public function test_messages_contem_mensagens_customizadas(): void
     {
-        $req = new RegisterInventoryRequest;
+        /**
+         * Cenário
+         * Dado: RegisterInventoryRequest
+         * Quando: messages() é consultado
+         * Então: contém mensagens customizadas para product_id e quantity/unit_cost
+         */
+        $req      = new RegisterInventoryRequest;
         $messages = $req->messages();
 
         $this->assertArrayHasKey('product_id.required', $messages);

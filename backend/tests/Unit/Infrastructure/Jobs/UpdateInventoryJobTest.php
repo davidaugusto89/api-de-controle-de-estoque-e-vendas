@@ -1,9 +1,21 @@
 <?php
 
+/**
+ * Cenário
+ * Dado: job de atualização de estoque com itens válidos
+ * Quando: handle do job é executado
+ * Então: chama InventoryRepository->update e commit da transação
+ */
 declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Jobs;
 
+/**
+ * Cenário
+ * Dado: falha na transação ao atualizar estoque
+ * Quando: job é executado
+ * Então: transação é revertida e exceção propagada
+ */
 use App\Domain\Inventory\Services\InventoryLockService;
 use App\Domain\Inventory\Services\StockPolicy;
 use App\Infrastructure\Jobs\UpdateInventoryJob;
@@ -11,6 +23,12 @@ use App\Support\Database\Transactions;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Cenário
+ * Dado: existe item inválido na lista
+ * Quando: job é executado
+ * Então: não chama update no repositório
+ */
 /**
  * UpdateInventoryJobTest
  *
@@ -93,7 +111,7 @@ final class UpdateInventoryJobTest extends TestCase
 
         // inventoryRepo->decrementIfEnough deve ser chamado com os pares corretos em ordem
         $callIndex = 0;
-        $expected = [
+        $expected  = [
             [7, 3],
             [8, 1],
         ];

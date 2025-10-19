@@ -25,7 +25,7 @@ final class SaleController extends Controller
         return response()->json([
             'message' => 'Venda recebida e será processada.',
             'sale_id' => $saleId,
-            'status' => 'pending',
+            'status'  => 'pending',
         ], 202);
     }
 
@@ -39,7 +39,7 @@ final class SaleController extends Controller
         if ($row === null) {
             return response()->json([
                 'error' => [
-                    'code' => 'SaleNotFound',
+                    'code'    => 'SaleNotFound',
                     'message' => 'Venda não encontrada.',
                 ],
             ], 404);
